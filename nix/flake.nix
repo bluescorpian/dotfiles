@@ -7,7 +7,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
   in
@@ -17,15 +17,15 @@
         system = "x86_64-linux";
         modules = [
           ./system/configuration.nix
-#           home-manager.nixosModules.home-manager
-#           {
-#             home-manager.useGlobalPkgs = true;
-#             home-manager.useUserPackages = true;
-#             home-manager.users.jdoe = ./home.nix;
-#
-#             # Optionally, use home-manager.extraSpecialArgs to pass
-#             # arguments to home.nix
-#           }
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.harry = ./home/home.nix;
+
+            # Optionally, use home-manager.extraSpecialArgs to pass
+            # arguments to home.nix
+          }
         ];
       };
     };
