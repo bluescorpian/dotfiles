@@ -3,6 +3,8 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, ... } @ inputs:
@@ -10,9 +12,22 @@
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
   in
   {
-    packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
-
-    packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
-
+     nixosConfigurations = {
+      nixos = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./system/configuration.nix
+#           home-manager.nixosModules.home-manager
+#           {
+#             home-manager.useGlobalPkgs = true;
+#             home-manager.useUserPackages = true;
+#             home-manager.users.jdoe = ./home.nix;
+#
+#             # Optionally, use home-manager.extraSpecialArgs to pass
+#             # arguments to home.nix
+#           }
+        ];
+      };
+    };
   };
 }

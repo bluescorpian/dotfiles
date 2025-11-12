@@ -90,6 +90,10 @@
   #  wget
   discord
   keepassxc
+  stow
+  wget
+  curl
+  git
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -121,5 +125,17 @@
 
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+
+  programs.git = {
+    enable = true;                # manages ~/.gitconfig for basics
+    package = pkgs.gitFull;       # includes extras like credential helpers
+    lfs.enable = true;            # Git LFS support
+    config = {
+      init.defaultBranch = "main";
+      core.editor = "nvim";
+    };
+  };
+  boot.loader.grub.configurationLimit = 3;
 
 }
