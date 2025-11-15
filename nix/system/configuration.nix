@@ -32,7 +32,7 @@
 
   # Enable the X11 windowing system.
   # You can disable this if you're only using the Wayland session.
-  services.xserver.enable = true;
+  services.xserver.enable = false;
 
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
@@ -94,6 +94,7 @@
   wget
   curl
   git
+  brave
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -137,5 +138,10 @@
     };
   };
   boot.loader.grub.configurationLimit = 3;
+
+  hardware.graphics.enable = true;
+  services.xserver.videoDrivers = [ "nvidia" ];
+  hardware.nvidia.open = true;  # see the note above
+
 
 }
