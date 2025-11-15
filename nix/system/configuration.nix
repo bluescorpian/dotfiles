@@ -30,6 +30,9 @@
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
+  programs.hyprland.enable = true;
+  #  hint electron apps to use wayland:
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   # NVIDIA
   hardware.graphics.enable = true;
@@ -41,6 +44,12 @@
     layout = "us";
     variant = "dvp";
   };
+
+  services.xserver = {
+    layout = "us";
+    xkbVariant = "dvp";
+  };
+
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
