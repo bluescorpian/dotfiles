@@ -10,4 +10,10 @@
     discord
     google-chrome
   ];
+
+  programs.git = {
+    enable = true;
+    userName = "Harry Kruger";
+    userEmail = "harry@hrry.sh";
+  };
 }
