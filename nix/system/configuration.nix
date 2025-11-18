@@ -102,6 +102,16 @@
     };
   };
 
+  security.pam.services = {
+    login = {
+      kwallet = {
+        enable = true;
+      };
+    };
+  };
+
+  services.mako.enable = true;
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
