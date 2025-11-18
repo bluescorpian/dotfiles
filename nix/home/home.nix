@@ -18,6 +18,19 @@
     userEmail = "harry@hrry.sh";
   };
 
+#   systemd.user.sessionVariables = config.home-manager.users.justinas.home.sessionVariables;
+
+  qt = {
+    enable = true;
+
+    platformTheme.name = "qtct"; # use qt5ct/qt6ct control center
+
+    style.name = "adwaita-dark";
+    style.package = with pkgs; [
+      adwaita-qt
+      adwaita-qt6
+    ];
+  };
 
   programs.kitty.enable = true; # required for the default Hyprland config
   programs.wofi.enable = true;
