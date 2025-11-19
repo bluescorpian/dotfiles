@@ -1,6 +1,9 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
+  # Apply claude-code overlay for latest version
+  nixpkgs.overlays = [ inputs.claude-code.overlays.default ];
+
   home.username = "harry";
   home.homeDirectory = "/home/harry";
   home.stateVersion = "25.05";
@@ -68,4 +71,19 @@
         kb_variant = "dvp";
       };
   };
+
+  services.mako = {
+    enable = true;
+
+    # Basic appearance
+    font = "Inter 11";
+    defaultTimeout = 5000;  # in milliseconds
+    borderRadius = 8;
+
+    # Colours — adapt to your theme
+    backgroundColor = "#1e1e2e";
+    textColor = "#cdd6f4";
+    borderColor = "#3e3e60";
+  };
+
 }

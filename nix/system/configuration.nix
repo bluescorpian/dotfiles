@@ -110,8 +110,6 @@
     };
   };
 
-  services.mako.enable = true;
-
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -127,7 +125,11 @@
   system.stateVersion = "25.05"; # Did you read the comment?
 
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings = {
+    experimental-features = [ "nix-command" "flakes" ];
+    substituters = [ "https://claude-code.cachix.org" ];
+    trusted-public-keys = [ "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk=" ];
+  };
 
   boot.loader.grub.configurationLimit = 3;
 

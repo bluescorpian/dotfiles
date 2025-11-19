@@ -5,9 +5,10 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    claude-code.url = "github:sadjow/claude-code-nix";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, claude-code, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
   in
@@ -23,8 +24,8 @@
             home-manager.useUserPackages = true;
             home-manager.users.harry = ./home/home.nix;
 
-            # Optionally, use home-manager.extraSpecialArgs to pass
-            # arguments to home.nix
+            # Pass inputs to home.nix for overlay access
+            home-manager.extraSpecialArgs = { inherit inputs; };
           }
         ];
       };
