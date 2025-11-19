@@ -45,12 +45,6 @@
     variant = "dvp";
   };
 
-  services.xserver = {
-    layout = "us";
-    xkbVariant = "dvp";
-  };
-
-
   # Enable CUPS to print documents.
   services.printing.enable = true;
 

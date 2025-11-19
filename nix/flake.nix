@@ -18,14 +18,13 @@
         system = "x86_64-linux";
         modules = [
           ./system/configuration.nix
+          # Apply claude-code overlay globally
+          { nixpkgs.overlays = [ claude-code.overlays.default ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.harry = ./home/home.nix;
-
-            # Pass inputs to home.nix for overlay access
-            home-manager.extraSpecialArgs = { inherit inputs; };
           }
         ];
       };

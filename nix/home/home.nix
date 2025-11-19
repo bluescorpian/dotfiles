@@ -1,9 +1,6 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, ... }:
 
 {
-  # Apply claude-code overlay for latest version
-  nixpkgs.overlays = [ inputs.claude-code.overlays.default ];
-
   home.username = "harry";
   home.homeDirectory = "/home/harry";
   home.stateVersion = "25.05";
@@ -17,8 +14,10 @@
 
   programs.git = {
     enable = true;
-    userName = "Harry Kruger";
-    userEmail = "harry@hrry.sh";
+    settings = {
+      user.name = "Harry Kruger";
+      user.email = "harry@hrry.sh";
+    };
   };
 
 #   systemd.user.sessionVariables = config.home-manager.users.justinas.home.sessionVariables;
@@ -74,16 +73,17 @@
 
   services.mako = {
     enable = true;
+    settings = {
+      # Basic appearance
+      font = "Inter 11";
+      default-timeout = 5000;  # in milliseconds
+      border-radius = 8;
 
-    # Basic appearance
-    font = "Inter 11";
-    defaultTimeout = 5000;  # in milliseconds
-    borderRadius = 8;
-
-    # Colours — adapt to your theme
-    backgroundColor = "#1e1e2e";
-    textColor = "#cdd6f4";
-    borderColor = "#3e3e60";
+      # Colours — adapt to your theme
+      background-color = "#1e1e2e";
+      text-color = "#cdd6f4";
+      border-color = "#3e3e60";
+    };
   };
 
 }
