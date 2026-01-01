@@ -86,4 +86,6 @@
     };
   };
 
+  services.hyprpolkitagent.enable = true;
+
 }
