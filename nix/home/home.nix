@@ -24,14 +24,14 @@
 
   qt = {
     enable = true;
+    platformTheme.name = "kde";
+    style.name = "breeze";
+  };
 
-    platformTheme.name = "qtct"; # use qt5ct/qt6ct control center
-
-    style.name = "adwaita-dark";
-    style.package = with pkgs; [
-      adwaita-qt
-      adwaita-qt6
-    ];
+  # Enable dark mode for Plasma
+  programs.plasma = {
+    enable = true;
+    workspace.lookAndFeel = "org.kde.breezedark.desktop";
   };
 
   programs.kitty.enable = true; # required for the default Hyprland config
