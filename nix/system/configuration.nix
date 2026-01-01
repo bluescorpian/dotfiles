@@ -96,13 +96,13 @@
     };
   };
 
-  security.pam.services = {
-    login = {
-      kwallet = {
-        enable = true;
-      };
-    };
-  };
+#   security.pam.services = {
+#     login = {
+#       kwallet = {
+#         enable = true;
+#       };
+#     };
+#   };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -124,8 +124,5 @@
     substituters = [ "https://claude-code.cachix.org" ];
     trusted-public-keys = [ "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk=" ];
   };
-
-  boot.loader.grub.configurationLimit = 3;
-
 
 }
