@@ -91,4 +91,7 @@
 
   services.hyprpolkitagent.enable = true;
 
+  # PipeWire EQ Configuration
+  xdg.configFile."pipewire/pipewire.conf.d/10-filter-chain.conf".source = ./pipewire-eq.conf;
+
 }
