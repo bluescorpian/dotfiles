@@ -23,6 +23,25 @@
     };
   };
 
+  # SSH agent configuration
+  services.ssh-agent = {
+    enable = true;
+  };
+
+  # SSH configuration for GitHub
+  programs.ssh = {
+    enable = true;
+    matchBlocks = {
+      "github.com" = {
+        hostname = "github.com";
+        user = "git";
+        identityFile = "~/.ssh/bluescorpian";
+        identitiesOnly = true;
+        addKeysToAgent = "yes";
+      };
+    };
+  };
+
 #   systemd.user.sessionVariables = config.home-manager.users.justinas.home.sessionVariables;
 
   qt = {

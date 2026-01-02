@@ -58,6 +58,24 @@ sudo nixos-rebuild build --flake ~/nix#nixos
 2. Apply changes with `nixos-rebuild switch`
 3. Commit to git and push to backup
 
+## Git Workflow for Configuration Snapshots
+
+Git commits serve as snapshots of your NixOS configuration, allowing you to track changes and roll back if needed.
+
+### When to Commit
+
+- **After successful changes**: Once you've tested a configuration change with `nixos-rebuild switch` and verified it works
+- **Before major experiments**: Commit your working state before trying significant changes
+- **Atomic commits**: Each commit should represent one logical change (e.g., "Add Spotify", not "Update various things")
+
+### Commit Best Practices
+
+1. **Test first**: Always run `nixos-rebuild switch` and verify the system works before committing
+2. **Descriptive messages**: Write clear commit messages that explain what changed
+   - Good: "Add Spotify and configure PipeWire EQ"
+   - Poor: "Update config"
+3. **Push regularly**: Keep your remote backup current in case of hardware failure
+
 ## Adding Packages or Programs
 
 ### Deciding: System vs User Configuration
@@ -117,3 +135,26 @@ man <command>
 ```
 
 Always check local documentation first before searching online, as it matches this system's NixOS version and available options.
+
+## Running Commands That Require sudo
+
+Claude Code runs in a non-interactive environment and cannot directly execute commands that require password input via standard `sudo`.
+
+### Solution: Use Konsole for Interactive Commands
+
+When a command requires sudo password authentication, use Konsole to open a terminal window where the user can enter their password:
+
+```bash
+konsole -e bash -c "sudo COMMAND_HERE; echo; echo 'Press Enter to close...'; read" &
+```
+
+Example for nixos-rebuild:
+```bash
+konsole -e bash -c "sudo nixos-rebuild switch --flake ~/nix#nixos; echo; echo 'Press Enter to close...'; read" &
+```
+
+This approach:
+- Opens a new Konsole terminal window
+- Prompts for the sudo password in the terminal
+- Keeps the window open after completion so the user can see the output
+- Runs in the background so Claude Code can continue working
