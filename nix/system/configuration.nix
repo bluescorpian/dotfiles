@@ -83,6 +83,7 @@
     wget
     curl
     openssh
+    kdePackages.partitionmanager
   ];
 
 
