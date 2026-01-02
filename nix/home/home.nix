@@ -10,6 +10,9 @@
     discord
     google-chrome
     claude-code
+    imagemagick
+    ffmpeg
+    spotify
   ];
 
   programs.git = {
