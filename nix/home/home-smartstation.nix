@@ -26,14 +26,15 @@
     };
   };
 
-  # SSH configuration for GitHub (work key)
+  # SSH configuration for GitHub
   programs.ssh = {
     enable = true;
+    enableDefaultConfig = false;
     matchBlocks = {
       "github.com" = {
         hostname = "github.com";
         user = "git";
-        identityFile = "~/.ssh/work-key";
+        identityFile = "~/.ssh/bluescorpian";
         identitiesOnly = true;
         addKeysToAgent = "yes";
       };
