@@ -22,10 +22,19 @@
     ripgrep
     fd
     zellij
+    claude-code
+
+    # Utilities
+    imagemagick
+    ffmpeg
 
     # MongoDB tools
     mongosh
     mongodb-tools
+
+    # Programs
+    thunderbird
+    keepassxc
 
     # LSP servers (commented examples for later)
     # nodePackages.typescript-language-server

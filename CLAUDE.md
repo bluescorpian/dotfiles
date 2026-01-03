@@ -30,7 +30,7 @@ The system has two user accounts for work/personal isolation:
   - Packages: Development tools only (minimal, no social/entertainment apps)
 
 Both users share:
-- Development tools (VS Code, Neovim, Node.js 22 LTS, Docker, MongoDB tools)
+- Development tools
 - Hyprland configuration and keybindings
 - Desktop environment settings
 - File access via `harry-shared` group
