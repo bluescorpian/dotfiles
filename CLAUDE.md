@@ -13,20 +13,44 @@ The repository follows a flake-based structure with separation between system an
 - **nix/flake.nix**: Main entry point defining inputs and the `nixos` configuration output
 - **nix/system/configuration.nix**: System-level configuration (bootloader, networking, users, system packages, services)
 - **nix/system/hardware-configuration.nix**: Machine-specific hardware settings (this machine)
-- **nix/home/home.nix**: User-level configuration using home-manager (user packages, desktop settings, window manager configs)
+- **nix/home/common.nix**: Shared home-manager configuration for all users (Hyprland, development tools, desktop settings)
+- **nix/home/home.nix**: Personal user (harry) specific configuration
+- **nix/home/home-smartstation.nix**: Work user (harry-smartstation) specific configuration
 
 The flake uses home-manager as a NixOS module, so user and system configurations rebuild together atomically.
+
+### User Accounts
+
+The system has two user accounts for work/personal isolation:
+
+- **harry**: Personal user account
+  - Packages: Discord, Spotify, Google Chrome, entertainment apps
+
+- **harry-smartstation**: Work user account
+  - Packages: Development tools only (minimal, no social/entertainment apps)
+
+Both users share:
+- Development tools (VS Code, Neovim, Node.js 22 LTS, Docker, MongoDB tools)
+- Hyprland configuration and keybindings
+- Desktop environment settings
+- File access via `harry-shared` group
+- Shared directory: `/home/shared` (group writable with setgid bit)
 
 ## Essential Commands
 
 ### Applying Configuration Changes
 
-After editing any .nix file:
+After editing any .nix file, use the system-wide alias:
 ```bash
-sudo nixos-rebuild switch --flake ~/nix#nixos
+rebuild
 ```
 
-Note: `~/nix` is a symlink to `~/dotfiles/nix`
+This is equivalent to:
+```bash
+sudo nixos-rebuild switch --flake /home/harry/dotfiles/nix#nixos
+```
+
+Note: `~/nix` is a symlink to `~/dotfiles/nix`. The `rebuild` alias uses the absolute path so it works from both user accounts.
 
 ### Updating Dependencies
 
@@ -53,9 +77,11 @@ sudo nixos-rebuild build --flake ~/nix#nixos
 
 1. Edit the appropriate .nix file:
    - System-level changes → `nix/system/configuration.nix`
-   - User-level changes → `nix/home/home.nix`
+   - Shared settings (both users) → `nix/home/common.nix`
+   - Personal user only → `nix/home/home.nix`
+   - Work user only → `nix/home/home-smartstation.nix`
    - New flake inputs → `nix/flake.nix`
-2. Apply changes with `nixos-rebuild switch`
+2. Apply changes with `rebuild` alias
 3. Commit to git and push to backup
 
 ## Git Workflow for Configuration Snapshots
@@ -78,7 +104,7 @@ Git commits serve as snapshots of your NixOS configuration, allowing you to trac
 
 ## Adding Packages or Programs
 
-### Deciding: System vs User Configuration
+### Deciding: Where to Add Packages
 
 Use this decision tree to determine where a package belongs:
 
@@ -86,15 +112,19 @@ Use this decision tree to determine where a package belongs:
    - Examples: networking tools, display managers, bootloaders, drivers, system daemons
    - → Add to `environment.systemPackages` in **system/configuration.nix**
 
-2. **Is it a user application or tool?**
-   - Examples: browsers, editors, CLI tools, desktop applications
-   - → Add to `home.packages` in **home/home.nix**
+2. **Should it be available to both users?**
+   - Examples: development tools (editors, language runtimes), terminal utilities
+   - → Add to `home.packages` in **home/common.nix**
 
-3. **Does it need to be available system-wide or for all users?**
-   - Examples: development tools needed at login, system utilities
-   - → Add to **system/configuration.nix**
+3. **Is it personal/entertainment only?**
+   - Examples: Discord, Spotify, games
+   - → Add to `home.packages` in **home/home.nix** (personal user only)
 
-4. **When in doubt**: Prefer **home/home.nix** for single-user systems
+4. **Is it work-specific?**
+   - Examples: work-specific clients, enterprise tools
+   - → Add to `home.packages` in **home/home-smartstation.nix** (work user only)
+
+5. **When in doubt**: Add to **home/common.nix** for shared access
 
 ### Using Program Modules
 
