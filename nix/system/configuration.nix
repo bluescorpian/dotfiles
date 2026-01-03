@@ -37,7 +37,12 @@
   # NVIDIA
   hardware.graphics.enable = true;
   services.xserver.videoDrivers = [ "nvidia" ];
-  hardware.nvidia.open = true;
+  hardware.nvidia = {
+    modesetting.enable = true;   # important for Wayland compositors
+    nvidiaSettings = true;
+    powerManagement.enable = false;
+    open = false;
+  };
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -70,10 +75,7 @@
     extraGroups = [ "networkmanager" "wheel" "harry-shared" "docker" ];
     packages = with pkgs; [
       kdePackages.kate
-      keepassxc
       stow
-      brave
-    #  thunderbird
     ];
   };
 
