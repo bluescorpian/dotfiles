@@ -67,7 +67,7 @@
   users.users.harry = {
     isNormalUser = true;
     description = "Harry Kruger";
-    extraGroups = [ "networkmanager" "wheel" "harry-shared" ];
+    extraGroups = [ "networkmanager" "wheel" "harry-shared" "docker" ];
     packages = with pkgs; [
       kdePackages.kate
       keepassxc
@@ -80,7 +80,7 @@
   users.users.harry-smartstation = {
     isNormalUser = true;
     description = "Harry (Work)";
-    extraGroups = [ "networkmanager" "wheel" "harry-shared" ];
+    extraGroups = [ "networkmanager" "wheel" "harry-shared" "docker" ];
     packages = with pkgs; [
       kdePackages.kate
     ];
@@ -112,6 +112,16 @@
     config = {
       init.defaultBranch = "main";
       core.editor = "nano";
+    };
+  };
+
+  # Docker configuration
+  virtualisation.docker = {
+    enable = true;
+    enableOnBoot = true;
+    autoPrune = {
+      enable = true;
+      dates = "weekly";
     };
   };
 

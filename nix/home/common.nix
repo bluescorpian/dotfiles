@@ -1,6 +1,42 @@
 { config, pkgs, ... }:
 
 {
+  # Development packages
+  home.packages = with pkgs; [
+    # Editors
+    vscode
+    neovim
+
+    # Node.js ecosystem
+    nodejs_22  # Node.js 22.x LTS
+    bun
+    nodePackages.pnpm
+    nodePackages.yarn
+
+    # Development utilities
+    jq
+    ripgrep
+    fd
+    zellij
+
+    # MongoDB tools
+    mongosh
+    mongodb-tools
+
+    # LSP servers (commented examples for later)
+    # nodePackages.typescript-language-server
+    # vscode-langservers-extracted
+    # nil  # Nix LSP
+  ];
+
+  # Direnv configuration with nix-direnv for automatic environment loading
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+    enableBashIntegration = true;
+    enableZshIntegration = true;
+  };
+
   # Qt configuration
   qt = {
     enable = true;
