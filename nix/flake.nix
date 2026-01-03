@@ -28,6 +28,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.harry = ./home/home.nix;
+            home-manager.users.harry-smartstation = ./home/home-smartstation.nix;
             home-manager.sharedModules = [ plasma-manager.homeModules.plasma-manager ];
           }
         ];

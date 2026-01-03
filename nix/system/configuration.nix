@@ -60,11 +60,14 @@
     #jack.enable = true;
   };
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # Shared group for file sharing between users
+  users.groups.harry-shared = {};
+
+  # Define a user account. Don't forget to set a password with 'passwd'.
   users.users.harry = {
     isNormalUser = true;
     description = "Harry Kruger";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "harry-shared" ];
     packages = with pkgs; [
       kdePackages.kate
       keepassxc
@@ -74,8 +77,23 @@
     ];
   };
 
+  users.users.harry-smartstation = {
+    isNormalUser = true;
+    description = "Harry (Work)";
+    extraGroups = [ "networkmanager" "wheel" "harry-shared" ];
+    packages = with pkgs; [
+      kdePackages.kate
+    ];
+  };
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+
+  # System-wide shell aliases (available to all users)
+  environment.shellAliases = {
+    rebuild = "sudo nixos-rebuild switch --flake /home/harry/dotfiles/nix#nixos";
+    rebuild-test = "sudo nixos-rebuild test --flake /home/harry/dotfiles/nix#nixos";
+  };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -119,6 +137,16 @@
 
   system.stateVersion = "25.05"; # Did you read the comment?
 
+  # Declaratively set permissions for shared file access
+  systemd.tmpfiles.rules = [
+    # Make home directories group-readable (755 = rwxr-xr-x)
+    "z /home/harry 0755 harry harry-shared -"
+    "z /home/harry-smartstation 0755 harry-smartstation harry-shared -"
+
+    # Create shared directory with setgid bit (2775 = rwxrwsr-x)
+    # The setgid bit ensures new files inherit the harry-shared group
+    "d /home/shared 2775 harry harry-shared -"
+  ];
 
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
