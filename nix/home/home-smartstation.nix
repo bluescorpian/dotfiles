@@ -12,9 +12,6 @@
 
   # Work packages (minimal, focused on productivity)
   home.packages = with pkgs; [
-    claude-code
-    imagemagick
-    ffmpeg
   ];
 
   # Git configuration

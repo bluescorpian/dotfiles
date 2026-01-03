@@ -7,6 +7,10 @@
     vscode
     neovim
 
+    # Browsers
+    brave
+    google-chrome
+
     # Node.js ecosystem
     nodejs_22  # Node.js 22.x LTS
     bun

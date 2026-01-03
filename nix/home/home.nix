@@ -13,10 +13,6 @@
   # Personal packages
   home.packages = with pkgs; [
     discord
-    google-chrome
-    claude-code
-    imagemagick
-    ffmpeg
     spotify
   ];
 
