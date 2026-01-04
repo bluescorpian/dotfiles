@@ -35,6 +35,7 @@
     # Programs
     thunderbird
     keepassxc
+    super-productivity
 
     # LSP servers (commented examples for later)
     # nodePackages.typescript-language-server
@@ -46,6 +47,13 @@
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
+    enableBashIntegration = true;
+    enableZshIntegration = true;
+  };
+
+  # Zoxide - smarter cd command that learns your habits
+  programs.zoxide = {
+    enable = true;
     enableBashIntegration = true;
     enableZshIntegration = true;
   };

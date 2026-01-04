@@ -151,12 +151,7 @@
 
   # Declaratively set permissions for shared file access
   systemd.tmpfiles.rules = [
-    # Make home directories group-readable (755 = rwxr-xr-x)
-    "z /home/harry 0755 harry harry-shared -"
-    "z /home/harry-smartstation 0755 harry-smartstation harry-shared -"
-
     # Create shared directory with setgid bit (2775 = rwxrwsr-x)
-    # The setgid bit ensures new files inherit the harry-shared group
     "d /home/shared 2775 harry harry-shared -"
   ];
 
