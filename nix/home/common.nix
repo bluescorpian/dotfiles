@@ -23,6 +23,7 @@
     fd
     zellij
     claude-code
+    codex
 
     # Utilities
     imagemagick
