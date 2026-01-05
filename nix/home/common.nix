@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, pkgs-stable, ... }:
 
 {
   # Development packages
@@ -36,7 +36,7 @@
     # Programs
     thunderbird
     keepassxc
-    super-productivity
+    pkgs-stable.super-productivity  # Using stable version due to build issues in unstable
 
     # LSP servers (commented examples for later)
     # nodePackages.typescript-language-server
