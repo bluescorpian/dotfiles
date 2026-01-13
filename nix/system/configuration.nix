@@ -79,7 +79,7 @@
   users.users.harry = {
     isNormalUser = true;
     description = "Harry Kruger";
-    extraGroups = [ "networkmanager" "wheel" "harry-shared" "docker" ];
+    extraGroups = [ "networkmanager" "wheel" "harry-shared" "docker" "dialout" ];
     packages = with pkgs; [
       kdePackages.kate
       stow
@@ -89,7 +89,7 @@
   users.users.harry-smartstation = {
     isNormalUser = true;
     description = "Harry (Work)";
-    extraGroups = [ "networkmanager" "wheel" "harry-shared" "docker" ];
+    extraGroups = [ "networkmanager" "wheel" "harry-shared" "docker" "dialout" ];
     packages = with pkgs; [
       kdePackages.kate
     ];

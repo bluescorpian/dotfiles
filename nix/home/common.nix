@@ -32,6 +32,7 @@
     # MongoDB tools
     mongosh
     mongodb-tools
+    mongodb-compass
 
     # Programs
     thunderbird
