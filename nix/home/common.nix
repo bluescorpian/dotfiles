@@ -39,6 +39,7 @@
     keepassxc
     pkgs-stable.super-productivity  # Using stable version due to build issues in unstable
     libreoffice-fresh  # Office suite
+    obsidian
 
     # LSP servers (commented examples for later)
     # nodePackages.typescript-language-server
