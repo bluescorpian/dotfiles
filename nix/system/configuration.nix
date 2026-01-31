@@ -51,6 +51,10 @@
     open = false;
   };
 
+  # Blacklist ucsi_ccg module to prevent i2c timeout errors that cause login freezes
+  # This module is for USB-C functionality on the GPU and commonly causes issues
+  boot.blacklistedKernelModules = [ "ucsi_ccg" ];
+
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";
