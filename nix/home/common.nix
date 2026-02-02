@@ -3,6 +3,10 @@
 {
   # Development packages
   home.packages = with pkgs; [
+    # Fonts
+    cascadia-code
+    jetbrains-mono
+
     # Editors
     vscode
     neovim
