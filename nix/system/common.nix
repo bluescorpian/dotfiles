@@ -102,8 +102,8 @@
     };
   };
 
-  # Open SSH port in firewall
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  # Open SSH and VNC ports in firewall
+  networking.firewall.allowedTCPPorts = [ 22 5900 ];
 
   # Declaratively set permissions for shared file access
   systemd.tmpfiles.rules = [

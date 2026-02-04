@@ -46,7 +46,8 @@
     obsidian
 
     # Remote access
-    wayvnc  # VNC server for Wayland/Hyprland
+    kdePackages.krfb  # KDE VNC server
+    kdePackages.krdc  # KDE RDP/VNC client
     remmina  # VNC/RDP client for remote desktop access
 
     # LSP servers (commented examples for later)
