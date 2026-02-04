@@ -45,6 +45,10 @@
     libreoffice-fresh  # Office suite
     obsidian
 
+    # Remote access
+    wayvnc  # VNC server for Wayland/Hyprland
+    remmina  # VNC/RDP client for remote desktop access
+
     # LSP servers (commented examples for later)
     # nodePackages.typescript-language-server
     # vscode-langservers-extracted

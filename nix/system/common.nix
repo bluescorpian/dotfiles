@@ -93,6 +93,18 @@
     };
   };
 
+  # SSH configuration for remote access
+  services.openssh = {
+    enable = true;
+    settings = {
+      PermitRootLogin = "no";  # Security best practice
+      PasswordAuthentication = true;  # Allow password auth (can use SSH keys for password-less login)
+    };
+  };
+
+  # Open SSH port in firewall
+  networking.firewall.allowedTCPPorts = [ 22 ];
+
   # Declaratively set permissions for shared file access
   systemd.tmpfiles.rules = [
     # Create shared directory with setgid bit (2775 = rwxrwsr-x)
