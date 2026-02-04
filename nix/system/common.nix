@@ -60,8 +60,8 @@
   # System-wide shell aliases (available to all users)
   # Auto-detects hostname to select the correct configuration (desktop or laptop)
   environment.shellAliases = {
-    rebuild = "sudo nixos-rebuild switch --flake /home/harry/dotfiles/nix#$(hostname)";
-    rebuild-test = "sudo nixos-rebuild test --flake /home/harry/dotfiles/nix#$(hostname)";
+    rebuild = "sudo nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname)";
+    rebuild-test = "sudo nixos-rebuild test --flake /home/shared/dotfiles/nix#$(hostname)";
   };
 
   # System packages
