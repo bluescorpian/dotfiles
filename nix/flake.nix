@@ -19,11 +19,32 @@
   in
   {
      nixosConfigurations = {
-      nixos = nixpkgs.lib.nixosSystem {
+      # Desktop configuration - personal computer with both users
+      desktop = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit pkgs-stable; };
         modules = [
-          ./system/configuration.nix
+          ./system/desktop/configuration.nix
+          # Apply claude-code overlay globally
+          { nixpkgs.overlays = [ claude-code.overlays.default ]; }
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.harry = ./home/home.nix;
+            home-manager.users.harry-smartstation = ./home/home-smartstation.nix;
+            home-manager.sharedModules = [ plasma-manager.homeModules.plasma-manager ];
+            home-manager.extraSpecialArgs = { inherit pkgs-stable; };
+          }
+        ];
+      };
+
+      # Laptop configuration - work computer with both users
+      laptop = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = { inherit pkgs-stable; };
+        modules = [
+          ./system/laptop/configuration.nix
           # Apply claude-code overlay globally
           { nixpkgs.overlays = [ claude-code.overlays.default ]; }
           home-manager.nixosModules.home-manager
