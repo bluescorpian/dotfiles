@@ -108,7 +108,49 @@ ln -s ~/dotfiles/nix ~/nix
 
 After this, you can use the `rebuild` alias from anywhere.
 
-#### 8. Commit Hardware Config (Optional)
+#### 8. Copy SSH Keys and Configuration
+SSH keys are not managed by NixOS config and must be transferred manually.
+
+**For each user account**, copy SSH files from your existing machine:
+
+**Option A: Using USB Drive**
+```bash
+# On source machine (e.g., desktop)
+cp -r ~/.ssh /path/to/usb/harry-ssh-backup
+
+# On new machine (laptop)
+mkdir -p ~/.ssh
+cp -r /path/to/usb/harry-ssh-backup/* ~/.ssh/
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/id_* ~/.ssh/config 2>/dev/null || true
+chmod 644 ~/.ssh/*.pub 2>/dev/null || true
+```
+
+**Option B: Using SCP (if both machines are on network)**
+```bash
+# On new machine
+scp -r harry@desktop-ip:~/.ssh ~/.ssh
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/id_* ~/.ssh/config 2>/dev/null || true
+chmod 644 ~/.ssh/*.pub 2>/dev/null || true
+```
+
+**Option C: Generate New Keys**
+If you prefer fresh keys, generate new ones and update them on GitHub/servers:
+```bash
+ssh-keygen -t ed25519 -C "your_email@example.com"
+# Then add the new public key to GitHub, servers, etc.
+```
+
+**Important files to transfer:**
+- `~/.ssh/id_*` - Private keys (KEEP SECURE!)
+- `~/.ssh/id_*.pub` - Public keys
+- `~/.ssh/config` - SSH client configuration (if customized)
+- `~/.ssh/known_hosts` - Known server fingerprints (optional)
+
+Repeat this process for both users (`harry` and `harry-smartstation`) if both need SSH access.
+
+#### 9. Commit Hardware Config (Optional)
 If you want to version control your hardware configuration:
 ```bash
 cd ~/dotfiles
