@@ -13,8 +13,6 @@
   # Personal packages
   home.packages = with pkgs; [
     discord
-    spotify
-    haruna
   ];
 
   # Git configuration

@@ -15,6 +15,10 @@
     brave
     google-chrome
 
+    # Media
+    spotify
+    haruna
+
     # Node.js ecosystem
     nodejs_22  # Node.js 22.x LTS
     bun
