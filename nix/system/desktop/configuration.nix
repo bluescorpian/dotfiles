@@ -41,6 +41,9 @@
     isNormalUser = true;
     description = "Harry (Work)";
     extraGroups = [ "networkmanager" "wheel" "harry-shared" "docker" "dialout" ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEi+18q1ME2FMbniwQ276WWakX/j8V19fn37l3G7FTGq dsharryh27@gmail.com"
+    ];
     packages = with pkgs; [
       kdePackages.kate
     ];
