@@ -103,7 +103,12 @@
   };
 
   # Open SSH and VNC ports in firewall
-  networking.firewall.allowedTCPPorts = [ 22 5900 ];
+  networking.firewall = {
+    allowedTCPPorts = [ 22 5900 ];
+    # KDE Connect ports (TCP and UDP 1714-1764)
+    allowedTCPPortRanges = [ { from = 1714; to = 1764; } ];
+    allowedUDPPortRanges = [ { from = 1714; to = 1764; } ];
+  };
 
   # Declaratively set permissions for shared file access
   systemd.tmpfiles.rules = [

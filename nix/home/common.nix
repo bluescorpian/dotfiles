@@ -84,6 +84,12 @@
     workspace.lookAndFeel = "org.kde.breezedark.desktop";
   };
 
+  # KDE Connect for phone integration
+  services.kdeconnect = {
+    enable = true;
+    indicator = true;  # Show indicator in system tray
+  };
+
   # Terminal and launcher
   programs.kitty.enable = true;
   programs.wofi.enable = true;
