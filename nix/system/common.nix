@@ -80,6 +80,7 @@
     config = {
       init.defaultBranch = "main";
       core.editor = "nano";
+      safe.directory = "/home/shared/dotfiles";
     };
   };
 
