@@ -9,9 +9,35 @@
   # Hostname
   networking.hostName = "laptop";
 
-  # Graphics - using generic open-source drivers (will work with Intel/AMD integrated graphics)
-  # If you have NVIDIA on the laptop, you can add nvidia config here later
+  # Graphics - NVIDIA RTX A1000 with AMD integrated graphics
   hardware.graphics.enable = true;
+
+  # NVIDIA drivers
+  services.xserver.videoDrivers = [ "nvidia" ];
+
+  hardware.nvidia = {
+    # Use open-source kernel modules (Ampere/RTX A1000 supports this)
+    open = true;
+
+    # Enable modesetting (required for Wayland/Hyprland)
+    modesetting.enable = true;
+
+    # Power management (helps with battery life)
+    powerManagement.enable = true;
+
+    # PRIME offload mode for hybrid graphics (best battery life)
+    # Use integrated AMD GPU by default, NVIDIA only when needed
+    prime = {
+      offload = {
+        enable = true;
+        enableOffloadCmd = true;  # Provides nvidia-offload command
+      };
+
+      # PCI Bus IDs
+      amdgpuBusId = "PCI:5:0:0";
+      nvidiaBusId = "PCI:1:0:0";
+    };
+  };
 
   # Enable Bluetooth
   hardware.bluetooth.enable = true;
