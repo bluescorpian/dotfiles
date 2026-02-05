@@ -39,8 +39,8 @@
   };
 
   # Override Mako colors for visual distinction from personal account
-  services.mako.settings = {
-    background-color = "#2e2e3e";
-    border-color = "#4e4e70";
-  };
+  # services.mako.settings = {
+  #   background-color = "#2e2e3e";
+  #   border-color = "#4e4e70";
+  # };
 }

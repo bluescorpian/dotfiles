@@ -130,15 +130,15 @@
   # };
 
   # Notification daemon
-  services.mako = {
-    enable = true;
-    settings = {
-      font = "Inter 11";
-      default-timeout = 5000;
-      border-radius = 8;
-      text-color = "#cdd6f4";
-    };
-  };
+  # services.mako = {
+  #   enable = true;
+  #   settings = {
+  #     font = "Inter 11";
+  #     default-timeout = 5000;
+  #     border-radius = 8;
+  #     text-color = "#cdd6f4";
+  #   };
+  # };
 
   # Polkit agent for authentication
   # services.hyprpolkitagent.enable = true;

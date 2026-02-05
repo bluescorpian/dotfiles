@@ -42,10 +42,10 @@
   };
 
   # Personal Mako colors
-  services.mako.settings = {
-    background-color = "#1e1e2e";
-    border-color = "#3e3e60";
-  };
+  # services.mako.settings = {
+  #   background-color = "#1e1e2e";
+  #   border-color = "#3e3e60";
+  # };
 
   # Custom desktop entry for Brave with default profile
   xdg.desktopEntries.brave-browser = {
