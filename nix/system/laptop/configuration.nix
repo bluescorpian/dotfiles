@@ -9,6 +9,8 @@
   # Hostname
   networking.hostName = "laptop";
 
+  services.asusd.enable = true;
+
   # Graphics - NVIDIA RTX A1000 with AMD integrated graphics
   hardware.graphics.enable = true;
 
@@ -38,6 +40,11 @@
       nvidiaBusId = "PCI:1:0:0";
     };
   };
+
+  boot.kernelParams = [
+    "acpi_backlight=native"
+  ];
+
 
   # Enable Bluetooth
   hardware.bluetooth.enable = true;
