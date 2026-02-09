@@ -68,6 +68,9 @@
     enableZshIntegration = true;
   };
 
+  # Bash configuration - required for Home Manager to modify .bashrc
+  programs.bash.enable = true;
+
   # Zoxide - smarter cd command that learns your habits
   programs.zoxide = {
     enable = true;
