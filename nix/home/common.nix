@@ -48,6 +48,7 @@
     pkgs-stable.super-productivity  # Using stable version due to build issues in unstable
     libreoffice-fresh  # Office suite
     obsidian
+    logseq
 
     # Remote access
     kdePackages.krfb  # KDE VNC server
