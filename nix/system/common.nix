@@ -70,7 +70,23 @@
     curl
     openssh
     kdePackages.partitionmanager
+    qt6.qtmultimedia
   ];
+
+  services.flatpak = {
+    enable = true;
+
+    remotes = [
+      {
+        name = "flathub";
+        location = "https://flathub.org/repo/flathub.flatpakrepo";
+      }
+    ];
+
+    packages = [
+      "flathub:io.github.diegopvlk.Tomatillo"
+    ];
+  };
 
   # Git configuration
   programs.git = {
