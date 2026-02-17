@@ -74,7 +74,6 @@
   ];
 
   services.flatpak.enable = true;
-  };
 
   # Git configuration
   programs.git = {
