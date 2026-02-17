@@ -12,7 +12,6 @@
 
   # Personal packages
   home.packages = with pkgs; [
-    discord
   ];
 
   # Git configuration

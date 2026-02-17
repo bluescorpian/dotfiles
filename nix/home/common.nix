@@ -19,6 +19,9 @@
     spotify
     haruna
 
+    # Communication
+    discord
+
     # Node.js ecosystem
     nodejs_22  # Node.js 22.x LTS
     bun
