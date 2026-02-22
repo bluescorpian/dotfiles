@@ -8,7 +8,6 @@
     jetbrains-mono
 
     # Editors
-    vscode
     neovim
 
     # Browsers
@@ -99,6 +98,15 @@
   services.kdeconnect = {
     enable = true;
     indicator = true;  # Show indicator in system tray
+  };
+
+  # VS Code with extensions
+  programs.vscode = {
+    enable = true;
+    package = pkgs.vscode-fhs;
+    extensions = with pkgs.vscode-extensions; [
+      anthropic.claude-code
+    ];
   };
 
   # Terminal and launcher
