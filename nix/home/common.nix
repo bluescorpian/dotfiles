@@ -5,7 +5,7 @@
   home.packages = with pkgs; [
     # Fonts
     cascadia-code
-    jetbrains-mono
+    pkgs-stable.jetbrains-mono
 
     # Editors
     vscode
