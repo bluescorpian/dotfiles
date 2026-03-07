@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports = [
@@ -23,6 +23,18 @@
       user.email = "harry@hrry.sh";
     };
   };
+
+  # Fix SSH config ownership: vscode-fhs chroot sees Nix store files (uid 0) as
+  # uid 65534 (nobody), causing SSH to reject the symlinked config as bad owner.
+  # Solution: replace the symlink with a real file owned by the user.
+  home.activation.fixSshConfig = lib.hm.dag.entryAfter ["linkGeneration"] ''
+    if [ -L "$HOME/.ssh/config" ]; then
+      _target=$(readlink -f "$HOME/.ssh/config")
+      rm "$HOME/.ssh/config"
+      install -m600 "$_target" "$HOME/.ssh/config"
+    fi
+    chmod 700 "$HOME/.ssh"
+  '';
 
   # SSH configuration for GitHub
   programs.ssh = {
