@@ -5,7 +5,7 @@
   home.packages = with pkgs; [
     # Fonts
     cascadia-code
-    jetbrains-mono
+    pkgs-stable.jetbrains-mono
 
     # Editors
     neovim
@@ -27,13 +27,16 @@
     nodePackages.pnpm
     nodePackages.yarn
 
+    # Other Languages
+    python3
+
     # Development utilities
     jq
     ripgrep
     fd
     zellij
     claude-code
-    codex
+    gh
 
     # Utilities
     imagemagick
@@ -72,7 +75,12 @@
   };
 
   # Bash configuration - required for Home Manager to modify .bashrc
-  programs.bash.enable = true;
+  programs.bash = {
+    enable = true;
+    shellAliases = {
+      codex = "nix run github:sadjow/codex-cli-nix --";
+    };
+  };
 
   # Zoxide - smarter cd command that learns your habits
   programs.zoxide = {
