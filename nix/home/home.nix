@@ -13,6 +13,7 @@
   # Personal packages
   home.packages = with pkgs; [
     osu-lazer-bin
+    qbittorrent
   ];
 
   # Git configuration
