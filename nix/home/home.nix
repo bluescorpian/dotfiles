@@ -12,6 +12,7 @@
 
   # Personal packages
   home.packages = with pkgs; [
+    osu-lazer-bin
   ];
 
   # Git configuration
