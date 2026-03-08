@@ -34,6 +34,7 @@
             home-manager.backupFileExtension = "backup";
             home-manager.users.harry = ./home/home.nix;
             home-manager.users.harry-smartstation = ./home/home-smartstation.nix;
+            home-manager.users.guest = ./home/home-guest.nix;
             home-manager.sharedModules = [ plasma-manager.homeModules.plasma-manager ];
             home-manager.extraSpecialArgs = { inherit pkgs-stable; };
           }
@@ -55,6 +56,7 @@
             home-manager.backupFileExtension = "backup";
             home-manager.users.harry = ./home/home.nix;
             home-manager.users.harry-smartstation = ./home/home-smartstation.nix;
+            home-manager.users.guest = ./home/home-guest.nix;
             home-manager.sharedModules = [ plasma-manager.homeModules.plasma-manager ];
             home-manager.extraSpecialArgs = { inherit pkgs-stable; };
           }
