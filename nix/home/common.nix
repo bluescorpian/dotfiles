@@ -177,11 +177,10 @@
   };
 
   # Keep SSH connections alive
-  programs.ssh.extraConfig = ''
-    Host *
-      ServerAliveInterval 60
-      ServerAliveCountMax 3
-  '';
+  programs.ssh.matchBlocks."*" = {
+    serverAliveInterval = 60;
+    serverAliveCountMax = 3;
+  };
 
   # Fix SSH config ownership: vscode-fhs chroot sees Nix store files (uid 0) as
   # uid 65534 (nobody), causing SSH to reject the symlinked config as bad owner.
