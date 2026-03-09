@@ -185,7 +185,7 @@
       rm "$HOME/.ssh/config"
       install -m600 "$_target" "$HOME/.ssh/config"
     fi
-    chmod 700 "$HOME/.ssh"
+    [ -d "$HOME/.ssh" ] && chmod 700 "$HOME/.ssh"
   '';
 
   # PipeWire EQ Configuration
