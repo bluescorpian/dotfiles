@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-stable, ... }:
+{ config, pkgs, pkgs-stable, lib, ... }:
 
 {
   # Development packages
@@ -17,6 +17,7 @@
     # Media
     spotify
     haruna
+    obs-studio
 
     # Communication
     discord
@@ -174,6 +175,18 @@
   services.ssh-agent = {
     enable = true;
   };
+
+  # Fix SSH config ownership: vscode-fhs chroot sees Nix store files (uid 0) as
+  # uid 65534 (nobody), causing SSH to reject the symlinked config as bad owner.
+  # Solution: replace the symlink with a real file owned by the user.
+  home.activation.fixSshConfig = lib.hm.dag.entryAfter ["linkGeneration"] ''
+    if [ -L "$HOME/.ssh/config" ]; then
+      _target=$(readlink -f "$HOME/.ssh/config")
+      rm "$HOME/.ssh/config"
+      install -m600 "$_target" "$HOME/.ssh/config"
+    fi
+    chmod 700 "$HOME/.ssh"
+  '';
 
   # PipeWire EQ Configuration
   xdg.configFile."pipewire/pipewire.conf.d/10-filter-chain.conf".source = ./pipewire-eq.conf;
