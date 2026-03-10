@@ -22,6 +22,7 @@
     settings = {
       user.name = "Harry Kruger";
       user.email = "harry@hrry.sh";
+      safe.directory = "/home/shared/dotfiles";
     };
   };
 
