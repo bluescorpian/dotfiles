@@ -25,13 +25,6 @@
   # Hint electron apps to use wayland
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
-  # XDG Desktop Portal configuration - use KDE as the backend
-  xdg.portal = {
-    enable = true;
-    extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde ];
-    config.common.default = "kde";
-  };
-
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";
@@ -74,6 +67,13 @@
   ];
 
   services.flatpak.enable = true;
+
+  # Font configuration - enables font dir for Flatpak access
+  fonts.fontDir.enable = true;
+  fonts.packages = with pkgs; [
+    noto-fonts
+    noto-fonts-color-emoji
+  ];
 
   # Git configuration
   programs.git = {
