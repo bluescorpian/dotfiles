@@ -18,6 +18,7 @@
     spotify
     haruna
     obs-studio
+    gimp
 
     # Communication
     discord
