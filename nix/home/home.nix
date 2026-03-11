@@ -26,25 +26,12 @@
     };
   };
 
-  # SSH configuration for GitHub
-  programs.ssh = {
-    enable = true;
-    enableDefaultConfig = false;
-    matchBlocks = {
-      "github.com" = {
-        hostname = "github.com";
-        user = "git";
-        identityFile = "~/.ssh/bluescorpian";
-        identitiesOnly = true;
-        addKeysToAgent = "yes";
-      };
-      "vps" = {
-        hostname = "91.98.21.137";
-        user = "harry";
-        identityFile = "~/.ssh/bluescorpian";
-        identitiesOnly = true;
-      };
-    };
+  # SSH: VPS access (personal only)
+  programs.ssh.matchBlocks."vps" = {
+    hostname = "91.98.21.137";
+    user = "harry";
+    identityFile = "~/.ssh/bluescorpian";
+    identitiesOnly = true;
   };
 
   # Personal Mako colors

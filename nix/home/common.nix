@@ -177,15 +177,30 @@
     enable = true;
   };
 
-  # Keep SSH connections alive
-  programs.ssh.matchBlocks."*" = {
-    serverAliveInterval = 60;
-    serverAliveCountMax = 3;
+  # SSH configuration
+  programs.ssh = {
+    enable = true;
+    enableDefaultConfig = false;
+    matchBlocks = {
+      "*" = {
+        serverAliveInterval = 60;
+        serverAliveCountMax = 3;
+      };
+      "github.com" = {
+        hostname = "github.com";
+        user = "git";
+        identityFile = "~/.ssh/bluescorpian";
+        identitiesOnly = true;
+        addKeysToAgent = "yes";
+      };
+    };
   };
+  home.file.".ssh/config".force = true;
 
   # Fix SSH config ownership: vscode-fhs chroot sees Nix store files (uid 0) as
   # uid 65534 (nobody), causing SSH to reject the symlinked config as bad owner.
-  # Solution: replace the symlink with a real file owned by the user.
+  # Solution: force overwrite so home-manager can replace stale regular files,
+  # then copy the symlink target to a real file owned by the user.
   home.activation.fixSshConfig = lib.hm.dag.entryAfter ["linkGeneration"] ''
     if [ -L "$HOME/.ssh/config" ]; then
       _target=$(readlink -f "$HOME/.ssh/config")

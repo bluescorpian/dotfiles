@@ -24,20 +24,6 @@
     };
   };
 
-  # SSH configuration for GitHub
-  programs.ssh = {
-    enable = true;
-    enableDefaultConfig = false;
-    matchBlocks = {
-      "github.com" = {
-        hostname = "github.com";
-        user = "git";
-        identityFile = "~/.ssh/bluescorpian";
-        identitiesOnly = true;
-        addKeysToAgent = "yes";
-      };
-    };
-  };
 
   # Override Mako colors for visual distinction from personal account
   # services.mako.settings = {
