@@ -38,5 +38,36 @@
     htop
   ];
 
+  # SMB share
+  services.samba = {
+    enable = true;
+    settings = {
+      global = {
+        workgroup = "WORKGROUP";
+        "server string" = "vps";
+        security = "user";
+        "map to guest" = "never";
+      };
+      share = {
+        path = "/srv/smb";
+        browseable = "yes";
+        "read only" = "no";
+        "valid users" = "harry";
+      };
+    };
+  };
+
+  systemd.tmpfiles.rules = [
+    "d /srv/smb 0700 harry users -"
+  ];
+
+  networking.firewall.allowedTCPPorts = [ 22 139 445 ];
+  networking.firewall.allowedUDPPorts = [ 137 138 ];
+
+  nix.settings = {
+    experimental-features = [ "nix-command" "flakes" ];
+    trusted-users = [ "root" "harry" ];
+  };
+
   system.stateVersion = "24.11";
 }
