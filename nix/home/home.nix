@@ -38,6 +38,12 @@
         identitiesOnly = true;
         addKeysToAgent = "yes";
       };
+      "vps" = {
+        hostname = "91.98.21.137";
+        user = "harry";
+        identityFile = "~/.ssh/bluescorpian";
+        identitiesOnly = true;
+      };
     };
   };
 
