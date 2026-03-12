@@ -47,6 +47,11 @@ in {
 
   networking.firewall.allowedTCPPorts = [ 22 80 443 ];
 
+  swapDevices = [{
+    device = "/swapfile";
+    size = 4096; # 4GB
+  }];
+
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "n8n"
   ];
