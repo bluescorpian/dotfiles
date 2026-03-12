@@ -1,4 +1,4 @@
-{ modulesPath, ... }:
+{ modulesPath, lib, ... }:
 let
   domain = "hrry.sh";
 in {
@@ -46,6 +46,10 @@ in {
   services.vscode-server.enable = true;
 
   networking.firewall.allowedTCPPorts = [ 22 80 443 ];
+
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    "n8n"
+  ];
 
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
