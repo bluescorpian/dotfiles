@@ -43,8 +43,8 @@
         ];
       };
 
-      # VPS configuration - minimal headless server
-      vps = nixpkgs.lib.nixosSystem {
+      # VPS configuration - minimal headless server (stable channel)
+      vps = nixpkgs-stable.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
           disko.nixosModules.disko
