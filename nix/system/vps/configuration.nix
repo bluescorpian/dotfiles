@@ -13,6 +13,7 @@ in {
     ./services/vaultwarden.nix
     ./services/cockpit.nix
     ./services/n8n.nix
+    ./services/homepage.nix
   ];
 
   networking.hostName = "vps";
