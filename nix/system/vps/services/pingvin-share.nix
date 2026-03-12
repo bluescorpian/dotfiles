@@ -11,6 +11,7 @@ in {
   };
 
   services.caddy.virtualHosts.${subdomain}.extraConfig = ''
+    reverse_proxy /api/* localhost:3004
     reverse_proxy localhost:3005
   '';
 }
