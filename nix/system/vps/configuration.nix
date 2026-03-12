@@ -1,10 +1,16 @@
-{ modulesPath, lib, pkgs, ... }:
-{
+{ modulesPath, ... }:
+let
+  domain = "hrry.sh";
+in {
+  _module.args = { inherit domain; };
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disk-config.nix
     ./hardware-configuration.nix
+    ./packages.nix
+    ./samba.nix
+    ./services/vaultwarden.nix
   ];
 
   networking.hostName = "vps";
@@ -32,46 +38,9 @@
 
   security.sudo.wheelNeedsPassword = false;
 
-  environment.systemPackages = with pkgs; [
-    curl
-    git
-    htop
-  ];
+  services.caddy.enable = true;
 
-  # SMB share
-  services.samba = {
-    enable = true;
-    settings = {
-      global = {
-        workgroup = "WORKGROUP";
-        "server string" = "vps";
-        security = "user";
-        "map to guest" = "never";
-        "unix extensions" = "yes";
-        "ea support" = "yes";
-        "fruit:metadata" = "stream";
-        "fruit:model" = "MacSamba";
-      };
-      share = {
-        path = "/srv/smb";
-        browseable = "yes";
-        "read only" = "no";
-        writable = "yes";
-        "valid users" = "harry";
-        "vfs objects" = "fruit streams_xattr";
-        "create mask" = "0664";
-        "directory mask" = "0775";
-        "force user" = "harry";
-      };
-    };
-  };
-
-  systemd.tmpfiles.rules = [
-    "d /srv/smb 0700 harry users -"
-  ];
-
-  networking.firewall.allowedTCPPorts = [ 22 139 445 ];
-  networking.firewall.allowedUDPPorts = [ 137 138 ];
+  networking.firewall.allowedTCPPorts = [ 22 80 443 ];
 
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
