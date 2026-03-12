@@ -41,6 +41,8 @@ in {
 
   services.caddy.enable = true;
 
+  services.vscode-server.enable = true;
+
   networking.firewall.allowedTCPPorts = [ 22 80 443 ];
 
   nix.settings = {
