@@ -16,6 +16,8 @@ The repository follows a flake-based structure with separation between system an
 - **nix/home/common.nix**: Shared home-manager configuration for all users (Hyprland, development tools, desktop settings)
 - **nix/home/home.nix**: Personal user (harry) specific configuration
 - **nix/home/home-smartstation.nix**: Work user (harry-smartstation) specific configuration
+- **nix/system/vps/configuration.nix**: VPS (Hetzner CX22) server configuration — independent from desktop
+- **nix/system/common.nix**: Shell aliases shared across all local users (rebuild, rebuild-vps)
 
 The flake uses home-manager as a NixOS module, so user and system configurations rebuild together atomically.
 
@@ -43,6 +45,11 @@ Both users share:
 After editing any .nix file, use the system-wide alias:
 ```bash
 rebuild
+```
+
+For the VPS (remote deployment):
+```bash
+rebuild-vps
 ```
 
 This is equivalent to:
@@ -81,6 +88,7 @@ sudo nixos-rebuild build --flake ~/nix#nixos
    - Personal user only → `nix/home/home.nix`
    - Work user only → `nix/home/home-smartstation.nix`
    - New flake inputs → `nix/flake.nix`
+   - VPS server changes → `nix/system/vps/configuration.nix`
 2. Apply changes with `rebuild` alias
 3. Commit to git and push to backup
 
