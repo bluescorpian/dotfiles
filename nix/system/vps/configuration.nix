@@ -12,8 +12,9 @@ in {
     ./samba.nix
     ./services/vaultwarden.nix
     ./services/cockpit.nix
-    ./services/n8n.nix
+    # ./services/n8n.nix  # temporarily disabled
     ./services/homepage.nix
+    ./services/pingvin-share.nix
   ];
 
   networking.hostName = "vps";

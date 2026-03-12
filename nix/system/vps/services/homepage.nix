@@ -33,6 +33,13 @@ in {
               description = "Server management";
             };
           }
+          {
+            "Pingvin Share" = {
+              icon = "pingvin-share";
+              href = "https://share.${domain}";
+              description = "File sharing";
+            };
+          }
         ];
       }
     ];
