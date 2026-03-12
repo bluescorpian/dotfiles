@@ -15,6 +15,7 @@ in {
     # ./services/n8n.nix  # temporarily disabled
     ./services/homepage.nix
     ./services/pingvin-share.nix
+    ./services/filebrowser.nix
   ];
 
   networking.hostName = "vps";

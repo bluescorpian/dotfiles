@@ -40,6 +40,13 @@ in {
               description = "File sharing";
             };
           }
+          {
+            "FileBrowser" = {
+              icon = "filebrowser";
+              href = "https://files.${domain}";
+              description = "File manager";
+            };
+          }
         ];
       }
     ];
