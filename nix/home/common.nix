@@ -7,65 +7,59 @@
     cascadia-code
     pkgs-stable.jetbrains-mono
 
-    # Editors
-    neovim
-
     # Browsers
     brave
     google-chrome
 
-    # Media
+    # Communication
+    discord
+    bitwarden-desktop
+    thunderbird
+
+    # Media & Creative
     spotify
     haruna
     obs-studio
     gimp
 
-    # Communication
-    discord
+    # Office & Productivity
+    libreoffice-fresh
+    obsidian
+    logseq
+    keepassxc
+    pkgs-stable.super-productivity  # Using stable version due to build issues in unstable
 
-    # Node.js ecosystem
+    # Development - Editors
+    neovim
+
+    # Development - Languages & Runtimes
     nodejs_22  # Node.js 22.x LTS
     bun
     nodePackages.pnpm
     nodePackages.yarn
-
-    # Other Languages
     python3
 
-    # Development utilities
+    # Development - Tools
+    claude-code
+    gh
     jq
     ripgrep
     fd
     zellij
-    claude-code
-    gh
 
-    # Utilities
-    imagemagick
-    ffmpeg
-
-    # MongoDB tools
+    # Database
     mongosh
     mongodb-tools
     mongodb-compass
 
-    # Programs
-    thunderbird
-    keepassxc
-    pkgs-stable.super-productivity  # Using stable version due to build issues in unstable
-    libreoffice-fresh  # Office suite
-    obsidian
-    logseq
+    # Media Processing
+    imagemagick
+    ffmpeg
 
-    # Remote access
+    # Remote Access
     kdePackages.krfb  # KDE VNC server
     kdePackages.krdc  # KDE RDP/VNC client
-    remmina  # VNC/RDP client for remote desktop access
-
-    # LSP servers (commented examples for later)
-    # nodePackages.typescript-language-server
-    # vscode-langservers-extracted
-    # nil  # Nix LSP
+    remmina  # VNC/RDP client
   ];
 
   # Direnv configuration with nix-direnv for automatic environment loading
