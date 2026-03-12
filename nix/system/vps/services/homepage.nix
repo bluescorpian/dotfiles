@@ -38,7 +38,7 @@ in {
     ];
   };
 
-  services.caddy.virtualHosts."${domain}".extraConfig = ''
+  services.caddy.virtualHosts."home.${domain}".extraConfig = ''
     reverse_proxy localhost:${toString port}
   '';
 }
