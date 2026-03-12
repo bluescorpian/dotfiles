@@ -11,6 +11,7 @@ in {
     ./packages.nix
     ./samba.nix
     ./services/vaultwarden.nix
+    ./services/cockpit.nix
   ];
 
   networking.hostName = "vps";
