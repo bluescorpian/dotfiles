@@ -1,10 +1,21 @@
-{ modulesPath, lib, pkgs, ... }:
-{
+{ modulesPath, lib, ... }:
+let
+  domain = "hrry.sh";
+in {
+  _module.args = { inherit domain; };
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disk-config.nix
     ./hardware-configuration.nix
+    ./packages.nix
+    ./samba.nix
+    ./services/vaultwarden.nix
+    ./services/cockpit.nix
+    # ./services/n8n.nix  # temporarily disabled
+    ./services/homepage.nix
+    ./services/pingvin-share.nix
+    ./services/filebrowser.nix
   ];
 
   networking.hostName = "vps";
@@ -32,46 +43,20 @@
 
   security.sudo.wheelNeedsPassword = false;
 
-  environment.systemPackages = with pkgs; [
-    curl
-    git
-    htop
+  services.caddy.enable = true;
+
+  services.vscode-server.enable = true;
+
+  networking.firewall.allowedTCPPorts = [ 22 80 443 ];
+
+  swapDevices = [{
+    device = "/swapfile";
+    size = 4096; # 4GB
+  }];
+
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    "n8n"
   ];
-
-  # SMB share
-  services.samba = {
-    enable = true;
-    settings = {
-      global = {
-        workgroup = "WORKGROUP";
-        "server string" = "vps";
-        security = "user";
-        "map to guest" = "never";
-        "unix extensions" = "yes";
-        "ea support" = "yes";
-        "fruit:metadata" = "stream";
-        "fruit:model" = "MacSamba";
-      };
-      share = {
-        path = "/srv/smb";
-        browseable = "yes";
-        "read only" = "no";
-        writable = "yes";
-        "valid users" = "harry";
-        "vfs objects" = "fruit streams_xattr";
-        "create mask" = "0664";
-        "directory mask" = "0775";
-        "force user" = "harry";
-      };
-    };
-  };
-
-  systemd.tmpfiles.rules = [
-    "d /srv/smb 0700 harry users -"
-  ];
-
-  networking.firewall.allowedTCPPorts = [ 22 139 445 ];
-  networking.firewall.allowedUDPPorts = [ 137 138 ];
 
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];

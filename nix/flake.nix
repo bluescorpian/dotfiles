@@ -12,9 +12,11 @@
     claude-code.url = "github:sadjow/claude-code-nix";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+    vscode-server.url = "github:nix-community/nixos-vscode-server";
+    vscode-server.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, claude-code, disko, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, claude-code, disko, vscode-server, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     pkgs-stable = nixpkgs-stable.legacyPackages.x86_64-linux;
@@ -43,11 +45,13 @@
         ];
       };
 
-      # VPS configuration - minimal headless server
-      vps = nixpkgs.lib.nixosSystem {
+      # VPS configuration - minimal headless server (stable channel)
+      vps = nixpkgs-stable.lib.nixosSystem {
         system = "x86_64-linux";
+        specialArgs = { pkgs-unstable = nixpkgs.legacyPackages.x86_64-linux; };
         modules = [
           disko.nixosModules.disko
+          vscode-server.nixosModules.default
           ./system/vps/configuration.nix
         ];
       };

@@ -16,8 +16,25 @@ The repository follows a flake-based structure with separation between system an
 - **nix/home/common.nix**: Shared home-manager configuration for all users (Hyprland, development tools, desktop settings)
 - **nix/home/home.nix**: Personal user (harry) specific configuration
 - **nix/home/home-smartstation.nix**: Work user (harry-smartstation) specific configuration
+- **nix/system/vps/configuration.nix**: VPS (Hetzner CX22) server configuration — independent from desktop
+- **nix/system/vps/packages.nix**: VPS system packages and shell aliases
+- **nix/system/vps/samba.nix**: Samba SMB share configuration
+- **nix/system/vps/services/**: One file per self-hosted service (vaultwarden, cockpit, etc.)
+- **nix/system/common.nix**: Shell aliases shared across all local users (rebuild, rebuild-vps)
 
 The flake uses home-manager as a NixOS module, so user and system configurations rebuild together atomically.
+
+### VPS Service Architecture
+
+The VPS uses a modular pattern: one `.nix` file per service in `nix/system/vps/services/`.
+Each service file is self-contained with its systemd service, Caddy virtual host, and port.
+
+- Domain is defined as a variable (`domain = "hrry.sh"`) in `vps/configuration.nix` and passed via `_module.args`
+- Service files accept `{ domain, ... }:` and use subdomains like `"app.${domain}"`
+- Caddy handles reverse proxy and automatic HTTPS
+- Port convention: use 3001+ range, increment per service
+- VPS runs on `nixpkgs-stable`, with `pkgs-unstable` available via `specialArgs` for specific packages
+- To add a new service: create `services/foo.nix`, add import to `configuration.nix`
 
 ### User Accounts
 
@@ -43,6 +60,11 @@ Both users share:
 After editing any .nix file, use the system-wide alias:
 ```bash
 rebuild
+```
+
+For the VPS (remote deployment):
+```bash
+rebuild-vps
 ```
 
 This is equivalent to:
@@ -81,6 +103,8 @@ sudo nixos-rebuild build --flake ~/nix#nixos
    - Personal user only → `nix/home/home.nix`
    - Work user only → `nix/home/home-smartstation.nix`
    - New flake inputs → `nix/flake.nix`
+   - VPS server changes → `nix/system/vps/configuration.nix`
+   - New VPS service → create `nix/system/vps/services/<name>.nix` and add import
 2. Apply changes with `rebuild` alias
 3. Commit to git and push to backup
 
