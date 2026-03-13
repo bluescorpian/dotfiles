@@ -40,6 +40,9 @@
     claude-code
     gh
 
+    # Notifications
+    libnotify  # provides notify-send for desktop notifications
+
     # Utilities
     imagemagick
     ffmpeg
@@ -62,8 +65,8 @@
     kdePackages.krdc  # KDE RDP/VNC client
     remmina  # VNC/RDP client for remote desktop access
 
-    # LSP servers (commented examples for later)
-    # nodePackages.typescript-language-server
+    # LSP servers
+    nodePackages.typescript-language-server
     # vscode-langservers-extracted
     # nil  # Nix LSP
   ];
