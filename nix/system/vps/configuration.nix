@@ -16,7 +16,10 @@ in {
     ./services/homepage.nix
     ./services/pingvin-share.nix
     ./services/filebrowser.nix
+    ./services/mealie.nix
   ];
+
+  time.timeZone = "Africa/Johannesburg";
 
   networking.hostName = "vps";
 

@@ -47,6 +47,13 @@ in {
               description = "File manager";
             };
           }
+          {
+            "Mealie" = {
+              icon = "mealie";
+              href = "https://mealie.${domain}";
+              description = "Recipe manager";
+            };
+          }
         ];
       }
     ];
