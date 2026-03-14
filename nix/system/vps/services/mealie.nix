@@ -1,10 +1,11 @@
-{ domain, ... }:
+{ domain, pkgs-unstable, ... }:
 let
   port = 3007;
   subdomain = "mealie.${domain}";
 in {
   services.mealie = {
     enable = true;
+    package = pkgs-unstable.mealie;
     inherit port;
     credentialsFile = "/etc/mealie/credentials.env";
     settings = {
