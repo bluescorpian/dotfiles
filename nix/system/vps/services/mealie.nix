@@ -17,6 +17,10 @@ in {
     };
   };
 
+  systemd.tmpfiles.rules = [
+    "d /var/lib/mealie/nltk_data 0755 root root -"
+  ];
+
   systemd.services.mealie.serviceConfig.BindPaths = [ "/var/lib/mealie/nltk_data:/nltk_data" ];
 
   services.caddy.virtualHosts.${subdomain}.extraConfig = ''
