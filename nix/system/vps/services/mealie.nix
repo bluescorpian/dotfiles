@@ -13,7 +13,7 @@ in {
       TZ = "Africa/Johannesburg";
       NLTK_DATA = "/var/lib/mealie/nltk_data";
       OPENAI_BASE_URL = "https://openrouter.ai/api/v1";
-      OPENAI_MODEL = "openrouter/healer-alpha";
+      OPENAI_MODEL = "google/gemini-2.5-pro";
     };
   };
 
