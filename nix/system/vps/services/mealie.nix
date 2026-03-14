@@ -17,6 +17,8 @@ in {
     };
   };
 
+  systemd.services.mealie.serviceConfig.BindPaths = [ "/var/lib/mealie/nltk_data:/nltk_data" ];
+
   services.caddy.virtualHosts.${subdomain}.extraConfig = ''
     reverse_proxy localhost:${toString port}
   '';
