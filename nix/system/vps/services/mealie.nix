@@ -11,6 +11,7 @@ in {
     settings = {
       BASE_URL = "https://${subdomain}";
       TZ = "Africa/Johannesburg";
+      NLTK_DATA = "/var/lib/mealie/nltk_data";
       OPENAI_BASE_URL = "https://openrouter.ai/api/v1";
       OPENAI_MODEL = "openrouter/healer-alpha";
     };
