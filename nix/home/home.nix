@@ -15,6 +15,7 @@
     osu-lazer-bin
     qbittorrent
     handbrake
+    makemkv
   ];
 
   # Git configuration
