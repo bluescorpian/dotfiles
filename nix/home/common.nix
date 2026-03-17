@@ -21,6 +21,7 @@
     haruna
     obs-studio
     gimp
+    vlc
 
     # Office & Productivity
     libreoffice-fresh
