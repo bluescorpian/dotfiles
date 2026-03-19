@@ -26,6 +26,7 @@
 
     # Power management (helps with battery life)
     powerManagement.enable = true;
+    powerManagement.finegrained = true;
 
     # PRIME offload mode for hybrid graphics (best battery life)
     # Use integrated AMD GPU by default, NVIDIA only when needed
