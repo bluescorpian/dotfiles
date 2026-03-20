@@ -21,6 +21,7 @@
       user.name = "Harry Kruger";
       user.email = "harry@hrry.sh";  # Or use work email if different
       safe.directory = "/home/shared/dotfiles";
+      pull.rebase = false;
     };
   };
 
