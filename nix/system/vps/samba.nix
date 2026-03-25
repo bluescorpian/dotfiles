@@ -12,6 +12,7 @@
         "ea support" = "yes";
         "fruit:metadata" = "stream";
         "fruit:model" = "MacSamba";
+        "disable netbios" = "yes";
       };
       share = {
         path = "/srv/smb";
@@ -31,6 +32,5 @@
     "d /srv/smb 0700 harry users -"
   ];
 
-  networking.firewall.allowedTCPPorts = [ 139 445 ];
-  networking.firewall.allowedUDPPorts = [ 137 138 ];
+  networking.firewall.allowedTCPPorts = [ 445 ];
 }
