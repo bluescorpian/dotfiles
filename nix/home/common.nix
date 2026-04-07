@@ -41,6 +41,7 @@
     python3
 
     # Development - Tools
+    aichat
     claude-code
     gh
     jq
