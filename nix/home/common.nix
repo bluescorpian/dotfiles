@@ -214,6 +214,12 @@
     [ -d "$HOME/.ssh" ] && chmod 700 "$HOME/.ssh"
   '';
 
+  # Claude Code skills
+  home.file.".claude/skills".source = ../../claude/skills;
+
+  # Global gitignore
+  programs.git.ignores = [ "docs/session-notes/" ];
+
   # PipeWire EQ Configuration
   xdg.configFile."pipewire/pipewire.conf.d/10-filter-chain.conf".source = ./pipewire-eq.conf;
 }
