@@ -36,8 +36,8 @@
     # Development - Languages & Runtimes
     nodejs_22  # Node.js 22.x LTS
     bun
-    nodePackages.pnpm
-    nodePackages.yarn
+    pnpm
+    yarn
     python3
 
     # Development - Tools
@@ -67,7 +67,7 @@
     remmina  # VNC/RDP client for remote desktop access
 
     # LSP servers
-    nodePackages.typescript-language-server
+    typescript-language-server
     # vscode-langservers-extracted
     # nil  # Nix LSP
   ];
