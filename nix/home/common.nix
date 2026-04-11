@@ -118,9 +118,6 @@
   programs.vscode = {
     enable = true;
     package = pkgs.vscode-fhs;
-    profiles.default.extensions = with pkgs.vscode-extensions; [
-      anthropic.claude-code
-    ];
   };
 
   # Terminal and launcher
