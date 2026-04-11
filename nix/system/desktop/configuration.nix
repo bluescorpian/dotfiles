@@ -9,6 +9,9 @@
   # Hostname
   networking.hostName = "desktop";
 
+  # QMK keyboard firmware flashing support
+  hardware.keyboard.qmk.enable = true;
+
   # NVIDIA configuration
   hardware.graphics.enable = true;
   services.xserver.videoDrivers = [ "nvidia" ];
