@@ -32,6 +32,7 @@
 
     # Development - Editors
     neovim
+    antigravity
 
     # Development - Languages & Runtimes
     nodejs_22  # Node.js 22.x LTS
@@ -43,6 +44,7 @@
     # Development - Tools
     aichat
     claude-code
+    aichat
     gh
     jq
     ripgrep

@@ -58,4 +58,11 @@
     description = "Guest";
     hashedPassword = "$6$bW4BLv3IzUkDrhtK$/hWICa0LZDoeLjN6bh0hDbMhm8YujobvZJyhcWVA5Nqk4ET0VQMbhYf5Xg74X8w9jHof87ppH/QQPGL0fKMMs.";
   };
+
+  # Agenix secrets — openclaw gateway token for harry (personal user on desktop)
+  age.secrets.openclaw = {
+    file = ../../secrets/openclaw.age;
+    owner = "harry";
+    mode = "0400";
+  };
 }

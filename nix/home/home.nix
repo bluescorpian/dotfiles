@@ -28,6 +28,14 @@
     };
   };
 
+  # OpenClaw AI gateway — webchat at http://127.0.0.1:18789
+  # Token is stored in /run/agenix/openclaw (managed by agenix, not committed)
+  programs.openclaw = {
+    enable = true;
+    config.gateway.mode = "local";
+  };
+  systemd.user.services.openclaw-gateway.serviceConfig.EnvironmentFile = "/run/agenix/openclaw";
+
   # SSH: VPS access (personal only)
   programs.ssh.matchBlocks."vps" = {
     hostname = "91.98.21.137";

@@ -10,13 +10,16 @@
     plasma-manager.inputs.nixpkgs.follows = "nixpkgs";
     plasma-manager.inputs.home-manager.follows = "home-manager";
     claude-code.url = "github:sadjow/claude-code-nix";
+    nix-openclaw.url = "github:openclaw/nix-openclaw";
+    agenix.url = "github:ryantm/agenix";
+    agenix.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     vscode-server.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, claude-code, disko, vscode-server, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, claude-code, agenix, nix-openclaw, disko, vscode-server, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     pkgs-stable = nixpkgs-stable.legacyPackages.x86_64-linux;
@@ -29,8 +32,9 @@
         specialArgs = { inherit pkgs-stable; };
         modules = [
           ./system/desktop/configuration.nix
-          # Apply claude-code overlay globally
-          { nixpkgs.overlays = [ claude-code.overlays.default ]; }
+          agenix.nixosModules.default
+          # Apply claude-code and nix-openclaw overlays globally
+          { nixpkgs.overlays = [ claude-code.overlays.default nix-openclaw.overlays.default ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
@@ -39,7 +43,10 @@
             home-manager.users.harry = ./home/home.nix;
             home-manager.users.harry-smartstation = ./home/home-smartstation.nix;
             home-manager.users.guest = ./home/home-guest.nix;
-            home-manager.sharedModules = [ plasma-manager.homeModules.plasma-manager ];
+            home-manager.sharedModules = [
+              plasma-manager.homeModules.plasma-manager
+              nix-openclaw.homeManagerModules.openclaw
+            ];
             home-manager.extraSpecialArgs = { inherit pkgs-stable; };
           }
         ];
@@ -62,8 +69,9 @@
         specialArgs = { inherit pkgs-stable; };
         modules = [
           ./system/laptop/configuration.nix
-          # Apply claude-code overlay globally
-          { nixpkgs.overlays = [ claude-code.overlays.default ]; }
+          agenix.nixosModules.default
+          # Apply claude-code and nix-openclaw overlays globally
+          { nixpkgs.overlays = [ claude-code.overlays.default nix-openclaw.overlays.default ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
@@ -72,7 +80,10 @@
             home-manager.users.harry = ./home/home.nix;
             home-manager.users.harry-smartstation = ./home/home-smartstation.nix;
             home-manager.users.guest = ./home/home-guest.nix;
-            home-manager.sharedModules = [ plasma-manager.homeModules.plasma-manager ];
+            home-manager.sharedModules = [
+              plasma-manager.homeModules.plasma-manager
+              nix-openclaw.homeManagerModules.openclaw
+            ];
             home-manager.extraSpecialArgs = { inherit pkgs-stable; };
           }
         ];
