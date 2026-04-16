@@ -119,7 +119,24 @@
   # VS Code with extensions
   programs.vscode = {
     enable = true;
-    package = pkgs.vscode-fhs;
+    # Force Electron onto the AMD iGPU via DRI_PRIME=0 + Mesa.
+    # Without this, VS Code picks the NVIDIA dGPU, which causes texture atlas
+    # corruption in the integrated terminal when an external display is connected
+    # with fractional scaling (Electron/Chromium GPU process mismatch on PRIME).
+    # home-manager reads .pname to look up the VS Code variant in its
+    # knownProducts table; symlinkJoin produces no pname by default, causing
+    # evaluation to fail. Use `//` to attach the original pname to the wrapper.
+    package = (pkgs.symlinkJoin {
+      name = "vscode-fhs-igpu";
+      paths = [ pkgs.vscode-fhs ];
+      buildInputs = [ pkgs.makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/code \
+          --set DRI_PRIME 0 \
+          --set __NV_PRIME_RENDER_OFFLOAD 0 \
+          --set __GLX_VENDOR_LIBRARY_NAME mesa
+      '';
+    }) // { pname = pkgs.vscode-fhs.pname; };
   };
 
   # Terminal and launcher
