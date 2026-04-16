@@ -230,7 +230,8 @@
     [ -d "$HOME/.ssh" ] && chmod 700 "$HOME/.ssh"
   '';
 
-  # Claude Code skills
+  # Claude Code configuration
+  home.file.".claude/CLAUDE.md".source = ../../claude/CLAUDE.md;
   home.file.".claude/skills".source = ../../claude/skills;
 
   # Global gitignore

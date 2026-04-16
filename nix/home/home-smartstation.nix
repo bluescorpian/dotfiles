@@ -32,7 +32,10 @@
     enable = true;
     config.gateway.mode = "local";
   };
-  systemd.user.services.openclaw-gateway.serviceConfig.EnvironmentFile = "/run/agenix/openclaw";
+  xdg.configFile."systemd/user/openclaw-gateway.service.d/token.conf".text = ''
+    [Service]
+    EnvironmentFile=/run/agenix/openclaw
+  '';
 
   # Override Mako colors for visual distinction from personal account
   # services.mako.settings = {

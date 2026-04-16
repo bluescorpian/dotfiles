@@ -53,6 +53,7 @@
   # System-wide shell aliases (available to all users)
   # Auto-detects hostname to select the correct configuration (desktop or laptop)
   environment.shellAliases = {
+    cc = "claude";
     rebuild = "sudo nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname)";
     rebuild-test = "sudo nixos-rebuild test --flake /home/shared/dotfiles/nix#$(hostname)";
     rebuild-vps = "nixos-rebuild switch --flake /home/shared/dotfiles/nix#vps --target-host harry@91.98.21.137 --sudo";
