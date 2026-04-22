@@ -53,7 +53,7 @@
   # System-wide shell aliases (available to all users)
   # Auto-detects hostname to select the correct configuration (desktop or laptop)
   environment.shellAliases = {
-    cc = "claude --model default --effort medium";
+    cc = "claude";
     ccfast = "claude --model sonnet --effort low";
     rebuild = "sudo nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname)";
     rebuild-test = "sudo nixos-rebuild test --flake /home/shared/dotfiles/nix#$(hostname)";
@@ -68,6 +68,7 @@
     openssh
     kdePackages.partitionmanager
     qt6.qtmultimedia
+    claude-desktop
   ];
 
   services.flatpak.enable = true;

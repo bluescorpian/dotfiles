@@ -11,6 +11,7 @@
     plasma-manager.inputs.home-manager.follows = "home-manager";
     claude-code.url = "github:sadjow/claude-code-nix";
     nix-openclaw.url = "github:openclaw/nix-openclaw";
+    claude-desktop.url = "github:aaddrick/claude-desktop-debian";
     agenix.url = "github:ryantm/agenix";
     agenix.inputs.nixpkgs.follows = "nixpkgs";
     disko.url = "github:nix-community/disko";
@@ -19,7 +20,7 @@
     vscode-server.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, claude-code, agenix, nix-openclaw, disko, vscode-server, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, claude-code, claude-desktop, agenix, nix-openclaw, disko, vscode-server, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     pkgs-stable = nixpkgs-stable.legacyPackages.x86_64-linux;
@@ -34,7 +35,7 @@
           ./system/desktop/configuration.nix
           agenix.nixosModules.default
           # Apply claude-code and nix-openclaw overlays globally
-          { nixpkgs.overlays = [ claude-code.overlays.default nix-openclaw.overlays.default ]; }
+          { nixpkgs.overlays = [ claude-code.overlays.default nix-openclaw.overlays.default claude-desktop.overlays.default ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
@@ -71,7 +72,7 @@
           ./system/laptop/configuration.nix
           agenix.nixosModules.default
           # Apply claude-code and nix-openclaw overlays globally
-          { nixpkgs.overlays = [ claude-code.overlays.default nix-openclaw.overlays.default ]; }
+          { nixpkgs.overlays = [ claude-code.overlays.default nix-openclaw.overlays.default claude-desktop.overlays.default ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
