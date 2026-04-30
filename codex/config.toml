@@ -1,4 +1,8 @@
 approvals_reviewer = "guardian_subagent"
+
+[project]
+project_doc_fallback_filenames = ["CLAUDE.md", "AGENTS.md"]
+
 [projects."/home/harry-smartstation/smart-station/repos/wedded-world"]
 trust_level = "trusted"
 
