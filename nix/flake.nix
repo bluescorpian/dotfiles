@@ -18,9 +18,11 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     vscode-server.inputs.nixpkgs.follows = "nixpkgs";
+    worktrunk.url = "github:max-sixty/worktrunk";
+    worktrunk.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, claude-code, claude-desktop, agenix, nix-openclaw, disko, vscode-server, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, claude-code, claude-desktop, agenix, nix-openclaw, disko, vscode-server, worktrunk, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     pkgs-stable = nixpkgs-stable.legacyPackages.x86_64-linux;
@@ -48,7 +50,10 @@
               plasma-manager.homeModules.plasma-manager
               nix-openclaw.homeManagerModules.openclaw
             ];
-            home-manager.extraSpecialArgs = { inherit pkgs-stable; };
+            home-manager.extraSpecialArgs = {
+              inherit pkgs-stable;
+              worktrunk-pkg = worktrunk.packages.x86_64-linux.default;
+            };
           }
         ];
       };
@@ -85,7 +90,10 @@
               plasma-manager.homeModules.plasma-manager
               nix-openclaw.homeManagerModules.openclaw
             ];
-            home-manager.extraSpecialArgs = { inherit pkgs-stable; };
+            home-manager.extraSpecialArgs = {
+              inherit pkgs-stable;
+              worktrunk-pkg = worktrunk.packages.x86_64-linux.default;
+            };
           }
         ];
       };

@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-stable, lib, ... }:
+{ config, pkgs, pkgs-stable, worktrunk-pkg, lib, ... }:
 
 {
   # Development packages
@@ -50,6 +50,7 @@
     ripgrep
     fd
     zellij
+    worktrunk-pkg  # git worktree manager (wt CLI)
 
     # Notifications
     libnotify  # provides notify-send for desktop notifications
@@ -88,6 +89,9 @@
     shellAliases = {
       codex = "nix run github:sadjow/codex-cli-nix --";
     };
+    initExtra = ''
+      if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init bash)"; fi
+    '';
   };
 
   # Zoxide - smarter cd command that learns your habits
