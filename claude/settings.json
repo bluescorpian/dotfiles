@@ -1,0 +1,69 @@
+{
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(npx next build:*)",
+      "WebFetch(domain:clerk.com)",
+      "Bash(find:*)",
+      "Bash(git -C /home/harry-smartstation/smart-station/repos/wedded-world diff)",
+      "Bash(git -C /home/harry-smartstation/smart-station/repos/wedded-world log --oneline -5)",
+      "mcp__ide__getDiagnostics",
+      "mcp__claude_ai_Atlassian__getAccessibleAtlassianResources",
+      "mcp__claude_ai_Atlassian__fetch",
+      "mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources",
+      "mcp__plugin_atlassian_atlassian__getConfluencePage",
+      "Bash(ls:*)",
+      "Bash(git:*)",
+      "Bash(journalctl:*)",
+      "Bash(echo:*)",
+      "Bash(systemctl:*)",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(git diff:*)",
+      "Bash(pnpm type-check:*)",
+      "Bash(pnpm prisma generate)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs"
+    ],
+    "defaultMode": "default"
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/harry-smartstation/.claude/hooks/notify.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "atlassian@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": false,
+    "commit-commands@claude-plugins-official": false,
+    "claude-md-management@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "worktrunk@worktrunk": true
+  },
+  "extraKnownMarketplaces": {
+    "worktrunk": {
+      "source": {
+        "source": "github",
+        "repo": "max-sixty/worktrunk"
+      }
+    }
+  },
+  "effortLevel": "high",
+  "preferredNotifChannel": "terminal_bell",
+  "autoCompactEnabled": false,
+  "skipAutoPermissionPrompt": true,
+  "voiceEnabled": true
+}

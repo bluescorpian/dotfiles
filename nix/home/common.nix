@@ -234,9 +234,14 @@
     [ -d "$HOME/.ssh" ] && chmod 700 "$HOME/.ssh"
   '';
 
-  # Claude Code configuration
-  home.file.".claude/CLAUDE.md".source = ../../claude/CLAUDE.md;
+  # Shared agent configuration
+  home.file.".claude/CLAUDE.md".source = ../../agents/AGENTS.md;
+  home.file.".claude/settings.json".source = ../../claude/settings.json;
   home.file.".claude/skills".source = ../../claude/skills;
+  home.file.".codex/AGENTS.md".source = ../../agents/AGENTS.md;
+  home.file.".codex/config.toml".source = ../../codex/config.toml;
+  home.file.".codex/rules".source = ../../codex/rules;
+  home.file.".codex/skills".source = ../../codex/skills;
 
   # Global gitignore
   programs.git.ignores = [ "docs/session-notes/" ];
