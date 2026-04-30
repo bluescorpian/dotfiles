@@ -25,6 +25,11 @@
   # Hint electron apps to use wayland
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
+  # Force KWin triple buffering on Wayland. Reduces frame-pacing stalls on
+  # AMD iGPU (menus, window open/close, focus switches) where double-buffer
+  # latency causes visible hitches.
+  environment.sessionVariables.KWIN_TRIPLE_BUFFER = "1";
+
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";

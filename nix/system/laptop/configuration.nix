@@ -25,8 +25,13 @@
     modesetting.enable = true;
 
     # Power management (helps with battery life)
+    # finegrained=false: with finegrained=true, the dGPU suspends after every
+    # offloaded client exits and any subsequent GLX/Vulkan probe (including
+    # incidental ones from KWin/Electron) blocks for tens of ms while the
+    # bus link retrains. Turning it off keeps the dGPU in a low D3 state
+    # without the per-client suspend/resume cycle that causes UI stutter.
     powerManagement.enable = true;
-    powerManagement.finegrained = true;
+    powerManagement.finegrained = false;
 
     # PRIME offload mode for hybrid graphics (best battery life)
     # Use integrated AMD GPU by default, NVIDIA only when needed
@@ -44,6 +49,10 @@
 
   boot.kernelParams = [
     "acpi_backlight=native"
+    # Disable AMD PSR (Panel Self Refresh) on the iGPU. PSR causes visible
+    # UI stutter on Rembrandt/Phoenix when the panel exits self-refresh
+    # (opening menus, focus changes, new windows).
+    "amdgpu.dcdebugmask=0x10"
   ];
 
 
