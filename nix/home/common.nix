@@ -244,7 +244,10 @@
   home.file.".codex/skills".source = ../../codex/skills;
 
   # Global gitignore
-  programs.git.ignores = [ "docs/session-notes/" ];
+  programs.git.ignores = [
+    ".codex"
+    "docs/session-notes/"
+  ];
 
   # PipeWire EQ Configuration
   xdg.configFile."pipewire/pipewire.conf.d/10-filter-chain.conf".source = ./pipewire-eq.conf;
