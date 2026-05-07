@@ -205,23 +205,16 @@ Always check local documentation first before searching online, as it matches th
 
 ## Running Commands That Require sudo
 
-Claude Code runs in a non-interactive environment and cannot directly execute commands that require password input via standard `sudo`.
+Claude Code's Bash subshells have no TTY, so plain `sudo` can't prompt for a password. The system is configured so `sudo -A` routes the prompt through a GUI dialog (`ksshaskpass`) instead, while keeping stdout/stderr/exit code wired back to the calling shell. Run sudo commands directly and read their output, the way you would any other Bash call:
 
-### Solution: Use Konsole for Interactive Commands
+```bash
+sudo -A nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname)
+```
 
-When a command requires sudo password authentication, use Konsole to open a terminal window where the user can enter their password:
+A small Qt password dialog pops up on the user's desktop. They type the password, hit Enter, and the command runs in the same Bash invocation — output streams back normally. Sudo's timestamp cache covers subsequent `sudo -A` calls within a few minutes without re-prompting.
+
+If no graphical session is available (pure SSH/TTY login), fall back to konsole — but in that mode the output is not visible to Claude:
 
 ```bash
 konsole -e bash -c "sudo COMMAND_HERE; echo; echo 'Press Enter to close...'; read" &
 ```
-
-Example for nixos-rebuild on the current host (must use the full command — shell aliases like `rebuild` do **not** expand inside `bash -c`):
-```bash
-konsole -e bash -c "sudo nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname); echo; echo 'Press Enter to close...'; read" &
-```
-
-This approach:
-- Opens a new Konsole terminal window
-- Prompts for the sudo password in the terminal
-- Keeps the window open after completion so the user can see the output
-- Runs in the background so Claude Code can continue working
