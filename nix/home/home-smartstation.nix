@@ -1,5 +1,22 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
+let
+  # Display layout script — used only by i3 (startup hook + Mod+Shift+m keybind).
+  # Plasma uses its own KScreen, which is untouched.
+  displays = pkgs.writeShellScriptBin "displays" ''
+    set -eu
+    PATH=${pkgs.xrandr}/bin:${pkgs.gnugrep}/bin:$PATH
+    if xrandr | grep -q "^HDMI-1-0 connected"; then
+      xrandr \
+        --output eDP       --primary --mode 1920x1080 --pos 0x0    --rotate normal \
+        --output HDMI-1-0            --mode 1920x1080 --pos 1920x0 --rotate normal
+    else
+      xrandr \
+        --output eDP       --primary --mode 1920x1080 --pos 0x0 --rotate normal \
+        --output HDMI-1-0  --off
+    fi
+  '';
+in
 {
   imports = [
     ./common.nix
@@ -12,7 +29,205 @@
 
   # Work packages (minimal, focused on productivity)
   home.packages = with pkgs; [
+    anydesk
+
+    # i3 ecosystem
+    rofi
+    feh
+    flameshot
+    i3status
+    i3lock
+    brightnessctl
+    playerctl
+    pavucontrol
+    networkmanagerapplet
+    arandr
+    xclip
+    xdotool
+
+    displays  # i3-only multi-monitor helper (defined in let-binding above)
   ];
+
+  # i3 window manager configuration (X11 session, alongside Plasma).
+  # System-level enablement is in system/laptop/configuration.nix.
+  xsession.enable = true;
+  xsession.windowManager.i3 = {
+    enable = true;
+    config = let mod = "Mod4"; in {
+      modifier = mod;
+      terminal = "kitty";
+      menu = "rofi -show drun";
+
+      # Add bindings on top of the home-manager i3 module defaults
+      # (focus arrows, kill, reload, layout toggles, etc).
+      keybindings = lib.mkOptionDefault {
+        "${mod}+Tab"        = "exec rofi -show window";
+        "${mod}+Shift+s"    = "exec flameshot gui";
+        "${mod}+Shift+x"    = "exec i3lock -c 1e1e2e";
+        "${mod}+Shift+m"    = "exec displays";  # re-detect monitors after hot-plug
+
+        "XF86AudioRaiseVolume"  = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+";
+        "XF86AudioLowerVolume"  = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
+        "XF86AudioMute"         = "exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+        "XF86AudioMicMute"      = "exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+        "XF86MonBrightnessUp"   = "exec brightnessctl set 5%+";
+        "XF86MonBrightnessDown" = "exec brightnessctl set 5%-";
+        "XF86AudioPlay"         = "exec playerctl play-pause";
+        "XF86AudioNext"         = "exec playerctl next";
+        "XF86AudioPrev"         = "exec playerctl previous";
+
+        # Suppress keysym digit bindings. Under Dvorak Programmer the digit
+        # keysyms live on the shifted layer in non-monotonic order, so
+        # Mod+<physical-digit-key> jumps to the wrong workspace via keysym.
+        # Replaced below by keycodebindings, which fire on physical position.
+        "${mod}+1" = lib.mkForce null;
+        "${mod}+2" = lib.mkForce null;
+        "${mod}+3" = lib.mkForce null;
+        "${mod}+4" = lib.mkForce null;
+        "${mod}+5" = lib.mkForce null;
+        "${mod}+6" = lib.mkForce null;
+        "${mod}+7" = lib.mkForce null;
+        "${mod}+8" = lib.mkForce null;
+        "${mod}+9" = lib.mkForce null;
+        "${mod}+0" = lib.mkForce null;
+        "${mod}+Shift+1" = lib.mkForce null;
+        "${mod}+Shift+2" = lib.mkForce null;
+        "${mod}+Shift+3" = lib.mkForce null;
+        "${mod}+Shift+4" = lib.mkForce null;
+        "${mod}+Shift+5" = lib.mkForce null;
+        "${mod}+Shift+6" = lib.mkForce null;
+        "${mod}+Shift+7" = lib.mkForce null;
+        "${mod}+Shift+8" = lib.mkForce null;
+        "${mod}+Shift+9" = lib.mkForce null;
+        "${mod}+Shift+0" = lib.mkForce null;
+      };
+
+      # Workspace switching by physical key position (keycodes 10..19 =
+      # top-row keys 1..0 on QWERTY layout, regardless of the active xkb
+      # variant). Lets Mod+<physical-1-key> always go to workspace 1, etc.
+      keycodebindings = {
+        "${mod}+10" = "workspace number 1";
+        "${mod}+11" = "workspace number 2";
+        "${mod}+12" = "workspace number 3";
+        "${mod}+13" = "workspace number 4";
+        "${mod}+14" = "workspace number 5";
+        "${mod}+15" = "workspace number 6";
+        "${mod}+16" = "workspace number 7";
+        "${mod}+17" = "workspace number 8";
+        "${mod}+18" = "workspace number 9";
+        "${mod}+19" = "workspace number 10";
+        "${mod}+Shift+10" = "move container to workspace number 1";
+        "${mod}+Shift+11" = "move container to workspace number 2";
+        "${mod}+Shift+12" = "move container to workspace number 3";
+        "${mod}+Shift+13" = "move container to workspace number 4";
+        "${mod}+Shift+14" = "move container to workspace number 5";
+        "${mod}+Shift+15" = "move container to workspace number 6";
+        "${mod}+Shift+16" = "move container to workspace number 7";
+        "${mod}+Shift+17" = "move container to workspace number 8";
+        "${mod}+Shift+18" = "move container to workspace number 9";
+        "${mod}+Shift+19" = "move container to workspace number 10";
+      };
+
+      bars = [{
+        statusCommand = "${pkgs.i3status}/bin/i3status";
+        position = "top";
+        fonts = {
+          names = [ "JetBrains Mono" "monospace" ];
+          size = 10.0;
+        };
+      }];
+
+      gaps = {
+        inner = 6;
+        outer = 0;
+      };
+
+      # Pin workspaces to outputs. i3 falls back to the active output if the
+      # named one is absent, so this is safe when the external monitor is
+      # disconnected (workspaces 6-9 land on eDP).
+      workspaceOutputAssign = [
+        { workspace = "1"; output = "eDP"; }
+        { workspace = "2"; output = "eDP"; }
+        { workspace = "3"; output = "eDP"; }
+        { workspace = "4"; output = "eDP"; }
+        { workspace = "5"; output = "eDP"; }
+        { workspace = "6"; output = "HDMI-1-0"; }
+        { workspace = "7"; output = "HDMI-1-0"; }
+        { workspace = "8"; output = "HDMI-1-0"; }
+        { workspace = "9"; output = "HDMI-1-0"; }
+      ];
+
+      startup = [
+        # Set up monitors before anything else paints.
+        { command = "displays"; notification = false; always = true; }
+        { command = "nm-applet";       notification = false; }
+        { command = "blueman-applet";  notification = false; }
+      ];
+    };
+  };
+
+  # Compositor — needed under i3 for vsync, fade, transparency.
+  services.picom = {
+    enable = true;
+    backend = "glx";
+    vSync = true;
+    fade = true;
+    fadeDelta = 4;
+  };
+
+  # Notification daemon for i3 (replaces mako, which is wayland-only).
+  services.dunst = {
+    enable = true;
+    settings = {
+      global = {
+        font = "JetBrains Mono 10";
+        frame_width = 1;
+        frame_color = "#89b4fa";
+        separator_color = "frame";
+        corner_radius = 6;
+        padding = 8;
+        horizontal_padding = 12;
+        offset = "12x12";
+        origin = "top-right";
+      };
+      urgency_low = {
+        background = "#1e1e2e";
+        foreground = "#cdd6f4";
+        timeout = 5;
+      };
+      urgency_normal = {
+        background = "#1e1e2e";
+        foreground = "#cdd6f4";
+        timeout = 8;
+      };
+      urgency_critical = {
+        background = "#1e1e2e";
+        foreground = "#f38ba8";
+        frame_color = "#f38ba8";
+        timeout = 0;
+      };
+    };
+  };
+
+  # Application launcher (Mod+d).
+  programs.rofi = {
+    enable = true;
+    terminal = "${pkgs.kitty}/bin/kitty";
+  };
+
+  # Force Chromium-family browsers to always use KWallet for passwords/cookies,
+  # regardless of session ($XDG_CURRENT_DESKTOP differs between Plasma and i3).
+  # Without this, under i3 they fall back to a "basic" store, which is a
+  # separate, weakly-encrypted database — saved logins look "missing".
+  home.file.".config/brave-flags.conf".text = ''
+    --password-store=kwallet5
+  '';
+  home.file.".config/chromium-flags.conf".text = ''
+    --password-store=kwallet5
+  '';
+  home.file.".config/chrome-flags.conf".text = ''
+    --password-store=kwallet5
+  '';
 
   # Git configuration
   programs.git = {
