@@ -43,8 +43,6 @@
 
     # Development - Tools
     aichat
-    claude-code
-    aichat
     gh
     jq
     ripgrep
@@ -245,11 +243,30 @@
   '';
 
   # Shared agent configuration
-  home.file.".claude/CLAUDE.md".source = ../../agents/AGENTS.md;
-  home.file.".claude/settings.json".source = ../../claude/settings.json;
-  home.file.".claude/skills".source = ../../claude/skills;
+  programs.claude-code = {
+    enable = true;
+    package = pkgs.claude-code;  # sadjow overlay; nixpkgs claude-code lags upstream
+    context = ../../agents/AGENTS.md;
+    skills = ../../claude/skills;
+    settings = lib.recursiveUpdate
+      (builtins.fromJSON (builtins.readFile ../../claude/settings.json))
+      {
+        hooks.Notification = [{
+          matcher = "";
+          hooks = [{
+            type = "command";
+            command = "${config.home.homeDirectory}/.claude/hooks/notify.sh";
+          }];
+        }];
+      };
+  };
+  # No structured option for statusLine script; module mkMerges home.file so this composes.
   home.file.".claude/statusline.sh" = {
     source = ../../claude/statusline.sh;
+    executable = true;
+  };
+  home.file.".claude/hooks/notify.sh" = {
+    source = ../../claude/hooks/notify.sh;
     executable = true;
   };
   home.file.".codex/AGENTS.md".source = ../../agents/AGENTS.md;
