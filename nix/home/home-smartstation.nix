@@ -1,22 +1,5 @@
 { config, pkgs, lib, ... }:
 
-let
-  # Display layout script — used only by i3 (startup hook + Mod+Shift+m keybind).
-  # Plasma uses its own KScreen, which is untouched.
-  displays = pkgs.writeShellScriptBin "displays" ''
-    set -eu
-    PATH=${pkgs.xrandr}/bin:${pkgs.gnugrep}/bin:$PATH
-    if xrandr | grep -q "^HDMI-1-0 connected"; then
-      xrandr \
-        --output eDP       --primary --mode 1920x1080 --pos 0x0    --rotate normal \
-        --output HDMI-1-0            --mode 1920x1080 --pos 1920x0 --rotate normal
-    else
-      xrandr \
-        --output eDP       --primary --mode 1920x1080 --pos 0x0 --rotate normal \
-        --output HDMI-1-0  --off
-    fi
-  '';
-in
 {
   imports = [
     ./common.nix
@@ -31,40 +14,33 @@ in
   home.packages = with pkgs; [
     anydesk
 
-    # i3 ecosystem
-    rofi
-    feh
-    flameshot
-    i3status
-    i3lock
+    # Sway ecosystem
+    i3status              # status command for swaybar
+    swaylock              # screen locker
+    grim                  # screenshot
+    slurp                 # region picker
+    wl-clipboard          # wl-copy / wl-paste
+    wdisplays             # GUI output configurator
     brightnessctl
     playerctl
     pavucontrol
     networkmanagerapplet
-    arandr
-    xclip
-    xdotool
-
-    displays  # i3-only multi-monitor helper (defined in let-binding above)
   ];
 
-  # i3 window manager configuration (X11 session, alongside Plasma).
+  # Sway compositor (Wayland session, offered by SDDM alongside Plasma).
   # System-level enablement is in system/laptop/configuration.nix.
-  xsession.enable = true;
-  xsession.windowManager.i3 = {
+  wayland.windowManager.sway = {
     enable = true;
     config = let mod = "Mod4"; in {
       modifier = mod;
       terminal = "kitty";
-      menu = "rofi -show drun";
+      menu = "wofi --show drun";
 
-      # Add bindings on top of the home-manager i3 module defaults
+      # Add bindings on top of the home-manager sway module defaults
       # (focus arrows, kill, reload, layout toggles, etc).
       keybindings = lib.mkOptionDefault {
-        "${mod}+Tab"        = "exec rofi -show window";
-        "${mod}+Shift+s"    = "exec flameshot gui";
-        "${mod}+Shift+x"    = "exec i3lock -c 1e1e2e";
-        "${mod}+Shift+m"    = "exec displays";  # re-detect monitors after hot-plug
+        "${mod}+Shift+s" = "exec ${pkgs.grim}/bin/grim -g \"$(${pkgs.slurp}/bin/slurp)\" - | ${pkgs.wl-clipboard}/bin/wl-copy";
+        "${mod}+Shift+x" = "exec swaylock -c 1e1e2e";
 
         "XF86AudioRaiseVolume"  = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+";
         "XF86AudioLowerVolume"  = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
@@ -142,88 +118,70 @@ in
         outer = 0;
       };
 
-      # Pin workspaces to outputs. i3 falls back to the active output if the
-      # named one is absent, so this is safe when the external monitor is
-      # disconnected (workspaces 6-9 land on eDP).
+      # Per-output config. Sway silently ignores blocks for outputs that
+      # aren't present, so listing both names covers the docked + undocked
+      # cases. Connector names follow the kernel DRM convention under the
+      # AMD iGPU (sway runs on amdgpu, not the dGPU, via PRIME render-offload).
+      output = {
+        "eDP-1"    = { mode = "1920x1080"; pos = "0 0"; };
+        "HDMI-A-1" = { mode = "1920x1080"; pos = "1920 0"; };
+      };
+
+      # Pin workspaces to outputs. Sway falls back to the active output if
+      # the named one is absent, so this is safe when the external monitor
+      # is disconnected (workspaces 6-9 land on eDP).
       workspaceOutputAssign = [
-        { workspace = "1"; output = "eDP"; }
-        { workspace = "2"; output = "eDP"; }
-        { workspace = "3"; output = "eDP"; }
-        { workspace = "4"; output = "eDP"; }
-        { workspace = "5"; output = "eDP"; }
-        { workspace = "6"; output = "HDMI-1-0"; }
-        { workspace = "7"; output = "HDMI-1-0"; }
-        { workspace = "8"; output = "HDMI-1-0"; }
-        { workspace = "9"; output = "HDMI-1-0"; }
+        { workspace = "1"; output = "eDP-1"; }
+        { workspace = "2"; output = "eDP-1"; }
+        { workspace = "3"; output = "eDP-1"; }
+        { workspace = "4"; output = "eDP-1"; }
+        { workspace = "5"; output = "eDP-1"; }
+        { workspace = "6"; output = "HDMI-A-1"; }
+        { workspace = "7"; output = "HDMI-A-1"; }
+        { workspace = "8"; output = "HDMI-A-1"; }
+        { workspace = "9"; output = "HDMI-A-1"; }
       ];
+
+      # Apply the system xkb layout (us/dvp) to all keyboards under sway.
+      input."type:keyboard" = {
+        xkb_layout = "us";
+        xkb_variant = "dvp";
+      };
 
       startup = [
-        # Set up monitors before anything else paints.
-        { command = "displays"; notification = false; always = true; }
-        { command = "nm-applet";       notification = false; }
-        { command = "blueman-applet";  notification = false; }
+        { command = "nm-applet --indicator"; }
+        { command = "blueman-applet"; }
       ];
     };
   };
 
-  # Compositor — needed under i3 for vsync, fade, transparency.
-  services.picom = {
-    enable = true;
-    backend = "glx";
-    vSync = true;
-    fade = true;
-    fadeDelta = 4;
-  };
-
-  # Notification daemon for i3 (replaces mako, which is wayland-only).
-  services.dunst = {
+  # Notification daemon. Mako is the wayland-native option; gating it on
+  # the sway session avoids clashing with Plasma's notification server.
+  services.mako = {
     enable = true;
     settings = {
-      global = {
-        font = "JetBrains Mono 10";
-        frame_width = 1;
-        frame_color = "#89b4fa";
-        separator_color = "frame";
-        corner_radius = 6;
-        padding = 8;
-        horizontal_padding = 12;
-        offset = "12x12";
-        origin = "top-right";
-      };
-      urgency_low = {
-        background = "#1e1e2e";
-        foreground = "#cdd6f4";
-        timeout = 5;
-      };
-      urgency_normal = {
-        background = "#1e1e2e";
-        foreground = "#cdd6f4";
-        timeout = 8;
-      };
-      urgency_critical = {
-        background = "#1e1e2e";
-        foreground = "#f38ba8";
-        frame_color = "#f38ba8";
-        timeout = 0;
-      };
+      font = "JetBrains Mono 10";
+      border-size = 1;
+      border-color = "#89b4fa";
+      border-radius = 6;
+      padding = 8;
+      background-color = "#1e1e2e";
+      text-color = "#cdd6f4";
+      default-timeout = 8000;
+      anchor = "top-right";
+      margin = 12;
     };
   };
 
-  # Only start dunst under i3 — Plasma ships its own notification server.
-  systemd.user.services.dunst.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=i3";
-
-  # Application launcher (Mod+d).
-  programs.rofi = {
-    enable = true;
-    terminal = "${pkgs.kitty}/bin/kitty";
-  };
+  # Only start mako under sway — Plasma ships its own notification server.
+  systemd.user.services.mako.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=sway";
 
   # Force Brave to use KWallet for passwords regardless of session.
-  # Plasma auto-detects KDE → kwallet5; i3 sets XDG_CURRENT_DESKTOP=i3 → falls
-  # back to the "basic" store, so saved logins look missing. Pinning the flag
-  # here makes both sessions share the same kdewallet entries ("Brave Safe
-  # Storage"). Note: the nixpkgs brave wrapper does NOT read brave-flags.conf,
-  # so the flag must live in the launcher itself.
+  # Plasma auto-detects KDE → kwallet5; sway sets XDG_CURRENT_DESKTOP=sway →
+  # falls back to the "basic" store, so saved logins look missing. Pinning the
+  # flag here makes both sessions share the same kdewallet entries ("Brave
+  # Safe Storage"). Note: the nixpkgs brave wrapper does NOT read
+  # brave-flags.conf, so the flag must live in the launcher itself.
   xdg.desktopEntries.brave-browser = {
     name = "Brave Web Browser";
     genericName = "Web Browser";
@@ -270,10 +228,4 @@ in
   #   [Service]
   #   EnvironmentFile=/run/agenix/openclaw
   # '';
-
-  # Override Mako colors for visual distinction from personal account
-  # services.mako.settings = {
-  #   background-color = "#2e2e3e";
-  #   border-color = "#4e4e70";
-  # };
 }

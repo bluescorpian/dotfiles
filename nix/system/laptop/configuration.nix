@@ -99,15 +99,20 @@
     mode = "0400";
   };
 
-  # i3 window manager — offered by SDDM as an alternative session to Plasma.
+  # Sway compositor — offered by SDDM as an alternative session to Plasma.
   # User-level config lives in home-manager (home-smartstation.nix).
-  services.xserver.windowManager.i3 = {
+  programs.sway = {
     enable = true;
-    package = pkgs.i3;
+    wrapperFeatures.gtk = true;
     extraPackages = with pkgs; [
-      i3status
-      i3lock
-      dmenu
+      swaylock
+      swayidle
+      grim
+      slurp
+      wl-clipboard
+      wdisplays
+      brightnessctl
+      playerctl
     ];
   };
 }
