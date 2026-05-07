@@ -61,6 +61,11 @@
       }
     }
   },
+  "statusLine": {
+    "type": "command",
+    "command": "$HOME/.claude/statusline.sh",
+    "padding": 0
+  },
   "effortLevel": "high",
   "preferredNotifChannel": "terminal_bell",
   "autoCompactEnabled": false,

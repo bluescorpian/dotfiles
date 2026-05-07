@@ -238,6 +238,10 @@
   home.file.".claude/CLAUDE.md".source = ../../agents/AGENTS.md;
   home.file.".claude/settings.json".source = ../../claude/settings.json;
   home.file.".claude/skills".source = ../../claude/skills;
+  home.file.".claude/statusline.sh" = {
+    source = ../../claude/statusline.sh;
+    executable = true;
+  };
   home.file.".codex/AGENTS.md".source = ../../agents/AGENTS.md;
   home.file.".codex/config.toml".source = ../../codex/config.toml;
   home.file.".codex/rules".source = ../../codex/rules;
