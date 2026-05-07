@@ -218,19 +218,34 @@ in
     terminal = "${pkgs.kitty}/bin/kitty";
   };
 
-  # Force Chromium-family browsers to always use KWallet for passwords/cookies,
-  # regardless of session ($XDG_CURRENT_DESKTOP differs between Plasma and i3).
-  # Without this, under i3 they fall back to a "basic" store, which is a
-  # separate, weakly-encrypted database — saved logins look "missing".
-  home.file.".config/brave-flags.conf".text = ''
-    --password-store=kwallet5
-  '';
-  home.file.".config/chromium-flags.conf".text = ''
-    --password-store=kwallet5
-  '';
-  home.file.".config/chrome-flags.conf".text = ''
-    --password-store=kwallet5
-  '';
+  # Force Brave to use KWallet for passwords regardless of session.
+  # Plasma auto-detects KDE → kwallet5; i3 sets XDG_CURRENT_DESKTOP=i3 → falls
+  # back to the "basic" store, so saved logins look missing. Pinning the flag
+  # here makes both sessions share the same kdewallet entries ("Brave Safe
+  # Storage"). Note: the nixpkgs brave wrapper does NOT read brave-flags.conf,
+  # so the flag must live in the launcher itself.
+  xdg.desktopEntries.brave-browser = {
+    name = "Brave Web Browser";
+    genericName = "Web Browser";
+    exec = "brave --password-store=kwallet5 %U";
+    terminal = false;
+    categories = [ "Network" "WebBrowser" ];
+    mimeType = [
+      "application/pdf"
+      "application/xhtml+xml"
+      "application/xml"
+      "image/gif"
+      "image/jpeg"
+      "image/png"
+      "image/webp"
+      "text/html"
+      "text/xml"
+      "x-scheme-handler/http"
+      "x-scheme-handler/https"
+    ];
+    icon = "brave-browser";
+  };
+  home.shellAliases.brave = "brave --password-store=kwallet5";
 
   # Git configuration
   programs.git = {
