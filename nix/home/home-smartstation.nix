@@ -209,6 +209,9 @@ in
     };
   };
 
+  # Only start dunst under i3 — Plasma ships its own notification server.
+  systemd.user.services.dunst.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=i3";
+
   # Application launcher (Mod+d).
   programs.rofi = {
     enable = true;
