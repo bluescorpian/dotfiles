@@ -69,11 +69,21 @@
     kdePackages.krdc  # KDE RDP/VNC client
     remmina  # VNC/RDP client for remote desktop access
 
+    # Authentication
+    kdePackages.ksshaskpass  # GUI password prompt for sudo -A / ssh-add
+
     # LSP servers
     typescript-language-server
     # vscode-langservers-extracted
     # nil  # Nix LSP
   ];
+
+  # Route sudo -A / ssh-add password prompts through a GUI dialog so
+  # non-interactive shells (like Claude Code) can drive sudo while you type
+  # the password into a Qt window. Run commands with `sudo -A <cmd>`.
+  home.sessionVariables = {
+    SUDO_ASKPASS = "${pkgs.kdePackages.ksshaskpass}/bin/ksshaskpass";
+  };
 
   # Direnv configuration with nix-direnv for automatic environment loading
   programs.direnv = {
