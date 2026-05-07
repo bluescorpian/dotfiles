@@ -4,25 +4,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Context
 
-This is Harry's personal NixOS dotfiles repository for the system you are currently running on. It uses flakes for declarative system and user configuration.
+This is Harry's personal NixOS dotfiles repository. It lives at **`/home/shared/dotfiles`** so both user accounts can reach the same checkout, and uses flakes for declarative system and user configuration.
+
+The flake defines three `nixosConfigurations`: **`desktop`**, **`laptop`**, and **`vps`**. The `rebuild` alias auto-selects the right one via `$(hostname)` — run `hostname` if you need to confirm which host you're on before rebuilding manually.
+
+## Working Style
+
+Treat this repo as a living system, not a museum piece. While working on a task, if you notice architectural smells — duplication across hosts, modules that have outgrown their file, stale abstractions, inconsistent naming, options that should be lifted into `common.nix` or pushed down into a host-specific file, services that would be cleaner as their own module — **say so**. Surface the observation as a short suggestion alongside the task at hand: what you noticed, why it matters, and a concrete refactor you'd propose. Do not silently implement large refactors; flag them and let the user decide whether to scope them in.
+
+Bias toward raising these proactively rather than waiting to be asked. A one-line "by the way, X looks like it wants to move to Y because Z" is exactly the kind of feedback that's wanted.
 
 ## Configuration Architecture
 
 The repository follows a flake-based structure with separation between system and user configurations:
 
-- **nix/flake.nix**: Main entry point defining inputs and the `nixos` configuration output
-- **nix/system/configuration.nix**: System-level configuration (bootloader, networking, users, system packages, services)
-- **nix/system/hardware-configuration.nix**: Machine-specific hardware settings (this machine)
+- **nix/flake.nix**: Main entry point defining inputs and the `desktop`/`laptop`/`vps` nixosConfigurations
+- **nix/system/common.nix**: Shared system config for desktop + laptop (display manager, audio, shell aliases including `rebuild`/`rebuild-vps`)
+- **nix/system/desktop/configuration.nix**: Desktop-host system config
+- **nix/system/desktop/hardware-configuration.nix**: Desktop hardware settings
+- **nix/system/laptop/configuration.nix**: Laptop-host system config
+- **nix/system/laptop/hardware-configuration.nix**: Laptop hardware settings
 - **nix/home/common.nix**: Shared home-manager configuration for all users (Hyprland, development tools, desktop settings)
 - **nix/home/home.nix**: Personal user (harry) specific configuration
 - **nix/home/home-smartstation.nix**: Work user (harry-smartstation) specific configuration
-- **nix/system/vps/configuration.nix**: VPS (Hetzner CX22) server configuration — independent from desktop
+- **nix/system/vps/configuration.nix**: VPS (Hetzner CX22) server configuration — independent from desktop/laptop
 - **nix/system/vps/packages.nix**: VPS system packages and shell aliases
 - **nix/system/vps/samba.nix**: Samba SMB share configuration
 - **nix/system/vps/services/**: One file per self-hosted service (vaultwarden, cockpit, etc.)
-- **nix/system/common.nix**: Shell aliases shared across all local users (rebuild, rebuild-vps)
 
 The flake uses home-manager as a NixOS module, so user and system configurations rebuild together atomically.
+
+> **Keep this section current.** When you add, rename, move, or remove a `.nix` file — or add/remove a host or service — update the file list above and any per-host references in the same change. Out-of-date architecture docs caused real rebuild failures (wrong path, wrong config name); fix it at the source instead of working around it.
 
 ### VPS Service Architecture
 
@@ -67,45 +79,46 @@ For the VPS (remote deployment):
 rebuild-vps
 ```
 
-This is equivalent to:
+The `rebuild` alias is defined in `nix/system/common.nix` and resolves to:
 ```bash
-sudo nixos-rebuild switch --flake /home/harry/dotfiles/nix#nixos
+sudo nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname)
 ```
 
-Note: `~/nix` is a symlink to `~/dotfiles/nix`. The `rebuild` alias uses the absolute path so it works from both user accounts.
+So on the laptop it builds `#laptop`, on the desktop it builds `#desktop`. Both users share the same checkout at `/home/shared/dotfiles` (group-readable via `harry-shared`), which is why the alias hard-codes that absolute path.
 
 ### Updating Dependencies
 
 Update flake inputs to latest versions:
 ```bash
-cd ~/nix
+cd /home/shared/dotfiles/nix
 nix flake update
-sudo nixos-rebuild switch --flake .#nixos
+rebuild
 ```
 
 ### Testing Changes
 
-Test without switching:
+Test without switching (also aliased as `rebuild-test`):
 ```bash
-sudo nixos-rebuild test --flake ~/nix#nixos
+sudo nixos-rebuild test --flake /home/shared/dotfiles/nix#$(hostname)
 ```
 
 Build without activating:
 ```bash
-sudo nixos-rebuild build --flake ~/nix#nixos
+sudo nixos-rebuild build --flake /home/shared/dotfiles/nix#$(hostname)
 ```
 
 ## Workflow for Configuration Changes
 
 1. Edit the appropriate .nix file:
-   - System-level changes → `nix/system/configuration.nix`
-   - Shared settings (both users) → `nix/home/common.nix`
+   - System-level changes shared by desktop+laptop → `nix/system/common.nix`
+   - Host-specific system changes → `nix/system/desktop/configuration.nix` or `nix/system/laptop/configuration.nix`
+   - Shared home-manager settings (both users) → `nix/home/common.nix`
    - Personal user only → `nix/home/home.nix`
    - Work user only → `nix/home/home-smartstation.nix`
    - New flake inputs → `nix/flake.nix`
    - VPS server changes → `nix/system/vps/configuration.nix`
    - New VPS service → create `nix/system/vps/services/<name>.nix` and add import
-2. Apply changes with `rebuild` alias
+2. Apply changes with `rebuild` alias (or `rebuild-vps` for the server)
 3. Commit to git and push to backup
 
 ## Git Workflow for Configuration Snapshots
@@ -134,7 +147,7 @@ Use this decision tree to determine where a package belongs:
 
 1. **Does it require system-level privileges or is it a system service?**
    - Examples: networking tools, display managers, bootloaders, drivers, system daemons
-   - → Add to `environment.systemPackages` in **system/configuration.nix**
+   - → Add to `environment.systemPackages` in **system/common.nix** (both hosts) or the relevant host's **system/<host>/configuration.nix**
 
 2. **Should it be available to both users?**
    - Examples: development tools (editors, language runtimes), terminal utilities
@@ -153,7 +166,7 @@ Use this decision tree to determine where a package belongs:
 ### Using Program Modules
 
 Many packages have declarative configuration modules:
-- System-level: `programs.*` in system/configuration.nix (e.g., `programs.git`)
+- System-level: `programs.*` in system/common.nix or system/<host>/configuration.nix (e.g., `programs.git`)
 - User-level: `programs.*` in home/home.nix (e.g., `programs.kitty`, `programs.plasma`)
 
 When a program module exists, prefer using it over just adding the package, as it provides better integration and declarative configuration.
@@ -202,9 +215,9 @@ When a command requires sudo password authentication, use Konsole to open a term
 konsole -e bash -c "sudo COMMAND_HERE; echo; echo 'Press Enter to close...'; read" &
 ```
 
-Example for nixos-rebuild:
+Example for nixos-rebuild on the current host (must use the full command — shell aliases like `rebuild` do **not** expand inside `bash -c`):
 ```bash
-konsole -e bash -c "sudo nixos-rebuild switch --flake ~/nix#nixos; echo; echo 'Press Enter to close...'; read" &
+konsole -e bash -c "sudo nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname); echo; echo 'Press Enter to close...'; read" &
 ```
 
 This approach:
