@@ -114,5 +114,13 @@
       brightnessctl
       playerctl
     ];
+    # Pin wlroots to the AMD iGPU (matches the PRIME render-offload setup —
+    # NVIDIA stays available for offloaded clients). realpath is mandatory:
+    # wlroots splits WLR_DRM_DEVICES on ':', and the by-path symlink contains
+    # colons (pci-0000:05:00.0), so passing the symlink directly gets shredded
+    # into nonsense paths. The canonical /dev/dri/cardN target has no colons.
+    extraSessionCommands = ''
+      export WLR_DRM_DEVICES=$(${pkgs.coreutils}/bin/realpath /dev/dri/by-path/pci-0000:05:00.0-card)
+    '';
   };
 }
