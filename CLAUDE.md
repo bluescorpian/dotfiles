@@ -43,7 +43,11 @@ Treat this repo as a living system. If you spot duplication across hosts, module
 
 ## Researching options
 
-- `man configuration.nix`
-- `/run/current-system/sw/share/doc/nixos/options.html` (large; grep it)
-- `nix search nixpkgs <query>` for packages
-- Local docs match this system's nixpkgs version — check them before going online.
+**Prefer the `nixos` MCP server** — it's wired up in `.mcp.json` at the repo root and exposes `nix` and `nix_versions` tools backed by live `search.nixos.org`, NixHub, FlakeHub, and the binary cache. Use it on **any** mention of a package name, attribute path, NixOS / home-manager option, channel, flake input, or `/nix/store/` path — even when you think you know the answer. It's faster than `nix search`, more current than the local `options.html` (which is frozen at the last `rebuild`), and authoritative for "did this commit ship version X" questions. Skipping it because the answer "feels obvious" is how stale advice gets baked into commits.
+
+Fallbacks when the MCP is unreachable or doesn't cover the question:
+- `man configuration.nix` — full options reference, version-matched to this system
+- `/run/current-system/sw/share/doc/nixos/options.html` — same content as HTML, ~24 MB; grep it, don't read it whole. The companion manual lives at `/run/current-system/sw/share/doc/nixos/index.html`
+- `nix search nixpkgs <query>` — package search (slow first run; flag is experimental but stable in practice)
+
+For weird build failures, undocumented behaviour, or anything where the official docs come up empty, **search the internet** with WebSearch / WebFetch. High-signal sources, in rough order: NixOS Discourse (`discourse.nixos.org`), GitHub issues on `NixOS/nixpkgs` and `nix-community/home-manager`, the NixOS wiki (`wiki.nixos.org`), and recent blog posts. NixOS error messages are often googled verbatim — paste the exact derivation/store path or the line that broke. Don't guess your way through opaque errors when someone has almost certainly hit them already.
