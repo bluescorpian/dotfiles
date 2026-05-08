@@ -174,7 +174,13 @@
   };
 
   # Only start mako under sway — Plasma ships its own notification server.
-  systemd.user.services.mako.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=sway";
+  # Bind to sway-session.target (not graphical-session.target, which Plasma
+  # also reaches) so the unit simply isn't pulled in under Plasma.
+  systemd.user.services.mako = {
+    Install.WantedBy = lib.mkForce [ "sway-session.target" ];
+    Unit.PartOf = lib.mkForce [ "sway-session.target" ];
+    Unit.After = lib.mkForce [ "sway-session.target" ];
+  };
 
   # Force Brave to use KWallet for passwords regardless of session.
   # Plasma auto-detects KDE → kwallet5; sway sets XDG_CURRENT_DESKTOP=sway →
