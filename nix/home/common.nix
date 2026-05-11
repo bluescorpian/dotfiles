@@ -122,22 +122,20 @@
     workspace.lookAndFeel = "org.kde.breezedark.desktop";
   };
 
-  # Konsole: declarative profile that maps Shift+Enter to ESC+CR so Claude
-  # Code (and similar TUIs reading the \r sequence) can insert newlines
-  # without submitting the prompt.
-  xdg.dataFile."konsole/ClaudeCode.keytab".text = ''
-    keyboard "Claude Code"
-
-    key Return+Shift : "\E\r"
-  '';
+  # Konsole: custom keytab based on upstream's default with Shift+Enter
+  # remapped to ESC+CR, so Claude Code (and similar TUIs reading \r) can
+  # insert newlines without submitting. Konsole keytabs replace rather than
+  # extend default.keytab, so the full ruleset lives alongside this file —
+  # see ./konsole.keytab.
+  xdg.dataFile."konsole/konsole.keytab".source = ./konsole.keytab;
 
   programs.konsole = {
     enable = true;
-    defaultProfile = "ClaudeCode";
-    profiles.ClaudeCode = {
-      name = "ClaudeCode";
+    defaultProfile = "Konsole";
+    profiles.Konsole = {
+      name = "Konsole";
       extraConfig = {
-        "Keyboard"."KeyBindings" = "ClaudeCode";
+        "Keyboard"."KeyBindings" = "konsole";
       };
     };
   };
