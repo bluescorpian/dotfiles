@@ -4,7 +4,7 @@ Harry's NixOS dotfiles — the declarative source of truth for his desktop, lapt
 
 ## What you'll usually be asked to do
 
-Most requests are **small, surgical edits to `.nix` files** to change the system: install a package, enable a program module, tweak a Hyprland keybind, add a shell alias, spin up a new VPS service, adjust a systemd unit. The loop is almost always: edit the right `.nix` file → `rebuild` → confirm it worked → commit.
+Most requests are **small, surgical edits to `.nix` files** to change the system: install a package, enable a program module, tweak a Sway keybind, add a shell alias, spin up a new VPS service, adjust a systemd unit. The loop is almost always: edit the right `.nix` file → `rebuild` → confirm it worked → commit.
 
 Less often: debug why a rebuild failed, refactor a module that's grown messy, update flake inputs, or research a NixOS option. Occasionally a larger structural change (new host, new user, new service module).
 

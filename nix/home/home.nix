@@ -76,11 +76,4 @@
     ];
     icon = "brave-browser";
   };
-
-  # Override Hyprland keybinding to use default profile
-  # wayland.windowManager.hyprland.settings = {
-  #   bind = [
-  #     "$mod, B, exec, brave --profile-directory=Default"
-  #   ];
-  # };
 }

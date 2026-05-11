@@ -326,7 +326,7 @@ On the new machine, follow the "Setting Up a New Device" steps above.
 ### User-Level (home/common.nix)
 - Development tools (editors, compilers, runtimes)
 - Terminal utilities
-- Hyprland configuration
+- KDE Plasma configuration
 - Shell configuration
 
 ### Personal User (home/home.nix)

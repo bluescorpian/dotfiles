@@ -21,7 +21,7 @@
     # Use open-source kernel modules (Ampere/RTX A1000 supports this)
     open = true;
 
-    # Enable modesetting (required for Wayland/Hyprland)
+    # Enable modesetting (required for Wayland)
     modesetting.enable = true;
 
     # Power management (helps with battery life)
