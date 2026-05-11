@@ -11,7 +11,7 @@
       "label": "Tabs",
       "color": "#89b4fa",
       "bindings": [
-        { "keys": ["Ctrl", "Shift", "t"],     "action": "New tab" },
+        { "keys": ["Ctrl", "Shift", "t"],     "action": "New tab (inherits cwd)",     "note": "custom: new_tab_with_cwd" },
         { "keys": ["Ctrl", "Shift", "q"],     "action": "Close tab" },
         { "keys": ["Ctrl", "Shift", "→"],     "action": "Next tab" },
         { "keys": ["Ctrl", "Shift", "←"],     "action": "Previous tab" },
@@ -23,7 +23,8 @@
       "label": "Windows",
       "color": "#74c7ec",
       "bindings": [
-        { "keys": ["Ctrl", "Shift", "Enter"], "action": "New window",                "note": "custom: new_window action" },
+        { "keys": ["Ctrl", "Shift", "Enter"], "action": "New window (inherits cwd)",  "note": "custom: new_window_with_cwd" },
+        { "keys": ["Ctrl", "Shift", "n"],     "action": "New OS window (inherits cwd)", "note": "custom: new_os_window_with_cwd" },
         { "keys": ["Ctrl", "Shift", "w"],     "action": "Close window" },
         { "keys": ["Alt", "←"],              "action": "Focus window left",          "note": "custom binding" },
         { "keys": ["Alt", "→"],              "action": "Focus window right",         "note": "custom binding" },
