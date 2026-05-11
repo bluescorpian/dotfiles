@@ -134,34 +134,4 @@
       exec >> "$HOME/sway-session.log" 2>&1
     '';
   };
-
-  # Debug session entry: same as "Sway" but with --debug and output captured
-  # to ~/sway-session.log so we can read why sway is dying. Registered as a
-  # sessionPackage because SDDM only enumerates session files from packages
-  # listed there — files dropped into /etc/xdg/wayland-sessions/ are ignored.
-  #
-  # The Exec= line points at a single wrapper script: SDDM parses Exec= per
-  # the XDG spec where single quotes are not special, so any inline shell
-  # pipeline gets split into nonsense args. A standalone script sidesteps
-  # that entirely.
-  #
-  # Drop this whole block once the launch issue is solved.
-  services.displayManager.sessionPackages =
-    let
-      swayDebug = pkgs.writeShellScript "sway-debug" ''
-        exec /run/current-system/sw/bin/sway --debug > "$HOME/sway-session.log" 2>&1
-      '';
-    in [
-      (pkgs.writeTextFile {
-        name = "sway-debug-session";
-        destination = "/share/wayland-sessions/sway-debug.desktop";
-        text = ''
-          [Desktop Entry]
-          Name=Sway (debug)
-          Comment=Sway with output captured to ~/sway-session.log
-          Exec=${swayDebug}
-          Type=Application
-        '';
-      } // { providedSessions = [ "sway-debug" ]; })
-    ];
 }
