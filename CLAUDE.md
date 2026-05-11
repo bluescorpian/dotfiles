@@ -41,6 +41,8 @@ Treat this repo as a living system. If you spot duplication across hosts, module
 2. `rebuild` (or `rebuild-vps` for the server). Test with `rebuild-test` if the change is risky.
 3. Commit only after a successful switch. One logical change per commit, descriptive message.
 
+When adding or changing keybindings in any `.nix` file, also update the corresponding JSON file in `keys_cheatsheet/` (e.g. `sway.json`, `kitty.json`). Start the viewer with `python3 -m http.server 8787 --directory keys_cheatsheet`.
+
 ## Researching options
 
 **Prefer the `nixos` MCP server** — it's wired up in `.mcp.json` at the repo root and exposes `nix` and `nix_versions` tools backed by live `search.nixos.org`, NixHub, FlakeHub, and the binary cache. Use it on **any** mention of a package name, attribute path, NixOS / home-manager option, channel, flake input, or `/nix/store/` path — even when you think you know the answer. It's faster than `nix search`, more current than the local `options.html` (which is frozen at the last `rebuild`), and authoritative for "did this commit ship version X" questions. Skipping it because the answer "feels obvious" is how stale advice gets baked into commits.
