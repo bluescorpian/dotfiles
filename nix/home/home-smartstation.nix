@@ -157,8 +157,19 @@
 
   # Notification daemon. Mako is the wayland-native option; gating it on
   # the sway session avoids clashing with Plasma's notification server.
+  #
+  # The package override strips mako's D-Bus activation file. It otherwise
+  # sits in XDG_DATA_DIRS ahead of Plasma's notification service, so the
+  # first notification under KDE bus-activates mako even though the systemd
+  # unit is gated on sway-session.target. Under sway, systemd starts mako
+  # before any notification fires, so activation isn't needed.
   services.mako = {
     enable = true;
+    package = pkgs.mako.overrideAttrs (old: {
+      postInstall = (old.postInstall or "") + ''
+        rm -f $out/share/dbus-1/services/fr.emersion.mako.service
+      '';
+    });
     settings = {
       font = "JetBrains Mono 10";
       border-size = 1;
