@@ -42,6 +42,13 @@
         "${mod}+Shift+s" = "exec ${pkgs.grim}/bin/grim -g \"$(${pkgs.slurp}/bin/slurp)\" - | ${pkgs.wl-clipboard}/bin/wl-copy";
         "${mod}+Shift+x" = "exec swaylock -c 1e1e2e";
 
+        # Cycle workspaces on the focused output with Mod+Ctrl+Arrows.
+        # Add Shift to drag the focused container along.
+        "${mod}+Ctrl+Left"        = "workspace prev_on_output";
+        "${mod}+Ctrl+Right"       = "workspace next_on_output";
+        "${mod}+Ctrl+Shift+Left"  = "move container to workspace prev_on_output; workspace prev_on_output";
+        "${mod}+Ctrl+Shift+Right" = "move container to workspace next_on_output; workspace next_on_output";
+
         "XF86AudioRaiseVolume"  = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+";
         "XF86AudioLowerVolume"  = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
         "XF86AudioMute"         = "exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
