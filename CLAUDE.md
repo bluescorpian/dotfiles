@@ -40,6 +40,7 @@ Treat this repo as a living system. If you spot duplication across hosts, module
 1. Edit the relevant `.nix` file. When unsure where something belongs, prefer the most-shared location (`common.nix`) and push down only if it's truly host- or user-specific.
 2. `rebuild` (or `rebuild-vps` for the server). Test with `rebuild-test` if the change is risky.
 3. Commit only after a successful switch. One logical change per commit, descriptive message.
+4. **At the end of every code-changing turn**, list the files you modified/created and remind Harry that the changes are uncommitted/untracked so he can review and commit. Do this even when the task feels "done" — `rebuild` succeeding is not a commit.
 
 When adding or changing keybindings in any `.nix` file, also update the corresponding JSON file in `keys_cheatsheet/` (e.g. `sway.json`, `kitty.json`). Start the viewer with `python3 -m http.server 8787 --directory keys_cheatsheet`.
 
