@@ -185,12 +185,25 @@
   };
 
   # Only start mako under sway — Plasma ships its own notification server.
-  # Bind to sway-session.target (not graphical-session.target, which Plasma
-  # also reaches) so the unit simply isn't pulled in under Plasma.
+  # Home-manager's services.mako doesn't ship a systemd unit (it relies on
+  # D-Bus activation, which we strip above), so define the whole unit here
+  # and gate it on sway-session.target. Plasma never pulls that target in,
+  # so the unit stays dormant under KDE.
   systemd.user.services.mako = {
-    Install.WantedBy = lib.mkForce [ "sway-session.target" ];
-    Unit.PartOf = lib.mkForce [ "sway-session.target" ];
-    Unit.After = lib.mkForce [ "sway-session.target" ];
+    Unit = {
+      Description = "Mako notification daemon";
+      Documentation = [ "man:mako(1)" ];
+      PartOf = [ "sway-session.target" ];
+      After = [ "sway-session.target" ];
+    };
+    Service = {
+      Type = "dbus";
+      BusName = "org.freedesktop.Notifications";
+      ExecStart = "${config.services.mako.package}/bin/mako";
+      ExecReload = "${config.services.mako.package}/bin/makoctl reload";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "sway-session.target" ];
   };
 
   # Force Brave to use KWallet for passwords regardless of session.
