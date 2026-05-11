@@ -122,9 +122,11 @@
       # aren't present, so listing both names covers the docked + undocked
       # cases. Connector names follow the kernel DRM convention under the
       # AMD iGPU (sway runs on amdgpu, not the dGPU, via PRIME render-offload).
+      # eDP-1 runs at scale 1.25, so its logical width is 1920/1.25 = 1536.
+      # HDMI-A-1 sits flush to the right at logical position 1536, not 1920.
       output = {
-        "eDP-1"    = { mode = "1920x1080"; pos = "0 0"; };
-        "HDMI-A-1" = { mode = "1920x1080"; pos = "1920 0"; };
+        "eDP-1"    = { mode = "1920x1080"; pos = "0 0";    scale = "1.25"; };
+        "HDMI-A-1" = { mode = "1920x1080"; pos = "1536 0"; };
       };
 
       # Pin workspaces to outputs. Sway falls back to the active output if
