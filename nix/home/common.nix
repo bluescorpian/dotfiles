@@ -5,7 +5,7 @@
   home.packages = with pkgs; [
     # Fonts
     cascadia-code
-    pkgs-stable.jetbrains-mono
+    nerd-fonts.jetbrains-mono
 
     # Browsers
     brave
@@ -170,7 +170,56 @@
   };
 
   # Terminal and launcher
-  programs.kitty.enable = true;
+  programs.kitty = {
+    enable = true;
+    font = {
+      name = "JetBrainsMono Nerd Font";
+      size = 10;
+    };
+    themeFile = "Catppuccin-Mocha";
+    settings = {
+      # Ligatures on, broken under the cursor for readability
+      disable_ligatures = "cursor";
+
+      # Window chrome
+      hide_window_decorations = "yes";
+      window_padding_width = 8;
+      background_opacity = "0.92";
+      background_blur = 32;
+      confirm_os_window_close = 0;
+
+      # Tab bar
+      tab_bar_edge = "top";
+      tab_bar_style = "powerline";
+      tab_powerline_style = "slanted";
+      tab_title_template = "{index}: {title}";
+
+      # Scrollback & clipboard
+      scrollback_lines = 100000;
+      copy_on_select = "clipboard";
+
+      # Bell & mouse
+      enable_audio_bell = "no";
+      mouse_hide_wait = "2.0";
+
+      # Cursor trail (kitty 0.36+)
+      cursor_trail = 3;
+      cursor_blink_interval = "0.5";
+    };
+    keybindings = {
+      "ctrl+equal"       = "change_font_size all +1.0";
+      "ctrl+minus"       = "change_font_size all -1.0";
+      "ctrl+0"           = "change_font_size all 0";
+      "ctrl+shift+enter" = "new_window_with_cwd";
+      "ctrl+shift+t"     = "new_tab_with_cwd";
+      "ctrl+shift+n"     = "new_os_window_with_cwd";
+      "alt+left"         = "neighboring_window left";
+      "alt+right"        = "neighboring_window right";
+      "alt+up"           = "neighboring_window up";
+      "alt+down"         = "neighboring_window down";
+      "ctrl+shift+e"     = "open_url_with_hints";
+    };
+  };
   programs.wofi.enable = true;
 
   # SSH agent configuration
