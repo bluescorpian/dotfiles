@@ -114,13 +114,54 @@
       brightnessctl
       playerctl
     ];
-    # Pin wlroots to the AMD iGPU (matches the PRIME render-offload setup —
-    # NVIDIA stays available for offloaded clients). realpath is mandatory:
-    # wlroots splits WLR_DRM_DEVICES on ':', and the by-path symlink contains
-    # colons (pci-0000:05:00.0), so passing the symlink directly gets shredded
-    # into nonsense paths. The canonical /dev/dri/cardN target has no colons.
+    # The HDMI port is wired to the NVIDIA dGPU, while the internal panel is
+    # wired to the AMD iGPU. Expose both DRM cards to wlroots, keeping AMD
+    # first so Sway still uses the integrated GPU as the primary device.
+    #
+    # realpath is mandatory: wlroots splits WLR_DRM_DEVICES on ':', and the
+    # by-path symlinks contain colons (pci-0000:05:00.0), so passing those
+    # symlinks directly gets parsed as multiple bogus paths. The canonical
+    # /dev/dri/cardN targets have no colons.
+    extraOptions = [ "--unsupported-gpu" ];
     extraSessionCommands = ''
-      export WLR_DRM_DEVICES=$(${pkgs.coreutils}/bin/realpath /dev/dri/by-path/pci-0000:05:00.0-card)
+      export WLR_DRM_DEVICES="$(${pkgs.coreutils}/bin/realpath /dev/dri/by-path/pci-0000:05:00.0-card):$(${pkgs.coreutils}/bin/realpath /dev/dri/by-path/pci-0000:01:00.0-card)"
+      # Redirect stdout/stderr to a file before exec'ing sway. The regular
+      # SDDM session entry leaves stdout/stderr attached to SDDM's pipe, and
+      # something on that pipe (buffer fill? SIGPIPE? closed fd?) causes sway
+      # to die silently at startup on this hardware — the debug entry only
+      # worked because it explicitly redirected output. Routing through a real
+      # file avoids that failure mode and gives us a log either way.
+      exec >> "$HOME/sway-session.log" 2>&1
     '';
   };
+
+  # Debug session entry: same as "Sway" but with --debug and output captured
+  # to ~/sway-session.log so we can read why sway is dying. Registered as a
+  # sessionPackage because SDDM only enumerates session files from packages
+  # listed there — files dropped into /etc/xdg/wayland-sessions/ are ignored.
+  #
+  # The Exec= line points at a single wrapper script: SDDM parses Exec= per
+  # the XDG spec where single quotes are not special, so any inline shell
+  # pipeline gets split into nonsense args. A standalone script sidesteps
+  # that entirely.
+  #
+  # Drop this whole block once the launch issue is solved.
+  services.displayManager.sessionPackages =
+    let
+      swayDebug = pkgs.writeShellScript "sway-debug" ''
+        exec /run/current-system/sw/bin/sway --debug > "$HOME/sway-session.log" 2>&1
+      '';
+    in [
+      (pkgs.writeTextFile {
+        name = "sway-debug-session";
+        destination = "/share/wayland-sessions/sway-debug.desktop";
+        text = ''
+          [Desktop Entry]
+          Name=Sway (debug)
+          Comment=Sway with output captured to ~/sway-session.log
+          Exec=${swayDebug}
+          Type=Application
+        '';
+      } // { providedSessions = [ "sway-debug" ]; })
+    ];
 }
