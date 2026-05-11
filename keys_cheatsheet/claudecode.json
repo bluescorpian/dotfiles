@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "title": "Claude Code Keybindings",
+    "host": "all hosts",
+    "layout_note": "Default keybindings for the Claude Code CLI. Customise via ~/.claude/keybindings.json.",
+    "generated": "2026-05-11"
+  },
+  "groups": [
+    {
+      "id": "submit",
+      "label": "Submit & Input",
+      "color": "#cba6f7",
+      "bindings": [
+        { "keys": ["Enter"],        "action": "Submit message" },
+        { "keys": ["Shift", "Enter"], "action": "Insert newline without submitting" },
+        { "keys": ["Escape"],       "action": "Clear current input" },
+        { "keys": ["Ctrl", "c"],    "action": "Interrupt / cancel current operation" }
+      ]
+    },
+    {
+      "id": "history",
+      "label": "Input History",
+      "color": "#89b4fa",
+      "bindings": [
+        { "keys": ["↑"],            "action": "Previous message from history" },
+        { "keys": ["↓"],            "action": "Next message from history" },
+        { "keys": ["Ctrl", "r"],    "action": "Search input history" }
+      ]
+    },
+    {
+      "id": "editing",
+      "label": "Text Editing",
+      "color": "#94e2d5",
+      "bindings": [
+        { "keys": ["Ctrl", "a"],    "action": "Move cursor to start of line" },
+        { "keys": ["Ctrl", "e"],    "action": "Move cursor to end of line" },
+        { "keys": ["Ctrl", "w"],    "action": "Delete word before cursor" },
+        { "keys": ["Ctrl", "u"],    "action": "Delete to start of line" },
+        { "keys": ["Ctrl", "k"],    "action": "Delete to end of line" },
+        { "keys": ["Alt", "←"],     "action": "Move cursor back one word" },
+        { "keys": ["Alt", "→"],     "action": "Move cursor forward one word" }
+      ]
+    },
+    {
+      "id": "interface",
+      "label": "Interface",
+      "color": "#a6e3a1",
+      "bindings": [
+        { "keys": ["Ctrl", "l"],    "action": "Clear terminal screen" },
+        { "keys": ["Ctrl", "d"],    "action": "Exit Claude Code (on empty input)" },
+        { "keys": ["Tab"],          "action": "Autocomplete file paths and commands" }
+      ]
+    },
+    {
+      "id": "slashcmds",
+      "label": "Slash Commands",
+      "color": "#f9e2af",
+      "bindings": [
+        { "keys": ["/help"],        "action": "Show help and available commands" },
+        { "keys": ["/clear"],       "action": "Clear conversation history" },
+        { "keys": ["/compact"],     "action": "Compact conversation to save context" },
+        { "keys": ["/config"],      "action": "Open settings" },
+        { "keys": ["/cost"],        "action": "Show token usage and cost for session" },
+        { "keys": ["/doctor"],      "action": "Diagnose configuration issues" },
+        { "keys": ["/init"],        "action": "Initialise CLAUDE.md for this project" },
+        { "keys": ["/memory"],      "action": "Open memory files for editing" },
+        { "keys": ["/model"],       "action": "Switch model (Opus / Sonnet / Haiku)" },
+        { "keys": ["/review"],      "action": "Review current branch changes" },
+        { "keys": ["/save"],        "action": "Save session handoff note" },
+        { "keys": ["/status"],      "action": "Show project status" },
+        { "keys": ["/vim"],         "action": "Toggle vim keybinding mode" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keybindings</title>
+  <style>
+    /* Catppuccin Mocha */
+    :root {
+      --base:     #1e1e2e;
+      --mantle:   #181825;
+      --crust:    #11111b;
+      --surface0: #313244;
+      --surface1: #45475a;
+      --surface2: #585b70;
+      --overlay0: #6c7086;
+      --subtext0: #a6adc8;
+      --subtext1: #bac2de;
+      --text:     #cdd6f4;
+      --yellow:   #f9e2af;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--base);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ── Header ──────────────────────────────────────────────────── */
+    #header {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      background: var(--mantle);
+      border-bottom: 1px solid var(--surface0);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 52px;
+    }
+
+    .title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #b4befe;
+      white-space: nowrap;
+    }
+
+    .search-wrap {
+      flex: 1;
+      position: relative;
+      max-width: 380px;
+    }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--overlay0);
+      pointer-events: none;
+      line-height: 0;
+    }
+    #search {
+      width: 100%;
+      background: var(--surface0);
+      border: 1px solid var(--surface1);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 7px 68px 7px 32px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    #search:focus { border-color: #89b4fa; }
+    #search::placeholder { color: var(--overlay0); }
+    .search-kbd {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: var(--overlay0);
+      background: var(--surface1);
+      border: 1px solid var(--surface2);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: 'JetBrains Mono', monospace;
+      pointer-events: none;
+      transition: opacity 0.15s;
+    }
+    #search:focus + .search-kbd,
+    #search:not(:placeholder-shown) + .search-kbd { opacity: 0; }
+
+    #result-count {
+      font-size: 12px;
+      color: var(--overlay0);
+      white-space: nowrap;
+    }
+
+    #json-link {
+      font-size: 11px;
+      color: var(--overlay0);
+      text-decoration: none;
+      border: 1px solid var(--surface1);
+      border-radius: 6px;
+      padding: 4px 10px;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    #json-link:hover { color: var(--text); border-color: var(--surface2); }
+
+    /* ── Source tabs ─────────────────────────────────────────────── */
+    #source-tabs {
+      position: sticky;
+      top: 52px;
+      z-index: 55;
+      background: var(--mantle);
+      border-bottom: 1px solid var(--surface0);
+      padding: 0 20px;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    #source-tabs::-webkit-scrollbar { display: none; }
+
+    .source-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 10px 14px;
+      border-bottom: 2px solid transparent;
+      color: var(--subtext0);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.12s, border-color 0.12s;
+      user-select: none;
+      background: transparent;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      flex-shrink: 0;
+    }
+    .source-tab:hover { color: var(--text); }
+    .source-tab.active {
+      color: var(--c, #b4befe);
+      border-bottom-color: var(--c, #b4befe);
+    }
+    .source-tab-count {
+      font-size: 10px;
+      opacity: 0.6;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Category chips ──────────────────────────────────────────── */
+    #filters {
+      position: sticky;
+      top: 96px;
+      z-index: 50;
+      background: var(--mantle);
+      border-bottom: 1px solid var(--surface0);
+      padding: 8px 20px;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      transition: opacity 0.15s;
+    }
+    #filters::-webkit-scrollbar { display: none; }
+    #filters.hidden { display: none; }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 11px;
+      border-radius: 20px;
+      border: 1px solid var(--surface1);
+      background: transparent;
+      color: var(--subtext0);
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.12s, border-color 0.12s, background 0.12s;
+      user-select: none;
+    }
+    .chip:hover { color: var(--text); border-color: var(--surface2); }
+    .chip.active {
+      background: color-mix(in srgb, var(--c) 18%, transparent);
+      border-color: var(--c);
+      color: var(--c);
+    }
+    .chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--c); flex-shrink: 0; }
+    .chip-count { font-size: 10px; opacity: 0.7; font-variant-numeric: tabular-nums; }
+
+    /* ── Info bar ────────────────────────────────────────────────── */
+    #info {
+      padding: 7px 20px;
+      font-size: 11px;
+      color: var(--overlay0);
+      border-bottom: 1px solid var(--surface0);
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    #info.hidden { display: none; }
+    #info span { display: flex; align-items: center; gap: 5px; }
+    #info strong { color: var(--subtext0); }
+
+    /* ── Main grid ───────────────────────────────────────────────── */
+    #main {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 14px;
+      align-items: start;
+    }
+
+    /* ── Cards ───────────────────────────────────────────────────── */
+    .card {
+      background: var(--mantle);
+      border: 1px solid var(--surface0);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .card.hidden { display: none; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--surface0);
+      border-left: 3px solid var(--c);
+    }
+    .card-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--c);
+    }
+    .card-badges { display: flex; gap: 6px; align-items: center; }
+    .card-count {
+      font-size: 10px;
+      color: var(--overlay0);
+      background: var(--surface0);
+      padding: 1px 7px;
+      border-radius: 10px;
+    }
+    .card-count-visible { color: var(--subtext1); }
+
+    .source-badge {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--s);
+      background: color-mix(in srgb, var(--s) 15%, transparent);
+      border: 1px solid color-mix(in srgb, var(--s) 35%, transparent);
+      border-radius: 8px;
+      padding: 1px 6px;
+      white-space: nowrap;
+    }
+
+    /* ── Bindings ────────────────────────────────────────────────── */
+    .bindings { list-style: none; }
+
+    .binding {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--surface0);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .binding:last-child { border-bottom: none; }
+    .binding:hover { background: var(--surface0); }
+    .binding.hidden { display: none; }
+
+    .keys {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+      min-width: 110px;
+      max-width: 175px;
+    }
+
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(to bottom, var(--surface1), var(--surface0));
+      border: 1px solid var(--surface2);
+      border-bottom: 2px solid var(--crust);
+      border-radius: 5px;
+      font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+      font-size: 11px;
+      color: var(--text);
+      padding: 2px 7px;
+      min-width: 22px;
+      text-align: center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+    .key-plus { color: var(--overlay0); font-size: 10px; user-select: none; margin: 0 1px; }
+
+    .binding-info { flex: 1; min-width: 0; }
+    .action { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .note   { font-size: 10px; color: var(--overlay0); margin-top: 1px; font-family: 'JetBrains Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .copy-hint { font-size: 11px; color: var(--overlay0); opacity: 0; flex-shrink: 0; transition: opacity 0.15s; user-select: none; }
+    .binding:hover .copy-hint { opacity: 1; }
+
+    /* ── Empty state ─────────────────────────────────────────────── */
+    #empty { display: none; grid-column: 1/-1; padding: 80px 20px; text-align: center; color: var(--overlay0); }
+    #empty.visible { display: block; }
+    #empty .empty-icon { font-size: 36px; margin-bottom: 14px; }
+    #empty h3 { font-size: 16px; color: var(--subtext0); margin-bottom: 6px; }
+
+    /* ── Toast ───────────────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: var(--surface1);
+      border: 1px solid var(--surface2);
+      color: var(--text);
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s, transform 0.18s;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    mark {
+      background: color-mix(in srgb, var(--yellow) 30%, transparent);
+      color: var(--yellow);
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+
+    @media (max-width: 600px) {
+      #header { flex-wrap: wrap; }
+      #main { padding: 12px; grid-template-columns: 1fr; gap: 10px; }
+      .keys { min-width: 90px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="header">
+  <div class="title">⌨ Keybindings</div>
+  <div class="search-wrap">
+    <span class="search-icon">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+    </span>
+    <input id="search" type="text" placeholder="Search actions or keys…" autocomplete="off" spellcheck="false">
+    <span class="search-kbd">/ to focus</span>
+  </div>
+  <div id="result-count"></div>
+  <a id="json-link" href="sources.json" target="_blank">{ } JSON</a>
+</div>
+
+<div id="source-tabs"></div>
+<div id="filters"></div>
+<div id="info"></div>
+
+<main id="main">
+  <div id="empty">
+    <div class="empty-icon">⌨</div>
+    <h3>No bindings match</h3>
+    <p>Try a different search term or reset filters</p>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+const $  = id => document.getElementById(id);
+const searchEl    = $('search');
+const sourceTabsEl = $('source-tabs');
+const filtersEl   = $('filters');
+const infoEl      = $('info');
+const mainEl      = $('main');
+const resultEl    = $('result-count');
+const emptyEl     = $('empty');
+const toastEl     = $('toast');
+const jsonLinkEl  = $('json-link');
+
+// ── State ──────────────────────────────────────────────────────────
+let sources      = [];          // entries from sources.json
+let sourceData   = new Map();   // id → { meta, groups }
+let activeSource = null;        // source id string or 'all'
+let activeGroups = new Set();   // group ids (unused in 'all' mode)
+let toastTimer   = null;
+
+// ── Boot ───────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch('sources.json');
+    if (!res.ok) throw new Error(`sources.json: HTTP ${res.status}`);
+    const manifest = await res.json();
+    sources = manifest.sources || [];
+
+    buildSourceTabs(sources, manifest.default || sources[0]?.id || 'all');
+
+    const hash = location.hash.slice(1);
+    const initial = (hash && (hash === 'all' || sources.find(s => s.id === hash)))
+      ? hash
+      : (manifest.default || sources[0]?.id || 'all');
+
+    await setActiveSource(initial);
+  } catch (e) {
+    showError(e);
+  }
+}
+
+// ── Source tabs ────────────────────────────────────────────────────
+function buildSourceTabs(srcs, defaultId) {
+  sourceTabsEl.innerHTML = '';
+
+  // "All" tab
+  const allTab = makeTab('all', 'All', '◈', '#9399b2',
+    srcs.reduce((n, s) => n + (sourceData.get(s.id)?.groups.reduce((m, g) => m + g.bindings.length, 0) || 0), 0));
+  sourceTabsEl.appendChild(allTab);
+
+  srcs.forEach(s => {
+    const tab = makeTab(s.id, s.label, s.icon, s.color, null);
+    sourceTabsEl.appendChild(tab);
+  });
+}
+
+function makeTab(id, label, icon, color, count) {
+  const btn = document.createElement('button');
+  btn.className = 'source-tab';
+  btn.dataset.sid = id;
+  btn.style.setProperty('--c', color);
+  btn.innerHTML = `${esc(icon)} ${esc(label)}` +
+    (count !== null ? ` <span class="source-tab-count">${count}</span>` : '');
+  btn.addEventListener('click', () => setActiveSource(id));
+  return btn;
+}
+
+// ── Activate source ────────────────────────────────────────────────
+async function setActiveSource(id) {
+  activeSource = id;
+
+  // Update tab highlight
+  sourceTabsEl.querySelectorAll('.source-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.sid === id));
+
+  // Update JSON link
+  if (id === 'all') {
+    jsonLinkEl.textContent = '{ } sources.json';
+    jsonLinkEl.href = 'sources.json';
+  } else {
+    const src = sources.find(s => s.id === id);
+    jsonLinkEl.textContent = `{ } ${src?.file || id + '.json'}`;
+    jsonLinkEl.href = src?.file || `${id}.json`;
+  }
+
+  // Update hash
+  history.replaceState(null, '', `#${id}`);
+
+  if (id === 'all') {
+    // Load all sources not yet cached
+    await Promise.allSettled(sources.map(s => loadSource(s.id)));
+    renderAll();
+  } else {
+    try {
+      await loadSource(id);
+      renderSource(id);
+    } catch (e) {
+      showError(e);
+    }
+  }
+}
+
+// ── Load a source file (cached) ────────────────────────────────────
+async function loadSource(id) {
+  if (sourceData.has(id)) return sourceData.get(id);
+  const src = sources.find(s => s.id === id);
+  if (!src) throw new Error(`Unknown source: ${id}`);
+  const res = await fetch(src.file);
+  if (!res.ok) throw new Error(`${src.file}: HTTP ${res.status}`);
+  const data = await res.json();
+  sourceData.set(id, data);
+  return data;
+}
+
+// ── Render single source ───────────────────────────────────────────
+function renderSource(id) {
+  const data = sourceData.get(id);
+  const src  = sources.find(s => s.id === id);
+
+  // Info bar
+  infoEl.classList.remove('hidden');
+  infoEl.innerHTML = '';
+  if (data.meta.modifier_display) {
+    const sp = document.createElement('span');
+    sp.innerHTML = `<strong>Modifier:</strong> ${esc(data.meta.modifier_display)} (${esc(data.meta.modifier_xkb || '')})`;
+    infoEl.appendChild(sp);
+  }
+  if (data.meta.layout_note) {
+    const sp = document.createElement('span');
+    sp.innerHTML = `<strong>Note:</strong> ${esc(data.meta.layout_note)}`;
+    infoEl.appendChild(sp);
+  }
+  if (data.meta.host) {
+    const sp = document.createElement('span');
+    sp.innerHTML = `<strong>Host:</strong> ${esc(data.meta.host)}`;
+    infoEl.appendChild(sp);
+  }
+  if (infoEl.children.length === 0) infoEl.classList.add('hidden');
+
+  // Category chips
+  filtersEl.classList.remove('hidden');
+  activeGroups = new Set(data.groups.map(g => g.id));
+  buildCategoryChips(data.groups, id);
+
+  // Cards (no source badges in single-source mode)
+  buildCards(data.groups, false, id, src?.color);
+}
+
+// ── Render all sources merged ──────────────────────────────────────
+function renderAll() {
+  infoEl.classList.add('hidden');
+  filtersEl.classList.add('hidden');
+  activeGroups = new Set();
+
+  // Flatten groups from all successfully-loaded sources
+  const allGroups = [];
+  sources.forEach(src => {
+    const data = sourceData.get(src.id);
+    if (!data) return;
+    data.groups.forEach(g => {
+      allGroups.push({ ...g, _sid: src.id, _scolor: src.color, _slabel: src.label, _sicon: src.icon });
+    });
+  });
+
+  buildCards(allGroups, true, null, null);
+}
+
+// ── Build category chip bar ────────────────────────────────────────
+function buildCategoryChips(groups, sourceId) {
+  filtersEl.innerHTML = '';
+
+  const allChip = makeChip('all', 'All', '#9399b2', groups.reduce((n, g) => n + g.bindings.length, 0));
+  allChip.addEventListener('click', () => {
+    if (activeGroups.size === groups.length) return;
+    activeGroups = new Set(groups.map(g => g.id));
+    refreshChips(groups);
+    refreshVisibility();
+  });
+  filtersEl.appendChild(allChip);
+
+  groups.forEach(g => {
+    const chip = makeChip(g.id, g.label, g.color, g.bindings.length);
+    chip.addEventListener('click', () => {
+      if (activeGroups.has(g.id)) {
+        if (activeGroups.size === 1) return;
+        activeGroups.delete(g.id);
+      } else {
+        activeGroups.add(g.id);
+      }
+      refreshChips(groups);
+      refreshVisibility();
+    });
+    filtersEl.appendChild(chip);
+  });
+}
+
+function makeChip(id, label, color, count) {
+  const btn = document.createElement('button');
+  btn.className = 'chip active';
+  btn.dataset.gid = id;
+  btn.style.setProperty('--c', color);
+  btn.innerHTML = `<span class="chip-dot"></span>${esc(label)}<span class="chip-count">${count}</span>`;
+  return btn;
+}
+
+function refreshChips(groups) {
+  filtersEl.querySelectorAll('.chip').forEach(chip => {
+    if (chip.dataset.gid === 'all') {
+      chip.classList.toggle('active', activeGroups.size === groups.length);
+    } else {
+      chip.classList.toggle('active', activeGroups.has(chip.dataset.gid));
+    }
+  });
+}
+
+// ── Build cards ────────────────────────────────────────────────────
+function buildCards(groups, allMode, sourceId, sourceColor) {
+  // Remove existing cards (keep #empty)
+  mainEl.querySelectorAll('.card').forEach(c => c.remove());
+
+  if (groups.length === 0) {
+    emptyEl.classList.add('visible');
+    return;
+  }
+  emptyEl.classList.remove('visible');
+
+  groups.forEach(g => {
+    const sid    = allMode ? g._sid    : sourceId;
+    const scolor = allMode ? g._scolor : sourceColor;
+    const slabel = allMode ? `${g._sicon} ${g._slabel}` : '';
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.gid = g.id;
+    card.dataset.sid = sid || '';
+    card.style.setProperty('--c', g.color);
+    if (scolor) card.style.setProperty('--s', scolor);
+
+    const badgeHtml = allMode
+      ? `<span class="source-badge">${esc(slabel)}</span>`
+      : '';
+
+    card.innerHTML = `
+      <div class="card-header">
+        <span class="card-title">${esc(g.label)}</span>
+        <div class="card-badges">
+          ${badgeHtml}
+          <span class="card-count" id="cnt-${sid}-${g.id}">${g.bindings.length}</span>
+        </div>
+      </div>
+      <ul class="bindings"></ul>`;
+
+    const list = card.querySelector('.bindings');
+    g.bindings.forEach(b => {
+      const li = document.createElement('li');
+      li.className = 'binding';
+      li.dataset.corpus = `${b.action} ${b.keys.join(' ')} ${b.note || ''}`.toLowerCase();
+
+      li.innerHTML = `
+        <div class="keys">${renderKeys(b.keys)}</div>
+        <div class="binding-info">
+          <div class="action" data-raw="${esc(b.action)}">${esc(b.action)}</div>
+          ${b.note ? `<div class="note">${esc(b.note)}</div>` : ''}
+        </div>
+        <span class="copy-hint" title="Copy key combo">⎘</span>`;
+
+      li.addEventListener('click', () => {
+        const combo = b.keys.join('+');
+        navigator.clipboard?.writeText(combo).then(() => showToast(`Copied: ${combo}`));
+      });
+
+      list.appendChild(li);
+    });
+
+    mainEl.insertBefore(card, emptyEl);
+  });
+
+  // Recount tab binding totals in "all" tab after data loads
+  updateAllTabCount();
+  refreshVisibility();
+}
+
+function updateAllTabCount() {
+  const allTab = sourceTabsEl.querySelector('[data-sid="all"]');
+  if (!allTab) return;
+  const total = sources.reduce((n, s) => {
+    const d = sourceData.get(s.id);
+    return n + (d ? d.groups.reduce((m, g) => m + g.bindings.length, 0) : 0);
+  }, 0);
+  const countEl = allTab.querySelector('.source-tab-count');
+  if (countEl) countEl.textContent = total;
+  else allTab.innerHTML += ` <span class="source-tab-count">${total}</span>`;
+}
+
+function renderKeys(keys) {
+  return keys.map((k, i) => {
+    const sep = i < keys.length - 1 ? '<span class="key-plus">+</span>' : '';
+    return `<kbd>${esc(k)}</kbd>${sep}`;
+  }).join('');
+}
+
+// ── Visibility (search + category filter) ─────────────────────────
+function refreshVisibility() {
+  const query  = searchEl.value.trim().toLowerCase();
+  const tokens = query ? query.split(/\s+/).filter(Boolean) : [];
+  const isAll  = activeSource === 'all';
+
+  let totalVisible  = 0;
+  let totalBindings = 0;
+  let visibleCards  = 0;
+
+  mainEl.querySelectorAll('.card').forEach(card => {
+    const gid = card.dataset.gid;
+
+    // Category filter (only in single-source mode)
+    const groupOn = isAll || activeGroups.has(gid);
+    if (!groupOn) { card.classList.add('hidden'); return; }
+
+    let cardVisible = 0;
+    card.querySelectorAll('.binding').forEach(row => {
+      totalBindings++;
+      const matches = tokens.length === 0 || tokens.every(t => row.dataset.corpus.includes(t));
+      row.classList.toggle('hidden', !matches);
+
+      if (matches) {
+        cardVisible++;
+        totalVisible++;
+        const actionEl = row.querySelector('.action');
+        const raw      = actionEl.dataset.raw;
+        actionEl.innerHTML = tokens.length ? highlight(raw, tokens) : esc(raw);
+      }
+    });
+
+    card.classList.toggle('hidden', cardVisible === 0);
+    if (cardVisible > 0) {
+      visibleCards++;
+      const cntEl = card.querySelector('.card-count');
+      if (cntEl) {
+        const total = card.querySelectorAll('.binding').length;
+        cntEl.innerHTML = query
+          ? `<span class="card-count-visible">${cardVisible}</span> / ${total}`
+          : `${total}`;
+      }
+    }
+  });
+
+  const isFiltered = query || (!isAll && activeGroups.size < (sourceData.get(activeSource)?.groups.length ?? 0));
+  emptyEl.classList.toggle('visible', visibleCards === 0 && isFiltered);
+
+  if (query) {
+    resultEl.textContent = `${totalVisible} of ${totalBindings} results`;
+  } else {
+    resultEl.textContent = `${totalBindings} binding${totalBindings !== 1 ? 's' : ''}`;
+  }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function highlight(text, tokens) {
+  const pattern = tokens.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  if (!pattern) return esc(text);
+  const re = new RegExp(`(${pattern})`, 'gi');
+  let result = '', last = 0, m;
+  while ((m = re.exec(text)) !== null) {
+    result += esc(text.slice(last, m.index));
+    result += `<mark>${esc(m[0])}</mark>`;
+    last = m.index + m[0].length;
+  }
+  return result + esc(text.slice(last));
+}
+
+function showError(e) {
+  mainEl.innerHTML = `
+    <div style="grid-column:1/-1;padding:60px 24px;text-align:center;color:var(--overlay0)">
+      <div style="font-size:32px;margin-bottom:14px">⚠</div>
+      <h3 style="color:var(--subtext0);margin-bottom:8px">Could not load sources</h3>
+      <p style="margin-bottom:4px;font-size:12px">${esc(e.message)}</p>
+      <p style="margin:16px 0 8px;font-size:13px;color:var(--subtext0)">Serve the folder over HTTP:</p>
+      <code style="display:inline-block;background:var(--surface0);padding:8px 18px;border-radius:6px;font-size:12px;font-family:monospace;border:1px solid var(--surface1)">python3 -m http.server 8787 -d /home/shared/dotfiles/keys_cheatsheet</code>
+    </div>`;
+}
+
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+}
+
+// ── Keyboard shortcuts ─────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+    e.preventDefault(); searchEl.focus(); searchEl.select(); return;
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault(); searchEl.focus(); searchEl.select(); return;
+  }
+  if (e.key === 'Escape' && document.activeElement === searchEl) {
+    if (searchEl.value) { searchEl.value = ''; refreshVisibility(); }
+    else searchEl.blur();
+  }
+});
+
+searchEl.addEventListener('input', refreshVisibility);
+
+window.addEventListener('hashchange', () => {
+  const id = location.hash.slice(1);
+  if (id && id !== activeSource && (id === 'all' || sources.find(s => s.id === id))) {
+    setActiveSource(id);
+  }
+});
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "title": "Konsole Keybindings",
+    "host": "laptop · harry-smartstation",
+    "layout_note": "Custom keytab at nix/home/konsole.keytab. Shift+Enter sends ESC+CR instead of \\EOM so TUIs (Claude Code, etc.) insert newlines rather than submitting.",
+    "generated": "2026-05-11"
+  },
+  "groups": [
+    {
+      "id": "tabs",
+      "label": "Tabs",
+      "color": "#89b4fa",
+      "bindings": [
+        { "keys": ["Ctrl", "Shift", "t"],     "action": "New tab" },
+        { "keys": ["Ctrl", "w"],              "action": "Close tab" },
+        { "keys": ["Ctrl", "Tab"],            "action": "Next tab" },
+        { "keys": ["Ctrl", "Shift", "Tab"],   "action": "Previous tab" },
+        { "keys": ["Shift", "←"],             "action": "Previous tab", "note": "hardcoded in keytab" },
+        { "keys": ["Shift", "→"],             "action": "Next tab",     "note": "hardcoded in keytab" },
+        { "keys": ["Alt", "1–8"],             "action": "Switch to tab N" }
+      ]
+    },
+    {
+      "id": "splits",
+      "label": "Splits",
+      "color": "#74c7ec",
+      "bindings": [
+        { "keys": ["Ctrl", "("],              "action": "Split view left / right" },
+        { "keys": ["Ctrl", ")"],              "action": "Split view top / bottom" },
+        { "keys": ["Ctrl", "Shift", "←"],    "action": "Focus split left" },
+        { "keys": ["Ctrl", "Shift", "→"],    "action": "Focus split right" },
+        { "keys": ["Ctrl", "Shift", "↑"],    "action": "Focus split above" },
+        { "keys": ["Ctrl", "Shift", "↓"],    "action": "Focus split below" }
+      ]
+    },
+    {
+      "id": "clipboard",
+      "label": "Clipboard",
+      "color": "#a6e3a1",
+      "bindings": [
+        { "keys": ["Ctrl", "Shift", "c"],     "action": "Copy selection" },
+        { "keys": ["Ctrl", "Shift", "v"],     "action": "Paste" },
+        { "keys": ["Ctrl", "Shift", "x"],     "action": "Copy and clear selection" }
+      ]
+    },
+    {
+      "id": "scrollback",
+      "label": "Scrollback",
+      "color": "#cba6f7",
+      "bindings": [
+        { "keys": ["Shift", "↑"],             "action": "Scroll up one line" },
+        { "keys": ["Shift", "↓"],             "action": "Scroll down one line" },
+        { "keys": ["Shift", "PgUp"],          "action": "Scroll up one page" },
+        { "keys": ["Shift", "PgDn"],          "action": "Scroll down one page" },
+        { "keys": ["Ctrl", "Shift", "PgUp"],  "action": "Scroll up to previous prompt" },
+        { "keys": ["Ctrl", "Shift", "PgDn"],  "action": "Scroll down to next prompt" },
+        { "keys": ["Shift", "Home"],          "action": "Scroll to top" },
+        { "keys": ["Shift", "End"],           "action": "Scroll to bottom" }
+      ]
+    },
+    {
+      "id": "search",
+      "label": "Search",
+      "color": "#f9e2af",
+      "bindings": [
+        { "keys": ["Ctrl", "Shift", "f"],     "action": "Find in scrollback" },
+        { "keys": ["F3"],                     "action": "Find next match" },
+        { "keys": ["Shift", "F3"],            "action": "Find previous match" }
+      ]
+    },
+    {
+      "id": "view",
+      "label": "View",
+      "color": "#fab387",
+      "bindings": [
+        { "keys": ["Ctrl", "+"],              "action": "Increase font size" },
+        { "keys": ["Ctrl", "-"],              "action": "Decrease font size" },
+        { "keys": ["Ctrl", "Alt", "0"],       "action": "Reset font size" },
+        { "keys": ["F11"],                    "action": "Toggle fullscreen" },
+        { "keys": ["Ctrl", "Shift", "m"],     "action": "Show / hide menu bar" }
+      ]
+    },
+    {
+      "id": "window",
+      "label": "Window",
+      "color": "#94e2d5",
+      "bindings": [
+        { "keys": ["Ctrl", "Shift", "n"],     "action": "New window" },
+        { "keys": ["Ctrl", "Shift", "q"],     "action": "Close window" }
+      ]
+    },
+    {
+      "id": "custom",
+      "label": "Custom Keytab",
+      "color": "#f38ba8",
+      "bindings": [
+        { "keys": ["Shift", "Return"],        "action": "Insert newline (no submit)", "note": "sends ESC+CR — overrides default \\EOM for TUI compat" },
+        { "keys": ["Ctrl", "Space"],          "action": "Send NUL (\\x00)",           "note": "workaround for dead keys" },
+        { "keys": ["Backspace"],              "action": "Send DEL (\\x7f)",           "note": "matches xterm; Alt+Backspace → \\E+DEL" },
+        { "keys": ["Ctrl", "Backspace"],      "action": "Send BS (\\x08 / ^H)",       "note": "matches xterm Ctrl+Backspace behaviour" }
+      ]
+    }
+  ]
+}

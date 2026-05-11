@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "title": "Kitty Keybindings",
+    "host": "all hosts",
+    "layout_note": "Custom bindings are in nix/home/common.nix programs.kitty.keybindings. All others are Kitty defaults.",
+    "generated": "2026-05-11"
+  },
+  "groups": [
+    {
+      "id": "tabs",
+      "label": "Tabs",
+      "color": "#89b4fa",
+      "bindings": [
+        { "keys": ["Ctrl", "Shift", "t"],     "action": "New tab" },
+        { "keys": ["Ctrl", "Shift", "q"],     "action": "Close tab" },
+        { "keys": ["Ctrl", "Shift", "→"],     "action": "Next tab" },
+        { "keys": ["Ctrl", "Shift", "←"],     "action": "Previous tab" },
+        { "keys": ["Ctrl", "Alt", "t"],       "action": "Set tab title" }
+      ]
+    },
+    {
+      "id": "windows",
+      "label": "Windows",
+      "color": "#74c7ec",
+      "bindings": [
+        { "keys": ["Ctrl", "Shift", "Enter"], "action": "New window",                "note": "custom: new_window action" },
+        { "keys": ["Ctrl", "Shift", "w"],     "action": "Close window" },
+        { "keys": ["Alt", "←"],              "action": "Focus window left",          "note": "custom binding" },
+        { "keys": ["Alt", "→"],              "action": "Focus window right",         "note": "custom binding" },
+        { "keys": ["Alt", "↑"],              "action": "Focus window above",         "note": "custom binding" },
+        { "keys": ["Alt", "↓"],              "action": "Focus window below",         "note": "custom binding" },
+        { "keys": ["Ctrl", "Shift", "]"],     "action": "Next window" },
+        { "keys": ["Ctrl", "Shift", "["],     "action": "Previous window" },
+        { "keys": ["Ctrl", "Shift", "f"],     "action": "Move window forward" },
+        { "keys": ["Ctrl", "Shift", "b"],     "action": "Move window backward" },
+        { "keys": ["Ctrl", "Shift", "`"],     "action": "Move window to top" }
+      ]
+    },
+    {
+      "id": "layout",
+      "label": "Layout",
+      "color": "#cba6f7",
+      "bindings": [
+        { "keys": ["Ctrl", "Shift", "l"],     "action": "Cycle to next layout" }
+      ]
+    },
+    {
+      "id": "scrollback",
+      "label": "Scrollback",
+      "color": "#94e2d5",
+      "bindings": [
+        { "keys": ["Ctrl", "Shift", "↑"],     "action": "Scroll up one line" },
+        { "keys": ["Ctrl", "Shift", "↓"],     "action": "Scroll down one line" },
+        { "keys": ["Ctrl", "Shift", "PgUp"],  "action": "Scroll up one page" },
+        { "keys": ["Ctrl", "Shift", "PgDn"],  "action": "Scroll down one page" },
+        { "keys": ["Ctrl", "Shift", "Home"],  "action": "Scroll to top" },
+        { "keys": ["Ctrl", "Shift", "End"],   "action": "Scroll to bottom" },
+        { "keys": ["Ctrl", "Shift", "h"],     "action": "Browse scrollback in pager" },
+        { "keys": ["Ctrl", "Shift", "g"],     "action": "Browse last cmd output in pager" }
+      ]
+    },
+    {
+      "id": "search",
+      "label": "Search",
+      "color": "#f9e2af",
+      "bindings": [
+        { "keys": ["Ctrl", "Shift", "/"],     "action": "Search scrollback" },
+        { "keys": ["Ctrl", "Shift", "e"],     "action": "Open URL (hints mode)",     "note": "custom binding" }
+      ]
+    },
+    {
+      "id": "clipboard",
+      "label": "Clipboard",
+      "color": "#a6e3a1",
+      "bindings": [
+        { "keys": ["Ctrl", "Shift", "c"],     "action": "Copy to clipboard" },
+        { "keys": ["Ctrl", "Shift", "v"],     "action": "Paste from clipboard" },
+        { "keys": ["Ctrl", "Shift", "s"],     "action": "Paste from primary selection" }
+      ]
+    },
+    {
+      "id": "font",
+      "label": "Font & View",
+      "color": "#fab387",
+      "bindings": [
+        { "keys": ["Ctrl", "="],              "action": "Increase font size",        "note": "custom — default is Ctrl+Shift+=" },
+        { "keys": ["Ctrl", "-"],              "action": "Decrease font size",        "note": "custom — default is Ctrl+Shift+-" },
+        { "keys": ["Ctrl", "0"],              "action": "Reset font size",           "note": "custom — default is Ctrl+Shift+Backspace" },
+        { "keys": ["Ctrl", "Shift", "F11"],   "action": "Toggle fullscreen" },
+        { "keys": ["Ctrl", "Shift", "F10"],   "action": "Toggle maximized" }
+      ]
+    },
+    {
+      "id": "misc",
+      "label": "Misc",
+      "color": "#f38ba8",
+      "bindings": [
+        { "keys": ["Ctrl", "Shift", "F2"],    "action": "Open kitty.conf in editor" },
+        { "keys": ["Ctrl", "Shift", "F5"],    "action": "Reload kitty config" },
+        { "keys": ["Ctrl", "Shift", "u"],     "action": "Unicode character input" },
+        { "keys": ["Ctrl", "Shift", "Delete"],"action": "Clear terminal" },
+        { "keys": ["Ctrl", "l"],              "action": "Clear screen (shell passthrough)" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "default": "sway",
+  "sources": [
+    { "id": "sway",       "label": "Sway",        "icon": "🪟", "color": "#89b4fa", "file": "sway.json" },
+    { "id": "claudecode", "label": "Claude Code",  "icon": "✦",  "color": "#cba6f7", "file": "claudecode.json" },
+    { "id": "konsole",    "label": "Konsole",       "icon": "🖥",  "color": "#a6e3a1", "file": "konsole.json" },
+    { "id": "kitty",      "label": "Kitty",         "icon": "🐱", "color": "#fab387", "file": "kitty.json" }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "title": "Sway Keybindings",
+    "host": "laptop · harry-smartstation",
+    "modifier_display": "Super",
+    "modifier_xkb": "Mod4",
+    "layout_note": "Dvorak Programmer layout (us/dvp). Workspace keys use physical row position (keycodes), not keysym values.",
+    "generated": "2026-05-11"
+  },
+  "groups": [
+    {
+      "id": "apps",
+      "label": "Applications",
+      "color": "#89b4fa",
+      "bindings": [
+        { "keys": ["Super", "Return"], "action": "Open terminal", "note": "kitty" },
+        { "keys": ["Super", "d"],      "action": "App launcher",   "note": "wofi --show drun" }
+      ]
+    },
+    {
+      "id": "window",
+      "label": "Window",
+      "color": "#74c7ec",
+      "bindings": [
+        { "keys": ["Super", "Shift", "q"],     "action": "Kill focused window" },
+        { "keys": ["Super", "f"],              "action": "Fullscreen toggle" },
+        { "keys": ["Super", "Shift", "Space"], "action": "Float toggle" },
+        { "keys": ["Super", "Space"],          "action": "Focus tiling / floating toggle" },
+        { "keys": ["Super", "a"],              "action": "Focus parent container" },
+        { "keys": ["Super", "r"],              "action": "Enter resize mode" }
+      ]
+    },
+    {
+      "id": "focus",
+      "label": "Focus",
+      "color": "#94e2d5",
+      "bindings": [
+        { "keys": ["Super", "←"], "action": "Focus left" },
+        { "keys": ["Super", "↓"], "action": "Focus down" },
+        { "keys": ["Super", "↑"], "action": "Focus up" },
+        { "keys": ["Super", "→"], "action": "Focus right" }
+      ]
+    },
+    {
+      "id": "move",
+      "label": "Move",
+      "color": "#a6e3a1",
+      "bindings": [
+        { "keys": ["Super", "Shift", "←"], "action": "Move window left" },
+        { "keys": ["Super", "Shift", "↓"], "action": "Move window down" },
+        { "keys": ["Super", "Shift", "↑"], "action": "Move window up" },
+        { "keys": ["Super", "Shift", "→"], "action": "Move window right" }
+      ]
+    },
+    {
+      "id": "layout",
+      "label": "Layout",
+      "color": "#cba6f7",
+      "bindings": [
+        { "keys": ["Super", "b"], "action": "Split horizontal" },
+        { "keys": ["Super", "v"], "action": "Split vertical" },
+        { "keys": ["Super", "s"], "action": "Stacking layout" },
+        { "keys": ["Super", "w"], "action": "Tabbed layout" },
+        { "keys": ["Super", "e"], "action": "Toggle split layout" }
+      ]
+    },
+    {
+      "id": "resize",
+      "label": "Resize Mode",
+      "color": "#f9e2af",
+      "bindings": [
+        { "keys": ["←"],      "action": "Shrink width",       "note": "after Super+r to enter mode" },
+        { "keys": ["↓"],      "action": "Grow height",        "note": "after Super+r to enter mode" },
+        { "keys": ["↑"],      "action": "Shrink height",      "note": "after Super+r to enter mode" },
+        { "keys": ["→"],      "action": "Grow width",         "note": "after Super+r to enter mode" },
+        { "keys": ["Return"], "action": "Exit resize mode" },
+        { "keys": ["Escape"], "action": "Exit resize mode" }
+      ]
+    },
+    {
+      "id": "workspaces",
+      "label": "Workspaces",
+      "color": "#b4befe",
+      "bindings": [
+        { "keys": ["Super", "1–10"],       "action": "Switch to workspace N",        "note": "physical key; 1–5 left monitor, 6–10 right" },
+        { "keys": ["Super", "Shift", "1–10"], "action": "Move container to workspace N", "note": "physical key position" }
+      ]
+    },
+    {
+      "id": "system",
+      "label": "System",
+      "color": "#f38ba8",
+      "bindings": [
+        { "keys": ["Super", "Shift", "s"], "action": "Screenshot region → clipboard", "note": "grim + slurp + wl-copy" },
+        { "keys": ["Super", "Shift", "x"], "action": "Lock screen",                  "note": "swaylock" },
+        { "keys": ["Super", "Shift", "c"], "action": "Reload Sway config" },
+        { "keys": ["Super", "Shift", "e"], "action": "Exit Sway" }
+      ]
+    },
+    {
+      "id": "media",
+      "label": "Media & Hardware",
+      "color": "#fab387",
+      "bindings": [
+        { "keys": ["🔊 Vol+"],       "action": "Volume up 5%" },
+        { "keys": ["🔉 Vol−"],       "action": "Volume down 5%" },
+        { "keys": ["🔇 Mute"],       "action": "Toggle audio mute" },
+        { "keys": ["🎤 Mic Mute"],   "action": "Toggle microphone mute" },
+        { "keys": ["☀ Bright+"],     "action": "Brightness up 5%" },
+        { "keys": ["🌙 Bright−"],    "action": "Brightness down 5%" },
+        { "keys": ["⏯ Play/Pause"],  "action": "Play / pause" },
+        { "keys": ["⏭ Next"],        "action": "Skip to next track" },
+        { "keys": ["⏮ Prev"],        "action": "Go to previous track" }
+      ]
+    }
+  ]
+}
