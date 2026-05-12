@@ -53,10 +53,11 @@
         { "keys": ["Super", "Shift", "h"], "action": "Move window left",  "note": "dvp home row" },
         { "keys": ["Super", "Shift", "t"], "action": "Move window down",  "note": "dvp home row" },
         { "keys": ["Super", "Shift", "n"], "action": "Move window up",    "note": "dvp home row" },
+        { "keys": ["Super", "Shift", "s"], "action": "Move window right", "note": "dvp home row" },
         { "keys": ["Super", "Shift", "←"], "action": "Move window left" },
         { "keys": ["Super", "Shift", "↓"], "action": "Move window down" },
         { "keys": ["Super", "Shift", "↑"], "action": "Move window up" },
-        { "keys": ["Super", "Shift", "→"], "action": "Move window right", "note": "Shift+s reserved for screenshot" }
+        { "keys": ["Super", "Shift", "→"], "action": "Move window right" }
       ]
     },
     {
@@ -108,7 +109,7 @@
       "label": "System",
       "color": "#f38ba8",
       "bindings": [
-        { "keys": ["Super", "Shift", "s"], "action": "Screenshot region → clipboard", "note": "grim + slurp + wl-copy" },
+        { "keys": ["Print"],               "action": "Screenshot region → clipboard", "note": "grim + slurp + wl-copy" },
         { "keys": ["Super", "l"],          "action": "Lock screen",                  "note": "swaylock" },
         { "keys": ["Super", "Shift", "c"], "action": "Reload Sway config" },
         { "keys": ["Super", "Shift", "e"], "action": "Exit Sway" }

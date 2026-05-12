@@ -68,15 +68,17 @@
       # Add bindings on top of the home-manager sway module defaults
       # (focus arrows, kill, reload, layout toggles, etc).
       keybindings = lib.mkOptionDefault {
-        "${mod}+Shift+s" = "exec ${pkgs.grim}/bin/grim -g \"$(${pkgs.slurp}/bin/slurp)\" - | ${pkgs.wl-clipboard}/bin/wl-copy";
+        # Region screenshot → clipboard. Bound to the keyboard's Print key
+        # (the framed-camera icon on the F-row); Mod+Shift+s is freed for
+        # the htns move-right symmetry below.
+        "Print" = "exec ${pkgs.grim}/bin/grim -g \"$(${pkgs.slurp}/bin/slurp)\" - | ${pkgs.wl-clipboard}/bin/wl-copy";
 
         # Dvorak-friendly focus/move: htns sits on the right-hand home row
         # under dvp (physical J/K/L/;), unlike hjkl whose keysyms scatter
         # across J/C/V/P. h stays as focus-left (HM default). Mod+s
         # overrides HM's default "layout stacking" (re-bound to Mod+Shift+w
         # below, pairing with Mod+w = tabbed) and Mod+l takes the screen
-        # lock. Move-right via Mod+Shift+s is skipped to leave the
-        # screenshot binding intact — use Mod+Shift+Right.
+        # lock.
         "${mod}+j" = lib.mkForce null;
         "${mod}+k" = lib.mkForce null;
         "${mod}+l" = lib.mkForce "exec swaylock -c 1e1e2e";
@@ -88,6 +90,7 @@
         "${mod}+Shift+l" = lib.mkForce null;
         "${mod}+Shift+t" = "move down";
         "${mod}+Shift+n" = "move up";
+        "${mod}+Shift+s" = "move right";
         "${mod}+Shift+w" = "layout stacking";
 
         # Hold Mod+o for sov's workspace-grid overlay; release to hide.
