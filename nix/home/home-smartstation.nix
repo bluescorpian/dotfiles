@@ -179,6 +179,71 @@
         outer = 0;
       };
 
+      # Title-bar font. Matches the rofi/waybar JetBrainsMono Nerd Font
+      # already pulled in via common.nix, so no extra package needed.
+      fonts = {
+        names = [ "JetBrainsMono Nerd Font" ];
+        size = 10.0;
+      };
+
+      # Window decorations: thin 2px border + slim title bar. `smart` edge
+      # borders means the border disappears when a workspace has a single
+      # tiled window, so you only see chrome when there's something to
+      # disambiguate.
+      window = {
+        border = 2;
+        titlebar = true;
+        hideEdgeBorders = "smart";
+      };
+      floating = {
+        border = 2;
+        titlebar = true;
+      };
+
+      # Catppuccin Mocha palette, same hexes as the rofi theme in
+      # common.nix. Sway's per-state block is: border / background / text /
+      # indicator / childBorder. `childBorder` is the strip you actually
+      # see around the focused container; `border` is the title-bar's own
+      # outline.
+      colors = {
+        focused = {
+          border      = "#89b4fa";
+          background  = "#89b4fa";
+          text        = "#1e1e2e";
+          indicator   = "#a6e3a1";
+          childBorder = "#89b4fa";
+        };
+        focusedInactive = {
+          border      = "#45475a";
+          background  = "#313244";
+          text        = "#cdd6f4";
+          indicator   = "#45475a";
+          childBorder = "#313244";
+        };
+        unfocused = {
+          border      = "#313244";
+          background  = "#1e1e2e";
+          text        = "#a6adc8";
+          indicator   = "#313244";
+          childBorder = "#313244";
+        };
+        urgent = {
+          border      = "#f38ba8";
+          background  = "#f38ba8";
+          text        = "#1e1e2e";
+          indicator   = "#f38ba8";
+          childBorder = "#f38ba8";
+        };
+        placeholder = {
+          border      = "#1e1e2e";
+          background  = "#1e1e2e";
+          text        = "#cdd6f4";
+          indicator   = "#1e1e2e";
+          childBorder = "#1e1e2e";
+        };
+        background = "#1e1e2e";
+      };
+
       # Per-output config. Sway silently ignores blocks for outputs that
       # aren't present, so listing both names covers the docked + undocked
       # cases. Connector names follow the kernel DRM convention under the
@@ -218,6 +283,16 @@
         { command = "${sovStart}"; }
       ];
     };
+
+    # Title-bar geometry knobs the home-manager module doesn't expose as
+    # typed options. Padding is (horizontal, vertical) px; thickness 0
+    # turns off the inner title-bar outline so the colour block reads as
+    # a clean strip.
+    extraConfig = ''
+      titlebar_padding 8 3
+      titlebar_border_thickness 0
+      title_align center
+    '';
   };
 
   # Notification daemon. Mako is the wayland-native option; gating it on
