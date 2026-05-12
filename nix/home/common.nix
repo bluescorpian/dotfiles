@@ -220,7 +220,115 @@
       "ctrl+shift+e"     = "open_url_with_hints";
     };
   };
-  programs.wofi.enable = true;
+  # Rofi — launcher, window switcher, and dmenu replacement. As of rofi 2.0
+  # (Aug 2025) it has native Wayland support, so a single binary replaces
+  # what was previously wofi+swayr on this machine. Themed to match the
+  # Catppuccin Mocha palette used in waybar and mako.
+  programs.rofi = {
+    enable = true;
+    font = "JetBrainsMono Nerd Font 11";
+    extraConfig = {
+      modi = "drun,run,window";
+      show-icons = true;
+      icon-theme = "Adwaita";
+      display-drun = "Apps";
+      display-run = "Run";
+      display-window = "Windows";
+      drun-display-format = "{name}";
+      window-format = "{w} · {c} · {t}";
+      sidebar-mode = false;
+    };
+    # The theme file is installed via xdg.configFile below and referenced
+    # by name here — passing a derivation directly to `theme` confuses the
+    # HM module (it tries to render it as a rasi attrset).
+    theme = "catppuccin-mocha";
+  };
+
+  xdg.configFile."rofi/themes/catppuccin-mocha.rasi".text = ''
+    * {
+      bg:        #1e1e2e;
+      bg-alt:    #313244;
+      bg-sel:    #45475a;
+      fg:        #cdd6f4;
+      fg-dim:    #a6adc8;
+      accent:    #89b4fa;
+      urgent:    #f38ba8;
+      active:    #a6e3a1;
+
+      background-color: transparent;
+      text-color:       @fg;
+    }
+
+    window {
+      width:            640px;
+      background-color: @bg;
+      border:           2px;
+      border-color:     @accent;
+      border-radius:    0;
+      padding:          14px;
+    }
+
+    mainbox {
+      children: [ inputbar, message, listview ];
+      spacing:  10px;
+    }
+
+    inputbar {
+      children:         [ prompt, entry ];
+      spacing:          8px;
+      padding:          6px 10px;
+      background-color: @bg-alt;
+      border-radius:    0;
+    }
+
+    prompt {
+      text-color: @accent;
+    }
+
+    entry {
+      placeholder:       "type to filter";
+      placeholder-color: @fg-dim;
+    }
+
+    message {
+      background-color: @bg-alt;
+      border-radius:    0;
+      padding:          6px 10px;
+    }
+    textbox {
+      text-color: @fg;
+    }
+
+    listview {
+      lines:        10;
+      columns:      1;
+      scrollbar:    false;
+      spacing:      2px;
+      fixed-height: true;
+    }
+
+    element {
+      padding:       6px 8px;
+      spacing:       8px;
+      border-radius: 0;
+    }
+    element normal.normal   { text-color: @fg; }
+    element normal.urgent   { text-color: @urgent; }
+    element normal.active   { text-color: @active; }
+    element selected.normal { background-color: @accent; text-color: @bg; }
+    element selected.urgent { background-color: @urgent; text-color: @bg; }
+    element selected.active { background-color: @active; text-color: @bg; }
+
+    element-icon {
+      size:             1.2em;
+      background-color: transparent;
+    }
+    element-text {
+      background-color: transparent;
+      text-color:       inherit;
+      vertical-align:   0.5;
+    }
+  '';
 
   # SSH agent configuration
   services.ssh-agent = {
