@@ -44,24 +44,24 @@
       battery = {
         states = { warning = 30; critical = 15; };
         format          = "{icon}  {capacity}%";
-        format-charging = "  {capacity}%";
-        format-plugged  = "  {capacity}%";
-        format-icons    = [ "" "" "" "" "" ];
+        format-charging = "  {capacity}%";
+        format-plugged  = "  {capacity}%";
+        format-icons    = [ "" "" "" "" "" ];
       };
 
       network = {
-        format-wifi         = "  {signalStrength}%";
-        format-ethernet     = "  {ifname}";
-        format-disconnected = "  offline";
+        format-wifi         = "  {signalStrength}%";
+        format-ethernet     = "  {ifname}";
+        format-disconnected = "  offline";
         tooltip-format      = "{ifname}: {ipaddr}";
       };
 
       pulseaudio = {
         format       = "{icon}  {volume}%";
-        format-muted = "  muted";
+        format-muted = "  muted";
         format-icons = {
-          default   = [ "" "" "" ];
-          headphone = "";
+          default   = [ "" "" "" ];
+          headphone = "";
         };
         on-click = "pavucontrol";
       };
