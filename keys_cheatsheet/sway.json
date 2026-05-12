@@ -5,7 +5,7 @@
     "modifier_display": "Super",
     "modifier_xkb": "Mod4",
     "layout_note": "Dvorak Programmer layout (us/dvp). Workspace keys use physical row position (keycodes), not keysym values.",
-    "generated": "2026-05-11"
+    "generated": "2026-05-12"
   },
   "groups": [
     {
@@ -14,7 +14,7 @@
       "color": "#89b4fa",
       "bindings": [
         { "keys": ["Super", "Return"], "action": "Open terminal", "note": "kitty" },
-        { "keys": ["Super", "d"],      "action": "App launcher",   "note": "wofi --show drun" }
+        { "keys": ["Super", "d"],      "action": "App launcher",   "note": "rofi -show drun" }
       ]
     },
     {
@@ -35,6 +35,10 @@
       "label": "Focus",
       "color": "#94e2d5",
       "bindings": [
+        { "keys": ["Super", "h"], "action": "Focus left",  "note": "dvp home row" },
+        { "keys": ["Super", "t"], "action": "Focus down",  "note": "dvp home row" },
+        { "keys": ["Super", "n"], "action": "Focus up",    "note": "dvp home row" },
+        { "keys": ["Super", "s"], "action": "Focus right", "note": "dvp home row" },
         { "keys": ["Super", "←"], "action": "Focus left" },
         { "keys": ["Super", "↓"], "action": "Focus down" },
         { "keys": ["Super", "↑"], "action": "Focus up" },
@@ -46,10 +50,13 @@
       "label": "Move",
       "color": "#a6e3a1",
       "bindings": [
+        { "keys": ["Super", "Shift", "h"], "action": "Move window left",  "note": "dvp home row" },
+        { "keys": ["Super", "Shift", "t"], "action": "Move window down",  "note": "dvp home row" },
+        { "keys": ["Super", "Shift", "n"], "action": "Move window up",    "note": "dvp home row" },
         { "keys": ["Super", "Shift", "←"], "action": "Move window left" },
         { "keys": ["Super", "Shift", "↓"], "action": "Move window down" },
         { "keys": ["Super", "Shift", "↑"], "action": "Move window up" },
-        { "keys": ["Super", "Shift", "→"], "action": "Move window right" }
+        { "keys": ["Super", "Shift", "→"], "action": "Move window right", "note": "Shift+s reserved for screenshot" }
       ]
     },
     {
@@ -57,11 +64,11 @@
       "label": "Layout",
       "color": "#cba6f7",
       "bindings": [
-        { "keys": ["Super", "b"], "action": "Split horizontal" },
-        { "keys": ["Super", "v"], "action": "Split vertical" },
-        { "keys": ["Super", "s"], "action": "Stacking layout" },
-        { "keys": ["Super", "w"], "action": "Tabbed layout" },
-        { "keys": ["Super", "e"], "action": "Toggle split layout" }
+        { "keys": ["Super", "b"],          "action": "Split horizontal" },
+        { "keys": ["Super", "v"],          "action": "Split vertical" },
+        { "keys": ["Super", "Shift", "w"], "action": "Stacking layout", "note": "moved off Super+s (now focus right)" },
+        { "keys": ["Super", "w"],          "action": "Tabbed layout" },
+        { "keys": ["Super", "e"],          "action": "Toggle split layout" }
       ]
     },
     {
@@ -87,12 +94,22 @@
       ]
     },
     {
+      "id": "overview",
+      "label": "Overview & Switchers",
+      "color": "#f5c2e7",
+      "bindings": [
+        { "keys": ["Super", "o"],          "action": "Workspace overview (hold)",    "note": "sov — release to hide" },
+        { "keys": ["Super", "Tab"],        "action": "Window switcher",              "note": "rofi -show window" },
+        { "keys": ["Super", "Shift", "Tab"], "action": "Workspace picker",           "note": "rofi -dmenu over swaymsg" }
+      ]
+    },
+    {
       "id": "system",
       "label": "System",
       "color": "#f38ba8",
       "bindings": [
         { "keys": ["Super", "Shift", "s"], "action": "Screenshot region → clipboard", "note": "grim + slurp + wl-copy" },
-        { "keys": ["Super", "Shift", "x"], "action": "Lock screen",                  "note": "swaylock" },
+        { "keys": ["Super", "l"],          "action": "Lock screen",                  "note": "swaylock" },
         { "keys": ["Super", "Shift", "c"], "action": "Reload Sway config" },
         { "keys": ["Super", "Shift", "e"], "action": "Exit Sway" }
       ]

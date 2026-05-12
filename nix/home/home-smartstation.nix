@@ -21,6 +21,7 @@
     slurp                 # region picker
     wl-clipboard          # wl-copy / wl-paste
     wdisplays             # GUI output configurator
+    sov                   # workspace overview overlay (Mod+o hold)
     brightnessctl
     playerctl
     pavucontrol
@@ -41,16 +42,62 @@
     # package=null, home-manager still writes ~/.config/sway/config from
     # this block but leaves the binary to the system wrapper.
     package = null;
-    config = let mod = "Mod4"; in {
+    config = let
+      mod = "Mod4";
+      # sov reads workspace-overview commands from a fifo. The startup script
+      # below creates the pipe and pumps it into sov; the Mod+o press/release
+      # bindings toggle the overlay (1 = show, 0 = hide).
+      sovStart = pkgs.writeShellScript "sov-start" ''
+        rm -f /tmp/sovpipe
+        ${pkgs.coreutils}/bin/mkfifo /tmp/sovpipe
+        exec ${pkgs.coreutils}/bin/tail -f /tmp/sovpipe | ${pkgs.sov}/bin/sov -t 200
+      '';
+      # Workspace picker built on rofi's dmenu mode. Lists workspaces in the
+      # order sway reports them; pick one to jump to it.
+      rofiWorkspace = pkgs.writeShellScript "rofi-workspace" ''
+        sel=$(${pkgs.sway}/bin/swaymsg -t get_workspaces \
+              | ${pkgs.jq}/bin/jq -r '.[] | "\(.num): \(.name)"' \
+              | ${pkgs.rofi}/bin/rofi -dmenu -p workspace)
+        [ -n "$sel" ] && exec ${pkgs.sway}/bin/swaymsg workspace number "''${sel%%:*}"
+      '';
+    in {
       modifier = mod;
       terminal = "kitty";
-      menu = "wofi --show drun";
+      menu = "rofi -show drun";
 
       # Add bindings on top of the home-manager sway module defaults
       # (focus arrows, kill, reload, layout toggles, etc).
       keybindings = lib.mkOptionDefault {
         "${mod}+Shift+s" = "exec ${pkgs.grim}/bin/grim -g \"$(${pkgs.slurp}/bin/slurp)\" - | ${pkgs.wl-clipboard}/bin/wl-copy";
-        "${mod}+Shift+x" = "exec swaylock -c 1e1e2e";
+
+        # Dvorak-friendly focus/move: htns sits on the right-hand home row
+        # under dvp (physical J/K/L/;), unlike hjkl whose keysyms scatter
+        # across J/C/V/P. h stays as focus-left (HM default). Mod+s
+        # overrides HM's default "layout stacking" (re-bound to Mod+Shift+w
+        # below, pairing with Mod+w = tabbed) and Mod+l takes the screen
+        # lock. Move-right via Mod+Shift+s is skipped to leave the
+        # screenshot binding intact — use Mod+Shift+Right.
+        "${mod}+j" = lib.mkForce null;
+        "${mod}+k" = lib.mkForce null;
+        "${mod}+l" = lib.mkForce "exec swaylock -c 1e1e2e";
+        "${mod}+t" = "focus down";
+        "${mod}+n" = "focus up";
+        "${mod}+s" = lib.mkForce "focus right";
+        "${mod}+Shift+j" = lib.mkForce null;
+        "${mod}+Shift+k" = lib.mkForce null;
+        "${mod}+Shift+l" = lib.mkForce null;
+        "${mod}+Shift+t" = "move down";
+        "${mod}+Shift+n" = "move up";
+        "${mod}+Shift+w" = "layout stacking";
+
+        # Hold Mod+o for sov's workspace-grid overlay; release to hide.
+        "--no-repeat ${mod}+o" = "exec echo 1 > /tmp/sovpipe";
+        "--release ${mod}+o"   = "exec echo 0 > /tmp/sovpipe";
+
+        # rofi — window switcher (live list of open windows) and workspace
+        # picker. Both share the system Catppuccin theme from common.nix.
+        "${mod}+Tab"       = "exec ${pkgs.rofi}/bin/rofi -show window";
+        "${mod}+Shift+Tab" = "exec ${rofiWorkspace}";
 
         # Cycle workspaces on the focused output with Mod+Ctrl+Arrows.
         # Add Shift to drag the focused container along.
@@ -165,6 +212,7 @@
         { command = "${pkgs.waybar}/bin/waybar"; }
         { command = "nm-applet --indicator"; }
         { command = "blueman-applet"; }
+        { command = "${sovStart}"; }
       ];
     };
   };
