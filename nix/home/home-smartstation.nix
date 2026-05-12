@@ -31,6 +31,16 @@
   # System-level enablement is in system/laptop/configuration.nix.
   wayland.windowManager.sway = {
     enable = true;
+    # Don't let home-manager install its own sway wrapper. The system-level
+    # `programs.sway` (in system/laptop/configuration.nix) ships a wrapper
+    # with the multi-GPU WLR_DRM_DEVICES export, the --unsupported-gpu flag,
+    # and the stdout/stderr redirect to ~/sway-session.log. If both modules
+    # install a wrapped sway, the per-user profile wins on $PATH and SDDM
+    # ends up launching the home-manager wrapper, which knows nothing about
+    # any of that — back to a blinking cursor on hybrid GPUs. With
+    # package=null, home-manager still writes ~/.config/sway/config from
+    # this block but leaves the binary to the system wrapper.
+    package = null;
     config = let mod = "Mod4"; in {
       modifier = mod;
       terminal = "kitty";
