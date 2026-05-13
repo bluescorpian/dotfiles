@@ -20,6 +20,8 @@
     grim                  # screenshot
     slurp                 # region picker
     wl-clipboard          # wl-copy / wl-paste
+    cliphist              # clipboard history (Mod+V picker via rofi)
+    wl-clip-persist       # keep clipboard alive after source app closes
     wdisplays             # GUI output configurator
     sov                   # workspace overview overlay (Mod+o hold)
     brightnessctl
@@ -51,6 +53,18 @@
         rm -f /tmp/sovpipe
         ${pkgs.coreutils}/bin/mkfifo /tmp/sovpipe
         exec ${pkgs.coreutils}/bin/tail -f /tmp/sovpipe | ${pkgs.sov}/bin/sov -t 200
+      '';
+      # Clipboard history picker. cliphist's two watcher services (one for
+      # text, one for images, defined below as systemd user units) feed a
+      # local db; this script lists entries through rofi, decodes the pick,
+      # and pumps it back into the wayland clipboard via wl-copy. Image
+      # entries show as `<binary data ...>` placeholders in the list but
+      # decode and paste correctly.
+      cliphistPick = pkgs.writeShellScript "cliphist-pick" ''
+        ${pkgs.cliphist}/bin/cliphist list \
+          | ${pkgs.rofi}/bin/rofi -dmenu -p clipboard \
+          | ${pkgs.cliphist}/bin/cliphist decode \
+          | ${pkgs.wl-clipboard}/bin/wl-copy
       '';
       # Workspace picker built on rofi's dmenu mode. Lists workspaces in the
       # order sway reports them; pick one to jump to it.
@@ -101,6 +115,10 @@
         # picker. Both share the system Catppuccin theme from common.nix.
         "${mod}+Tab"       = "exec ${pkgs.rofi}/bin/rofi -show window";
         "${mod}+Shift+Tab" = "exec ${rofiWorkspace}";
+
+        # Clipboard history picker (cliphist + rofi). Watchers + persist
+        # daemon are systemd user units gated on sway-session.target below.
+        "${mod}+v" = "exec ${cliphistPick}";
 
         # Cycle workspaces on the focused output with Mod+Ctrl+Arrows.
         # Add Shift to drag the focused container along.
@@ -341,6 +359,54 @@
       BusName = "org.freedesktop.Notifications";
       ExecStart = "${config.services.mako.package}/bin/mako";
       ExecReload = "${config.services.mako.package}/bin/makoctl reload";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "sway-session.target" ];
+  };
+
+  # Clipboard history (cliphist) + persistence (wl-clip-persist). Three
+  # user units, all gated on sway-session.target so they only run under
+  # sway — Plasma has Klipper for the same job. The two cliphist watchers
+  # are split by MIME type because `wl-paste --watch` takes a single
+  # --type filter; running both covers text and images.
+  systemd.user.services.cliphist-text = {
+    Unit = {
+      Description = "cliphist watcher (text)";
+      PartOf = [ "sway-session.target" ];
+      After = [ "sway-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --type text --watch ${pkgs.cliphist}/bin/cliphist store";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "sway-session.target" ];
+  };
+
+  systemd.user.services.cliphist-image = {
+    Unit = {
+      Description = "cliphist watcher (images)";
+      PartOf = [ "sway-session.target" ];
+      After = [ "sway-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --type image --watch ${pkgs.cliphist}/bin/cliphist store";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "sway-session.target" ];
+  };
+
+  # wl-clip-persist: when the app that owns the clipboard exits, wayland
+  # normally clears the selection. This daemon grabs the data first so it
+  # survives. `--clipboard regular` covers Ctrl+C/V (not the X-style
+  # middle-click primary selection).
+  systemd.user.services.wl-clip-persist = {
+    Unit = {
+      Description = "Keep wayland clipboard alive after source app closes";
+      PartOf = [ "sway-session.target" ];
+      After = [ "sway-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular";
       Restart = "on-failure";
     };
     Install.WantedBy = [ "sway-session.target" ];
