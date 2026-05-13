@@ -102,7 +102,7 @@
         { "keys": ["Super", "o"],          "action": "Workspace overview (hold)",    "note": "sov — release to hide" },
         { "keys": ["Super", "Tab"],        "action": "Window switcher",              "note": "rofi -show window" },
         { "keys": ["Super", "Shift", "Tab"], "action": "Workspace picker",           "note": "rofi -dmenu over swaymsg" },
-        { "keys": ["Super", "v"],          "action": "Clipboard history",            "note": "cliphist + rofi" }
+        { "keys": ["Super", "Shift", "v"], "action": "Clipboard history",            "note": "cliphist + rofi" }
       ]
     },
     {

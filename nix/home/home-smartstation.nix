@@ -20,7 +20,7 @@
     grim                  # screenshot
     slurp                 # region picker
     wl-clipboard          # wl-copy / wl-paste
-    cliphist              # clipboard history (Mod+V picker via rofi)
+    cliphist              # clipboard history (Mod+Shift+V picker via rofi)
     wl-clip-persist       # keep clipboard alive after source app closes
     wdisplays             # GUI output configurator
     sov                   # workspace overview overlay (Mod+o hold)
@@ -118,7 +118,9 @@
 
         # Clipboard history picker (cliphist + rofi). Watchers + persist
         # daemon are systemd user units gated on sway-session.target below.
-        "${mod}+v" = "exec ${cliphistPick}";
+        # Mod+v stays as sway's default splitv; Shift mirrors the
+        # paste-with-history convention (Win+Shift+V on Windows).
+        "${mod}+Shift+v" = "exec ${cliphistPick}";
 
         # Cycle workspaces on the focused output with Mod+Ctrl+Arrows.
         # Add Shift to drag the focused container along.
