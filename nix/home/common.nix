@@ -379,24 +379,19 @@
     [ -d "$HOME/.ssh" ] && chmod 700 "$HOME/.ssh"
   '';
 
-  # Shared agent configuration
+  # Shared agent configuration. We deliberately don't use the module's
+  # `settings` option — that targets ~/.claude/settings.json, which Claude's
+  # own /config command writes to. Symlinking it from the Nix store makes
+  # it read-only and /config fails. Instead we land our declarative config
+  # at settings.local.json (which Claude deep-merges over settings.json),
+  # leaving settings.json as a real writable file for /config to own.
   programs.claude-code = {
     enable = true;
     package = pkgs.claude-code;  # sadjow overlay; nixpkgs claude-code lags upstream
     context = ../../agents/AGENTS.md;
     skills = ../../claude/skills;
-    settings = lib.recursiveUpdate
-      (builtins.fromJSON (builtins.readFile ../../claude/settings.json))
-      {
-        hooks.Notification = [{
-          matcher = "";
-          hooks = [{
-            type = "command";
-            command = "${config.home.homeDirectory}/.claude/hooks/notify.sh";
-          }];
-        }];
-      };
   };
+  home.file.".claude/settings.local.json".source = ../../claude/settings.json;
   # No structured option for statusLine script; module mkMerges home.file so this composes.
   home.file.".claude/statusline.sh" = {
     source = ../../claude/statusline.sh;
