@@ -156,6 +156,17 @@
     # home-manager reads .pname to look up the VS Code variant in its
     # knownProducts table; symlinkJoin produces no pname by default, causing
     # evaluation to fail. Use `//` to attach the original pname to the wrapper.
+    #
+    # Keyring backend (FHS quirk): vscode-fhs's bubblewrap rootfs does not
+    # bundle libsecret, so Electron's --password-store=gnome-libsecret backend
+    # fails to dlopen and falls back to "basic" with an "OS keyring is not
+    # available for encryption" banner. The kwallet{5,6} backends use raw
+    # D-Bus via libdbus (which IS in the FHS) and reach kwalletd6 directly
+    # under both KDE and sway — no extra libs needed, same kdewallet file as
+    # Brave's --password-store=kwallet5. If a host hits that banner, fix it
+    # per-host with ~/.vscode/argv.json ("password-store": "kwallet6"), or
+    # codify globally by adding `--add-flags --password-store=kwallet6` to
+    # the wrapProgram call below.
     package = (pkgs.symlinkJoin {
       name = "vscode-fhs-igpu";
       paths = [ pkgs.vscode-fhs ];
