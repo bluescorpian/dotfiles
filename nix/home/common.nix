@@ -1,5 +1,18 @@
 { config, pkgs, pkgs-stable, worktrunk-pkg, lib, ... }:
 
+let
+  # Make HM's read-only Nix-store symlink at $HOME/<target> into a real
+  # writable copy on every rebuild. Pair with `home.file.<target>.force = true`
+  # (and a source if HM doesn't already provide one). Trade-off: in-place
+  # edits to the live file are clobbered on every rebuild.
+  writableSymlinkSwap = target: lib.hm.dag.entryAfter ["linkGeneration"] ''
+    if [ -L "$HOME/${target}" ]; then
+      _t=$(readlink -f "$HOME/${target}")
+      rm "$HOME/${target}"
+      install -m600 "$_t" "$HOME/${target}"
+    fi
+  '';
+in
 {
   # Development packages
   home.packages = with pkgs; [
@@ -364,34 +377,35 @@
       };
     };
   };
+  # SSH config needs to be a real file (not a Nix-store symlink) because
+  # vscode-fhs chroot sees store files (uid 0) as uid 65534 (nobody) and
+  # SSH then rejects the config as bad owner.
   home.file.".ssh/config".force = true;
-
-  # Fix SSH config ownership: vscode-fhs chroot sees Nix store files (uid 0) as
-  # uid 65534 (nobody), causing SSH to reject the symlinked config as bad owner.
-  # Solution: force overwrite so home-manager can replace stale regular files,
-  # then copy the symlink target to a real file owned by the user.
-  home.activation.fixSshConfig = lib.hm.dag.entryAfter ["linkGeneration"] ''
-    if [ -L "$HOME/.ssh/config" ]; then
-      _target=$(readlink -f "$HOME/.ssh/config")
-      rm "$HOME/.ssh/config"
-      install -m600 "$_target" "$HOME/.ssh/config"
-    fi
+  home.activation.fixSshConfig = writableSymlinkSwap ".ssh/config";
+  home.activation.fixSshDirMode = lib.hm.dag.entryAfter ["linkGeneration"] ''
     [ -d "$HOME/.ssh" ] && chmod 700 "$HOME/.ssh"
   '';
 
-  # Shared agent configuration. We deliberately don't use the module's
-  # `settings` option — that targets ~/.claude/settings.json, which Claude's
-  # own /config command writes to. Symlinking it from the Nix store makes
-  # it read-only and /config fails. Instead we land our declarative config
-  # at settings.local.json (which Claude deep-merges over settings.json),
-  # leaving settings.json as a real writable file for /config to own.
+  # Shared agent configuration. The module's `settings` option targets
+  # ~/.claude/settings.json, which Claude's own /config command writes to —
+  # a Nix-store symlink would be read-only and /config would fail. Claude
+  # only loads settings.local.json at the *project* level, not at user
+  # level, so that's not a workaround either. Pattern: declare the file
+  # normally with `force = true`, then in an activation script after
+  # linkGeneration swap the symlink for a real writable copy. Same
+  # approach as ~/.ssh/config above. Trade-off: /config edits are clobbered
+  # on every rebuild — commit them back to the repo to make them stick.
   programs.claude-code = {
     enable = true;
     package = pkgs.claude-code;  # sadjow overlay; nixpkgs claude-code lags upstream
     context = ../../agents/AGENTS.md;
     skills = ../../claude/skills;
   };
-  home.file.".claude/settings.local.json".source = ../../claude/settings.json;
+  home.file.".claude/settings.json" = {
+    source = ../../claude/settings.json;
+    force = true;
+  };
+  home.activation.makeClaudeSettingsWritable = writableSymlinkSwap ".claude/settings.json";
   # No structured option for statusLine script; module mkMerges home.file so this composes.
   home.file.".claude/statusline.sh" = {
     source = ../../claude/statusline.sh;
