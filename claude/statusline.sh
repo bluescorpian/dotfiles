@@ -17,9 +17,13 @@ MAUVE=$'\e[38;2;203;166;247m'     # #cba6f7  branch
 GREEN=$'\e[38;2;166;227;161m'     # #a6e3a1  ok / ahead
 YELLOW=$'\e[38;2;249;226;175m'    # #f9e2af  warn / dirty
 RED=$'\e[38;2;243;139;168m'       # #f38ba8  danger / behind
-SUBTEXT=$'\e[38;2;186;194;222m'   # #bac2de  title
-DIM=$'\e[38;2;166;173;200m'       # #a6adc8  side text
-OVERLAY=$'\e[38;2;108;112;134m'   # #6c7086  separators / arrow
+PEACH=$'\e[38;2;250;179;135m'     # #fab387  effort=max
+TEXT=$'\e[38;2;205;214;244m'      # #cdd6f4  text
+SUBTEXT=$'\e[38;2;186;194;222m'   # #bac2de  subtext1 (effort=xhigh, title)
+DIM=$'\e[38;2;166;173;200m'       # #a6adc8  subtext0 (effort=high, side text)
+OVERLAY2=$'\e[38;2;147;153;178m'  # #9399b2  overlay2 (effort=medium)
+OVERLAY1=$'\e[38;2;127;132;156m'  # #7f849c  overlay1 (effort=low)
+OVERLAY=$'\e[38;2;108;112;134m'   # #6c7086  overlay0 (separators / arrow)
 
 threshold() { # args: used_pct  is_1m_context_window
   local p=$1 is_1m=${2:-0}
@@ -43,6 +47,7 @@ cwd=$(J '.workspace.current_dir // .cwd')
 project_dir=$(J '.workspace.project_dir // .cwd')
 transcript=$(J '.transcript_path')
 model=$(J '.model.display_name')
+effort=$(J '.effort.level')
 ctx_pct_in=$(J '.context_window.used_percentage')
 exceeds_200k=$(command jq -r '.exceeds_200k_tokens // false' <<<"$input")
 dur_ms=$(command jq -r '.cost.total_duration_ms // 0' <<<"$input")
@@ -201,6 +206,17 @@ if [[ -n "$rl5_left_colored" ]]; then
 fi
 [[ -n "$session_text" ]] && line1+="${sep}${DIM}${session_text}${RST}"
 [[ -n "$model"        ]] && line1+="${sep}${DIM}${model}${RST}"
+if [[ -n "$effort" ]]; then
+  case "$effort" in
+    max)    effort_color=$PEACH    ;;
+    xhigh)  effort_color=$SUBTEXT  ;;
+    high)   effort_color=$DIM      ;;
+    medium) effort_color=$OVERLAY2 ;;
+    low)    effort_color=$OVERLAY1 ;;
+    *)      effort_color=$DIM      ;;
+  esac
+  line1+="${sep}${effort_color}${effort}${RST}"
+fi
 
 # --- Line 2 ---
 printf '%s' "$line1"
