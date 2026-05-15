@@ -4,8 +4,8 @@
     "host": "laptop · harry-smartstation",
     "modifier_display": "Super",
     "modifier_xkb": "Mod4",
-    "layout_note": "Dvorak Programmer layout (us/dvp). Workspace keys use physical row position (keycodes), not keysym values.",
-    "generated": "2026-05-12"
+    "layout_note": "Dvorak Programmer layout (us/dvp). Workspaces use named bindings on a/o/e/u.",
+    "generated": "2026-05-15"
   },
   "groups": [
     {
@@ -25,8 +25,8 @@
         { "keys": ["Super", "Shift", "q"],     "action": "Kill focused window" },
         { "keys": ["Super", "f"],              "action": "Fullscreen toggle" },
         { "keys": ["Super", "Shift", "Space"], "action": "Float toggle" },
-        { "keys": ["Super", "Space"],          "action": "Focus tiling / floating toggle" },
-        { "keys": ["Super", "a"],              "action": "Focus parent container" },
+        { "keys": ["Super", "/"],              "action": "Focus tiling / floating toggle" },
+        { "keys": ["Super", "p"],              "action": "Focus parent container" },
         { "keys": ["Super", "r"],              "action": "Enter resize mode" }
       ]
     },
@@ -69,7 +69,7 @@
         { "keys": ["Super", "v"],          "action": "Split vertical" },
         { "keys": ["Super", "Shift", "w"], "action": "Stacking layout", "note": "moved off Super+s (now focus right)" },
         { "keys": ["Super", "w"],          "action": "Tabbed layout" },
-        { "keys": ["Super", "e"],          "action": "Toggle split layout" }
+        { "keys": ["Super", "x"],          "action": "Toggle split layout" }
       ]
     },
     {
@@ -90,19 +90,37 @@
       "label": "Workspaces",
       "color": "#b4befe",
       "bindings": [
-        { "keys": ["Super", "1–10"],       "action": "Switch to workspace N",        "note": "physical key; 1–5 left monitor, 6–10 right" },
-        { "keys": ["Super", "Shift", "1–10"], "action": "Move container to workspace N", "note": "physical key position" }
+        { "keys": ["Super", "a"],              "action": "Switch to workspace web" },
+        { "keys": ["Super", "o"],              "action": "Switch to workspace notes" },
+        { "keys": ["Super", "e"],              "action": "Switch to workspace code" },
+        { "keys": ["Super", "u"],              "action": "Switch to workspace term" },
+        { "keys": ["Super", "Shift", "a"],    "action": "Move container to workspace web" },
+        { "keys": ["Super", "Shift", "o"],    "action": "Move container to workspace notes" },
+        { "keys": ["Super", "Shift", "e"],    "action": "Move container to workspace code" },
+        { "keys": ["Super", "Shift", "u"],    "action": "Move container to workspace term" },
+        { "keys": ["Super", "Tab"],            "action": "Previous workspace" },
+        { "keys": ["Super", "Shift", "Tab"],  "action": "Workspace picker", "note": "type a new name to create it" },
+        { "keys": ["Super", "Ctrl", "←"],      "action": "Previous workspace on output" },
+        { "keys": ["Super", "Ctrl", "→"],      "action": "Next workspace on output" },
+        { "keys": ["Super", "Ctrl", "Shift", "←"], "action": "Move container to previous workspace on output and switch" },
+        { "keys": ["Super", "Ctrl", "Shift", "→"], "action": "Move container to next workspace on output and switch" }
       ]
     },
     {
-      "id": "overview",
-      "label": "Overview & Switchers",
+      "id": "switchers",
+      "label": "Switchers",
       "color": "#f5c2e7",
       "bindings": [
-        { "keys": ["Super", "o"],          "action": "Workspace overview (hold)",    "note": "sov — release to hide" },
-        { "keys": ["Super", "Tab"],        "action": "Window switcher",              "note": "rofi -show window" },
-        { "keys": ["Super", "Shift", "Tab"], "action": "Workspace picker",           "note": "rofi -dmenu over swaymsg" },
+        { "keys": ["Super", "`"],          "action": "Window switcher",              "note": "rofi -show window" },
         { "keys": ["Super", "Shift", "v"], "action": "Clipboard history",            "note": "cliphist + rofi" }
+      ]
+    },
+    {
+      "id": "output",
+      "label": "Output",
+      "color": "#89dceb",
+      "bindings": [
+        { "keys": ["Super", "Space"],       "action": "Focus next output" }
       ]
     },
     {
@@ -113,7 +131,7 @@
         { "keys": ["Print"],               "action": "Screenshot region → clipboard", "note": "grim + slurp + wl-copy" },
         { "keys": ["Super", "l"],          "action": "Lock screen",                  "note": "swaylock" },
         { "keys": ["Super", "Shift", "c"], "action": "Reload Sway config" },
-        { "keys": ["Super", "Shift", "e"], "action": "Exit Sway" }
+        { "keys": ["Super", "Shift", "End"], "action": "Exit Sway" }
       ]
     },
     {

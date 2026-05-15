@@ -23,7 +23,6 @@
     cliphist              # clipboard history (Mod+Shift+V picker via rofi)
     wl-clip-persist       # keep clipboard alive after source app closes
     wdisplays             # GUI output configurator
-    sov                   # workspace overview overlay (Mod+o hold)
     brightnessctl
     playerctl
     pavucontrol
@@ -46,14 +45,6 @@
     package = null;
     config = let
       mod = "Mod4";
-      # sov reads workspace-overview commands from a fifo. The startup script
-      # below creates the pipe and pumps it into sov; the Mod+o press/release
-      # bindings toggle the overlay (1 = show, 0 = hide).
-      sovStart = pkgs.writeShellScript "sov-start" ''
-        rm -f /tmp/sovpipe
-        ${pkgs.coreutils}/bin/mkfifo /tmp/sovpipe
-        exec ${pkgs.coreutils}/bin/tail -f /tmp/sovpipe | ${pkgs.sov}/bin/sov -t 200
-      '';
       # Clipboard history picker. cliphist's two watcher services (one for
       # text, one for images, defined below as systemd user units) feed a
       # local db; this script lists entries through rofi, decodes the pick,
@@ -66,13 +57,14 @@
           | ${pkgs.cliphist}/bin/cliphist decode \
           | ${pkgs.wl-clipboard}/bin/wl-copy
       '';
-      # Workspace picker built on rofi's dmenu mode. Lists workspaces in the
-      # order sway reports them; pick one to jump to it.
+      # Workspace picker built on rofi's dmenu mode. Existing workspace names
+      # are offered, and typing a new name creates it through sway's workspace
+      # command.
       rofiWorkspace = pkgs.writeShellScript "rofi-workspace" ''
         sel=$(${pkgs.sway}/bin/swaymsg -t get_workspaces \
-              | ${pkgs.jq}/bin/jq -r '.[] | "\(.num): \(.name)"' \
+              | ${pkgs.jq}/bin/jq -r '.[].name' \
               | ${pkgs.rofi}/bin/rofi -dmenu -p workspace)
-        [ -n "$sel" ] && exec ${pkgs.sway}/bin/swaymsg workspace number "''${sel%%:*}"
+        [ -n "$sel" ] && exec ${pkgs.sway}/bin/swaymsg workspace "$sel"
       '';
     in {
       modifier = mod;
@@ -107,13 +99,21 @@
         "${mod}+Shift+s" = "move right";
         "${mod}+Shift+w" = "layout stacking";
 
-        # Hold Mod+o for sov's workspace-grid overlay; release to hide.
-        "--no-repeat ${mod}+o" = "exec echo 1 > /tmp/sovpipe";
-        "--release ${mod}+o"   = "exec echo 0 > /tmp/sovpipe";
+        # Named workspaces. Sway creates a workspace when switching to a name
+        # that does not exist yet.
+        "${mod}+a" = lib.mkForce "workspace web";
+        "${mod}+o" = "workspace notes";
+        "${mod}+e" = lib.mkForce "workspace code";
+        "${mod}+u" = "workspace term";
+        "${mod}+Shift+a" = lib.mkForce "move container to workspace web";
+        "${mod}+Shift+o" = "move container to workspace notes";
+        "${mod}+Shift+e" = lib.mkForce "move container to workspace code";
+        "${mod}+Shift+u" = "move container to workspace term";
 
         # rofi — window switcher (live list of open windows) and workspace
         # picker. Both share the system Catppuccin theme from common.nix.
-        "${mod}+Tab"       = "exec ${pkgs.rofi}/bin/rofi -show window";
+        "${mod}+grave"     = "exec ${pkgs.rofi}/bin/rofi -show window";
+        "${mod}+Tab"       = "workspace back_and_forth";
         "${mod}+Shift+Tab" = "exec ${rofiWorkspace}";
 
         # Clipboard history picker (cliphist + rofi). Watchers + persist
@@ -129,6 +129,14 @@
         "${mod}+Ctrl+Shift+Left"  = "move container to workspace prev_on_output; workspace prev_on_output";
         "${mod}+Ctrl+Shift+Right" = "move container to workspace next_on_output; workspace next_on_output";
 
+        # Rebind home-manager defaults that conflict with the named
+        # workspace layer and output focus.
+        "${mod}+p" = "focus parent";
+        "${mod}+x" = "layout toggle split";
+        "${mod}+slash" = "focus mode_toggle";
+        "${mod}+space" = lib.mkForce "focus output next";
+        "${mod}+Shift+End" = "exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'";
+
         "XF86AudioRaiseVolume"  = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+";
         "XF86AudioLowerVolume"  = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
         "XF86AudioMute"         = "exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
@@ -138,57 +146,6 @@
         "XF86AudioPlay"         = "exec playerctl play-pause";
         "XF86AudioNext"         = "exec playerctl next";
         "XF86AudioPrev"         = "exec playerctl previous";
-
-        # Suppress keysym digit bindings. Under Dvorak Programmer the digit
-        # keysyms live on the shifted layer in non-monotonic order, so
-        # Mod+<physical-digit-key> jumps to the wrong workspace via keysym.
-        # Replaced below by keycodebindings, which fire on physical position.
-        "${mod}+1" = lib.mkForce null;
-        "${mod}+2" = lib.mkForce null;
-        "${mod}+3" = lib.mkForce null;
-        "${mod}+4" = lib.mkForce null;
-        "${mod}+5" = lib.mkForce null;
-        "${mod}+6" = lib.mkForce null;
-        "${mod}+7" = lib.mkForce null;
-        "${mod}+8" = lib.mkForce null;
-        "${mod}+9" = lib.mkForce null;
-        "${mod}+0" = lib.mkForce null;
-        "${mod}+Shift+1" = lib.mkForce null;
-        "${mod}+Shift+2" = lib.mkForce null;
-        "${mod}+Shift+3" = lib.mkForce null;
-        "${mod}+Shift+4" = lib.mkForce null;
-        "${mod}+Shift+5" = lib.mkForce null;
-        "${mod}+Shift+6" = lib.mkForce null;
-        "${mod}+Shift+7" = lib.mkForce null;
-        "${mod}+Shift+8" = lib.mkForce null;
-        "${mod}+Shift+9" = lib.mkForce null;
-        "${mod}+Shift+0" = lib.mkForce null;
-      };
-
-      # Workspace switching by physical key position (keycodes 10..19 =
-      # top-row keys 1..0 on QWERTY layout, regardless of the active xkb
-      # variant). Lets Mod+<physical-1-key> always go to workspace 1, etc.
-      keycodebindings = {
-        "${mod}+10" = "workspace number 1";
-        "${mod}+11" = "workspace number 2";
-        "${mod}+12" = "workspace number 3";
-        "${mod}+13" = "workspace number 4";
-        "${mod}+14" = "workspace number 5";
-        "${mod}+15" = "workspace number 6";
-        "${mod}+16" = "workspace number 7";
-        "${mod}+17" = "workspace number 8";
-        "${mod}+18" = "workspace number 9";
-        "${mod}+19" = "workspace number 10";
-        "${mod}+Shift+10" = "move container to workspace number 1";
-        "${mod}+Shift+11" = "move container to workspace number 2";
-        "${mod}+Shift+12" = "move container to workspace number 3";
-        "${mod}+Shift+13" = "move container to workspace number 4";
-        "${mod}+Shift+14" = "move container to workspace number 5";
-        "${mod}+Shift+15" = "move container to workspace number 6";
-        "${mod}+Shift+16" = "move container to workspace number 7";
-        "${mod}+Shift+17" = "move container to workspace number 8";
-        "${mod}+Shift+18" = "move container to workspace number 9";
-        "${mod}+Shift+19" = "move container to workspace number 10";
       };
 
       # Disable sway's built-in bar; waybar is launched from startup below.
@@ -275,21 +232,6 @@
         "HDMI-A-1" = { mode = "1920x1080"; pos = "1536 0"; };
       };
 
-      # Pin workspaces to outputs. Sway falls back to the active output if
-      # the named one is absent, so this is safe when the external monitor
-      # is disconnected (workspaces 6-9 land on eDP).
-      workspaceOutputAssign = [
-        { workspace = "1"; output = "eDP-1"; }
-        { workspace = "2"; output = "eDP-1"; }
-        { workspace = "3"; output = "eDP-1"; }
-        { workspace = "4"; output = "eDP-1"; }
-        { workspace = "5"; output = "eDP-1"; }
-        { workspace = "6"; output = "HDMI-A-1"; }
-        { workspace = "7"; output = "HDMI-A-1"; }
-        { workspace = "8"; output = "HDMI-A-1"; }
-        { workspace = "9"; output = "HDMI-A-1"; }
-      ];
-
       # Apply the system xkb layout (us/dvp) to all keyboards under sway.
       input."type:keyboard" = {
         xkb_layout = "us";
@@ -300,7 +242,6 @@
         { command = "${pkgs.waybar}/bin/waybar"; }
         { command = "nm-applet --indicator"; }
         { command = "blueman-applet"; }
-        { command = "${sovStart}"; }
       ];
     };
 
