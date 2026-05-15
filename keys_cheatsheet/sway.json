@@ -120,7 +120,7 @@
       "label": "Output",
       "color": "#89dceb",
       "bindings": [
-        { "keys": ["Super", "Space"],       "action": "Focus next output" }
+        { "keys": ["Super", "Space"],       "action": "Move workspace to next output" }
       ]
     },
     {

@@ -66,6 +66,17 @@
               | ${pkgs.rofi}/bin/rofi -dmenu -p workspace)
         [ -n "$sel" ] && exec ${pkgs.sway}/bin/swaymsg workspace "$sel"
       '';
+      # `move workspace to output` only accepts {left,right,up,down,<name>} —
+      # `next` works for `focus output` but not here. This script toggles the
+      # focused workspace to whichever other active output exists.
+      moveWorkspaceOtherOutput = pkgs.writeShellScript "move-workspace-other-output" ''
+        cur=$(${pkgs.sway}/bin/swaymsg -t get_outputs \
+              | ${pkgs.jq}/bin/jq -r '.[] | select(.focused) | .name')
+        tgt=$(${pkgs.sway}/bin/swaymsg -t get_outputs \
+              | ${pkgs.jq}/bin/jq -r --arg c "$cur" '.[] | select(.name != $c and .active) | .name' \
+              | head -1)
+        [ -n "$tgt" ] && exec ${pkgs.sway}/bin/swaymsg "move workspace to output $tgt"
+      '';
     in {
       modifier = mod;
       terminal = "kitty";
@@ -134,7 +145,7 @@
         "${mod}+p" = "focus parent";
         "${mod}+x" = "layout toggle split";
         "${mod}+slash" = "focus mode_toggle";
-        "${mod}+space" = lib.mkForce "focus output next";
+        "${mod}+space" = lib.mkForce "exec ${moveWorkspaceOtherOutput}";
         "${mod}+Shift+End" = "exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'";
 
         "XF86AudioRaiseVolume"  = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+";
