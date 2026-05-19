@@ -4,8 +4,8 @@
     "host": "laptop · harry-smartstation",
     "modifier_display": "Super",
     "modifier_xkb": "Mod4",
-    "layout_note": "Dvorak Programmer layout (us/dvp). Workspaces use named bindings on a/o/e/u.",
-    "generated": "2026-05-15"
+    "layout_note": "Dvorak Programmer layout (us/dvp). Tier-1 workspaces (a/o/e/u) prefixed 1:..4: for fixed waybar ordering; ad-hoc via Super+i auto-numbered from 5.",
+    "generated": "2026-05-19"
   },
   "groups": [
     {
@@ -90,14 +90,15 @@
       "label": "Workspaces",
       "color": "#b4befe",
       "bindings": [
-        { "keys": ["Super", "a"],              "action": "Switch to workspace web" },
-        { "keys": ["Super", "o"],              "action": "Switch to workspace notes" },
-        { "keys": ["Super", "e"],              "action": "Switch to workspace code" },
-        { "keys": ["Super", "u"],              "action": "Switch to workspace term" },
-        { "keys": ["Super", "Shift", "a"],    "action": "Move container to workspace web" },
-        { "keys": ["Super", "Shift", "o"],    "action": "Move container to workspace notes" },
-        { "keys": ["Super", "Shift", "e"],    "action": "Move container to workspace code" },
-        { "keys": ["Super", "Shift", "u"],    "action": "Move container to workspace term" },
+        { "keys": ["Super", "a"],              "action": "Switch to workspace 1:web" },
+        { "keys": ["Super", "o"],              "action": "Switch to workspace 2:notes" },
+        { "keys": ["Super", "e"],              "action": "Switch to workspace 3:code" },
+        { "keys": ["Super", "u"],              "action": "Switch to workspace 4:term" },
+        { "keys": ["Super", "Shift", "a"],    "action": "Move container to workspace 1:web" },
+        { "keys": ["Super", "Shift", "o"],    "action": "Move container to workspace 2:notes" },
+        { "keys": ["Super", "Shift", "e"],    "action": "Move container to workspace 3:code" },
+        { "keys": ["Super", "Shift", "u"],    "action": "Move container to workspace 4:term" },
+        { "keys": ["Super", "i"],              "action": "New ad-hoc workspace", "note": "auto-numbered from 5" },
         { "keys": ["Super", "Tab"],            "action": "Previous workspace" },
         { "keys": ["Super", "Shift", "Tab"],  "action": "Workspace picker", "note": "type a new name to create it" },
         { "keys": ["Super", "Ctrl", "←"],      "action": "Previous workspace on output" },

@@ -66,6 +66,14 @@
               | ${pkgs.rofi}/bin/rofi -dmenu -p workspace)
         [ -n "$sel" ] && exec ${pkgs.sway}/bin/swaymsg workspace "$sel"
       '';
+      # Auto-create the next ad-hoc workspace by num. Tier-1 occupies 1-4
+      # (1:web through 4:term); pick the next integer >= 5 that's not in
+      # use and switch to it. Sway names it just "5", "6", etc.
+      nextAdHocWorkspace = pkgs.writeShellScript "next-adhoc-workspace" ''
+        next=$(${pkgs.sway}/bin/swaymsg -t get_workspaces \
+               | ${pkgs.jq}/bin/jq -r '[.[].num | select(. >= 5)] | (max // 4) + 1')
+        exec ${pkgs.sway}/bin/swaymsg "workspace number $next"
+      '';
       # `move workspace to output` only accepts {left,right,up,down,<name>} —
       # `next` works for `focus output` but not here. This script toggles the
       # focused workspace to whichever other active output exists.
@@ -110,16 +118,19 @@
         "${mod}+Shift+s" = "move right";
         "${mod}+Shift+w" = "layout stacking";
 
-        # Named workspaces. Sway creates a workspace when switching to a name
-        # that does not exist yet.
-        "${mod}+a" = lib.mkForce "workspace web";
-        "${mod}+o" = "workspace notes";
-        "${mod}+e" = lib.mkForce "workspace code";
-        "${mod}+u" = "workspace term";
-        "${mod}+Shift+a" = lib.mkForce "move container to workspace web";
-        "${mod}+Shift+o" = "move container to workspace notes";
-        "${mod}+Shift+e" = lib.mkForce "move container to workspace code";
-        "${mod}+Shift+u" = "move container to workspace term";
+        # Named workspaces with N: prefix. The leading number is sway's
+        # `num` attribute and locks left-to-right ordering in waybar
+        # (numbered workspaces always sort before unnumbered ones).
+        # Ad-hoc workspaces created via Mod+i pick up from num=5.
+        "${mod}+a" = lib.mkForce "workspace 1:web";
+        "${mod}+o" = "workspace 2:notes";
+        "${mod}+e" = lib.mkForce "workspace 3:code";
+        "${mod}+u" = "workspace 4:term";
+        "${mod}+Shift+a" = lib.mkForce "move container to workspace 1:web";
+        "${mod}+Shift+o" = "move container to workspace 2:notes";
+        "${mod}+Shift+e" = lib.mkForce "move container to workspace 3:code";
+        "${mod}+Shift+u" = "move container to workspace 4:term";
+        "${mod}+i" = "exec ${nextAdHocWorkspace}";
 
         # rofi — window switcher (live list of open windows) and workspace
         # picker. Both share the system Catppuccin theme from common.nix.
