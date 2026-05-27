@@ -267,6 +267,16 @@ in
         xkb_variant = "dvp";
       };
 
+      # Disable pointer acceleration for all mice. libinput defaults to the
+      # "adaptive" profile (speed-dependent accel), which feels lurchy on a
+      # gaming mouse. This matches the Plasma config (kcminputrc:
+      # PointerAccelerationProfile=1 / PointerAcceleration=0.000) — flat
+      # profile, neutral speed, i.e. raw 1:1 motion.
+      input."type:pointer" = {
+        accel_profile = "flat";
+        pointer_accel = "0";
+      };
+
       startup = [
         { command = "${pkgs.waybar}/bin/waybar"; }
         { command = "nm-applet --indicator"; }
