@@ -28,6 +28,10 @@
   boot.blacklistedKernelModules = [ "ucsi_ccg" ];
   boot.kernelModules = [ "sg" ];
 
+  # Enable Bluetooth
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
+
   # User accounts - desktop has both personal and work users
   users.users.harry = {
     isNormalUser = true;
