@@ -21,7 +21,13 @@ in
     nerd-fonts.jetbrains-mono
 
     # Browsers
-    brave
+    # Pin Brave's keyring backend to kwallet6. Chromium picks its cookie/password
+    # encryption store from $XDG_CURRENT_DESKTOP: KDE → kwallet (v11), but sway is
+    # unrecognised → silent fallback to the "basic" store (hardcoded key, v10). That
+    # mismatch orphaned all v11 cookies on the KDE→sway switch (→ logged out of every
+    # site). Forcing kwallet6 keeps one backend across both DEs; same wallet VS Code
+    # uses (see kwallet6 note below). v10 entries still read via the built-in fallback.
+    (brave.override { commandLineArgs = "--password-store=kwallet6"; })
     google-chrome
 
     # Communication
