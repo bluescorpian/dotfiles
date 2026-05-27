@@ -37,7 +37,20 @@
   };
 
   # Enable CUPS to print documents
-  services.printing.enable = true;
+  services.printing = {
+    enable = true;
+    drivers = [ pkgs.epson_201207w ];
+  };
+
+  # SMB client support for network printer shared via Samba
+  services.samba-wsdd.enable = true;
+
+  # Network printer discovery
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+  };
 
   # Enable sound with pipewire
   services.pulseaudio.enable = false;
@@ -71,6 +84,7 @@
     wget
     curl
     openssh
+    samba  # SMB client for CUPS network printing
     kdePackages.partitionmanager
     qt6.qtmultimedia
     claude-desktop

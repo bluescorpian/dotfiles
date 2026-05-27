@@ -3,6 +3,7 @@
 {
   imports = [
     ../common.nix
+    ../sway.nix
     ./hardware-configuration.nix
   ];
 
@@ -99,39 +100,25 @@
     mode = "0400";
   };
 
-  # Sway compositor — offered by SDDM as an alternative session to Plasma.
-  # User-level config lives in home-manager (home-smartstation.nix).
-  programs.sway = {
-    enable = true;
-    wrapperFeatures.gtk = true;
-    extraPackages = with pkgs; [
-      swaylock
-      swayidle
-      grim
-      slurp
-      wl-clipboard
-      wdisplays
-      brightnessctl
-      playerctl
-    ];
-    # The HDMI port is wired to the NVIDIA dGPU, while the internal panel is
-    # wired to the AMD iGPU. Expose both DRM cards to wlroots, keeping AMD
-    # first so Sway still uses the integrated GPU as the primary device.
-    #
-    # realpath is mandatory: wlroots splits WLR_DRM_DEVICES on ':', and the
-    # by-path symlinks contain colons (pci-0000:05:00.0), so passing those
-    # symlinks directly gets parsed as multiple bogus paths. The canonical
-    # /dev/dri/cardN targets have no colons.
-    extraOptions = [ "--unsupported-gpu" ];
-    extraSessionCommands = ''
-      export WLR_DRM_DEVICES="$(${pkgs.coreutils}/bin/realpath /dev/dri/by-path/pci-0000:05:00.0-card):$(${pkgs.coreutils}/bin/realpath /dev/dri/by-path/pci-0000:01:00.0-card)"
-      # Redirect stdout/stderr to a file before exec'ing sway. The regular
-      # SDDM session entry leaves stdout/stderr attached to SDDM's pipe, and
-      # something on that pipe (buffer fill? SIGPIPE? closed fd?) causes sway
-      # to die silently at startup on this hardware — the debug entry only
-      # worked because it explicitly redirected output. Routing through a real
-      # file avoids that failure mode and gives us a log either way.
-      exec >> "$HOME/sway-session.log" 2>&1
-    '';
-  };
+  # Sway-specific extras for this host. Shared base (enable, packages,
+  # --unsupported-gpu) lives in system/sway.nix.
+  #
+  # The HDMI port is wired to the NVIDIA dGPU, while the internal panel is
+  # wired to the AMD iGPU. Expose both DRM cards to wlroots, keeping AMD
+  # first so Sway still uses the integrated GPU as the primary device.
+  #
+  # realpath is mandatory: wlroots splits WLR_DRM_DEVICES on ':', and the
+  # by-path symlinks contain colons (pci-0000:05:00.0), so passing those
+  # symlinks directly gets parsed as multiple bogus paths. The canonical
+  # /dev/dri/cardN targets have no colons.
+  programs.sway.extraSessionCommands = ''
+    export WLR_DRM_DEVICES="$(${pkgs.coreutils}/bin/realpath /dev/dri/by-path/pci-0000:05:00.0-card):$(${pkgs.coreutils}/bin/realpath /dev/dri/by-path/pci-0000:01:00.0-card)"
+    # Redirect stdout/stderr to a file before exec'ing sway. The regular
+    # SDDM session entry leaves stdout/stderr attached to SDDM's pipe, and
+    # something on that pipe (buffer fill? SIGPIPE? closed fd?) causes sway
+    # to die silently at startup on this hardware — the debug entry only
+    # worked because it explicitly redirected output. Routing through a real
+    # file avoids that failure mode and gives us a log either way.
+    exec >> "$HOME/sway-session.log" 2>&1
+  '';
 }

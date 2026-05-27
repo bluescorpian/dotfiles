@@ -3,6 +3,7 @@
 {
   imports = [
     ../common.nix
+    ../sway.nix
     ./hardware-configuration.nix
   ];
 
@@ -26,6 +27,10 @@
   # This module is for USB-C functionality on the GPU and commonly causes issues
   boot.blacklistedKernelModules = [ "ucsi_ccg" ];
   boot.kernelModules = [ "sg" ];
+
+  # Enable Bluetooth
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
 
   # User accounts - desktop has both personal and work users
   users.users.harry = {
