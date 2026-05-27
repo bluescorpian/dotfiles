@@ -360,6 +360,9 @@ in
   };
 
   # SSH configuration
+  # TODO: home-manager deprecated `programs.ssh.matchBlocks` in favour of
+  # `programs.ssh.settings`. Migrate this block (and home.nix's vps entry)
+  # before the option is removed.
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
