@@ -93,13 +93,6 @@
     hashedPassword = "$6$bW4BLv3IzUkDrhtK$/hWICa0LZDoeLjN6bh0hDbMhm8YujobvZJyhcWVA5Nqk4ET0VQMbhYf5Xg74X8w9jHof87ppH/QQPGL0fKMMs.";
   };
 
-  # Agenix secrets — openclaw gateway token for harry-smartstation (work user on laptop)
-  age.secrets.openclaw = {
-    file = ../../secrets/openclaw.age;
-    owner = "harry-smartstation";
-    mode = "0400";
-  };
-
   # Sway-specific extras for this host. Shared base (enable, packages,
   # --unsupported-gpu) lives in system/sway.nix.
   #

@@ -55,17 +55,4 @@
       pull.rebase = false;
     };
   };
-
-
-  # OpenClaw AI gateway — webchat at http://127.0.0.1:18789
-  # Token is stored in /run/agenix/openclaw (managed by agenix, not committed)
-  # TEMPORARILY DISABLED
-  # programs.openclaw = {
-  #   enable = true;
-  #   config.gateway.mode = "local";
-  # };
-  # xdg.configFile."systemd/user/openclaw-gateway.service.d/token.conf".text = ''
-  #   [Service]
-  #   EnvironmentFile=/run/agenix/openclaw
-  # '';
 }
