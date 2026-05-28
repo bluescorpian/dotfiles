@@ -14,16 +14,7 @@
   # Work packages (minimal, focused on productivity)
   home.packages = with pkgs; [
     anydesk
-    (import ../packages/claude-conversation-search { inherit pkgs; })
   ];
-
-  programs.claude-code.mcpServers = {
-    claude-conversation-search = {
-      type = "stdio";
-      command = "claude-conversation-search";
-      args = [ "mcp" ];
-    };
-  };
 
   # Force Brave to use KWallet for passwords regardless of session.
   # Plasma auto-detects KDE → kwallet5; sway sets XDG_CURRENT_DESKTOP=sway →

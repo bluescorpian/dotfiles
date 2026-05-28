@@ -16,6 +16,8 @@ in
 {
   # Development packages
   home.packages = with pkgs; [
+    (import ../packages/claude-conversation-search { inherit pkgs; })
+
     # Fonts
     cascadia-code
     nerd-fonts.jetbrains-mono
@@ -409,6 +411,13 @@ in
     package = pkgs.claude-code;  # sadjow overlay; nixpkgs claude-code lags upstream
     context = ../../agents/AGENTS.md;
     skills = ../../claude/skills;
+    mcpServers = {
+      claude-conversation-search = {
+        type = "stdio";
+        command = "claude-conversation-search";
+        args = [ "mcp" ];
+      };
+    };
   };
   home.file.".claude/settings.json" = {
     source = ../../claude/settings.json;
@@ -437,4 +446,8 @@ in
 
   # PipeWire EQ Configuration
   xdg.configFile."pipewire/pipewire.conf.d/10-filter-chain.conf".source = ./pipewire-eq.conf;
+
+  # XDG user directories — lets GLib (and thus Thunar) correctly resolve
+  # special dirs (Documents, Downloads, etc.) via g_get_user_special_dir().
+  xdg.userDirs.enable = true;
 }
