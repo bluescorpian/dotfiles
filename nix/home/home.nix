@@ -39,11 +39,11 @@
   # systemd.user.services.openclaw-gateway.serviceConfig.EnvironmentFile = "/run/agenix/openclaw";
 
   # SSH: VPS access (personal only)
-  programs.ssh.matchBlocks."vps" = {
-    hostname = "91.98.21.137";
-    user = "harry";
-    identityFile = "~/.ssh/bluescorpian";
-    identitiesOnly = true;
+  programs.ssh.settings."vps" = {
+    HostName = "91.98.21.137";
+    User = "harry";
+    IdentityFile = "~/.ssh/bluescorpian";
+    IdentitiesOnly = true;
   };
 
   # Personal Mako colors

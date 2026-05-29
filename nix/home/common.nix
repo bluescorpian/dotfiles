@@ -368,23 +368,20 @@ in
   };
 
   # SSH configuration
-  # TODO: home-manager deprecated `programs.ssh.matchBlocks` in favour of
-  # `programs.ssh.settings`. Migrate this block (and home.nix's vps entry)
-  # before the option is removed.
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
-    matchBlocks = {
+    settings = {
       "*" = {
-        serverAliveInterval = 60;
-        serverAliveCountMax = 3;
+        ServerAliveInterval = 60;
+        ServerAliveCountMax = 3;
       };
       "github.com" = {
-        hostname = "github.com";
-        user = "git";
-        identityFile = "~/.ssh/bluescorpian";
-        identitiesOnly = true;
-        addKeysToAgent = "yes";
+        HostName = "github.com";
+        User = "git";
+        IdentityFile = "~/.ssh/bluescorpian";
+        IdentitiesOnly = true;
+        AddKeysToAgent = "yes";
       };
     };
   };
@@ -450,4 +447,5 @@ in
   # XDG user directories — lets GLib (and thus Thunar) correctly resolve
   # special dirs (Documents, Downloads, etc.) via g_get_user_special_dir().
   xdg.userDirs.enable = true;
+  xdg.userDirs.setSessionVariables = true;
 }
