@@ -45,6 +45,23 @@
   };
   home.shellAliases.brave = "brave --password-store=kwallet5";
 
+  # Thunar sidebar places. GTK file managers read ~/.config/gtk-3.0/bookmarks
+  # rather than Dolphin's user-places.xbel. Managing it here keeps places in
+  # sync with the rest of the config. To add a new place, add a line here and
+  # rebuild — Thunar's own "Add Bookmark" can't write to this file (nix store
+  # symlink, read-only).
+  home.file.".config/gtk-3.0/bookmarks".text = ''
+    file://${config.home.homeDirectory}/Documents
+    file://${config.home.homeDirectory}/Downloads
+    file://${config.home.homeDirectory}/Music
+    file://${config.home.homeDirectory}/Pictures
+    file://${config.home.homeDirectory}/Videos
+    file://${config.home.homeDirectory}/Projects
+    file://${config.home.homeDirectory}/smart-station smart-station
+    file://${config.home.homeDirectory}/smart-station/repos/wedded-world wedded-world
+    trash:/// Trash
+  '';
+
   # Git configuration
   programs.git = {
     enable = true;
