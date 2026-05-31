@@ -1,6 +1,14 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
+  # Bedtime countdown script for the custom/bedtime module below. Kept as a
+  # standalone .sh (like claude/statusline.sh) and dropped next to waybar's own
+  # generated config; edit BEDTIME/THRESHOLD_HOURS/ALWAYS at the top of the file.
+  xdg.configFile."waybar/bedtime.sh" = {
+    source = ../../waybar/bedtime.sh;
+    executable = true;
+  };
+
   # Waybar — wayland-native status bar replacing the i3status/swaybar combo.
   # Launched from sway's startup (not via systemd) so it only runs under sway,
   # not Plasma. Catppuccin Mocha palette to match kitty + mako.
@@ -15,7 +23,7 @@
 
       modules-left   = [ "sway/workspaces" "sway/mode" ];
       modules-center = [ "sway/window" ];
-      modules-right  = [ "tray" "pulseaudio" "network" "battery" "clock" ];
+      modules-right  = [ "tray" "pulseaudio" "network" "battery" "custom/bedtime" "clock" ];
 
       "sway/workspaces" = {
         disable-scroll = false;
@@ -39,6 +47,13 @@
       clock = {
         format = "{:%a %d %b  %I:%M %p}";
         tooltip-format = "<tt>{calendar}</tt>";
+      };
+
+      "custom/bedtime" = {
+        exec = "${config.xdg.configHome}/waybar/bedtime.sh";
+        return-type = "json";
+        interval = 30;
+        tooltip = true;
       };
 
       battery = {
@@ -119,6 +134,7 @@
       #battery,
       #network,
       #pulseaudio,
+      #custom-bedtime,
       #tray {
         padding: 0 10px;
         color: #cdd6f4;
@@ -129,6 +145,9 @@
       #battery.critical     { color: #f38ba8; }
       #network.disconnected { color: #f38ba8; }
       #pulseaudio.muted     { color: #6c7086; }
+
+      #custom-bedtime.soon     { color: #fab387; }                     /* orange, <30 min */
+      #custom-bedtime.overtime { color: #f38ba8; font-weight: bold; }  /* red, past bedtime */
 
       #tray > .passive         { -gtk-icon-effect: dim; }
       #tray > .needs-attention { -gtk-icon-effect: highlight; }
