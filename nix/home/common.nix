@@ -33,7 +33,15 @@ in
     google-chrome
 
     # Communication
-    discord
+    # Fix partial UI flicker (on hover/dropdowns and Sway workspace switches) on
+    # NVIDIA + Wayland. The compositor stack already supports explicit sync
+    # (sway 1.11/wlroots 0.19, NVIDIA 595), but NVIDIA's driver never handled
+    # *implicit* DMABUF sync — so a client that doesn't negotiate explicit sync
+    # races the compositor and shows regional corruption on repaint. Discord
+    # bundles Electron 37 / Chrome 138, which HAS the explicit-sync feature but
+    # leaves it off by default; this flag turns it on. (Chromium merges multiple
+    # --enable-features, so this is additive to the wrapper's WaylandWindowDecorations.)
+    (discord.override { commandLineArgs = "--enable-features=WaylandLinuxDrmSyncobj"; })
     bitwarden-desktop
     thunderbird
 
