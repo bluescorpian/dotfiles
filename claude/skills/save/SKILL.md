@@ -11,7 +11,7 @@ Gather context before writing:
 - Dirty files: !`git status --short 2>/dev/null || echo "none"`
 - Existing notes today: !`ls docs/session-notes/ 2>/dev/null | grep "^$(date +%Y-%m-%d)" || echo "none"`
 
-Derive a 2–4 word kebab-case slug that captures the session's main topic (e.g. `fix-waybar-module`, `add-vps-service`, `refactor-sway-config`). Use only lowercase letters and hyphens.
+Derive a 2–4 word kebab-case slug that captures the session's main topic (e.g. `fix-login-bug`, `add-auth-middleware`, `refactor-user-model`). Use only lowercase letters and hyphens.
 
 Filename: `docs/session-notes/YYYY-MM-DD-<slug>.md`. If that exact file already exists (same-day re-save on the same topic), append `-2`, `-3`, etc.
 
