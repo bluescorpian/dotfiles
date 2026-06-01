@@ -10,7 +10,6 @@
     plasma-manager.inputs.nixpkgs.follows = "nixpkgs";
     plasma-manager.inputs.home-manager.follows = "home-manager";
     claude-code.url = "github:sadjow/claude-code-nix";
-    nix-openclaw.url = "github:openclaw/nix-openclaw";
     claude-desktop.url = "github:aaddrick/claude-desktop-debian";
     agenix.url = "github:ryantm/agenix";
     agenix.inputs.nixpkgs.follows = "nixpkgs";
@@ -22,7 +21,7 @@
     worktrunk.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, claude-code, claude-desktop, agenix, nix-openclaw, disko, vscode-server, worktrunk, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     pkgs-stable = nixpkgs-stable.legacyPackages.x86_64-linux;
@@ -36,8 +35,8 @@
         modules = [
           ./system/desktop/configuration.nix
           agenix.nixosModules.default
-          # Apply claude-code and nix-openclaw overlays globally
-          { nixpkgs.overlays = [ claude-code.overlays.default nix-openclaw.overlays.default claude-desktop.overlays.default ]; }
+          # Apply claude-code and claude-desktop overlays globally
+          { nixpkgs.overlays = [ claude-code.overlays.default claude-desktop.overlays.default ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
@@ -48,7 +47,6 @@
             home-manager.users.guest = ./home/home-guest.nix;
             home-manager.sharedModules = [
               plasma-manager.homeModules.plasma-manager
-              nix-openclaw.homeManagerModules.openclaw
             ];
             home-manager.extraSpecialArgs = {
               inherit pkgs-stable;
@@ -76,8 +74,8 @@
         modules = [
           ./system/laptop/configuration.nix
           agenix.nixosModules.default
-          # Apply claude-code and nix-openclaw overlays globally
-          { nixpkgs.overlays = [ claude-code.overlays.default nix-openclaw.overlays.default claude-desktop.overlays.default ]; }
+          # Apply claude-code and claude-desktop overlays globally
+          { nixpkgs.overlays = [ claude-code.overlays.default claude-desktop.overlays.default ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
@@ -88,7 +86,6 @@
             home-manager.users.guest = ./home/home-guest.nix;
             home-manager.sharedModules = [
               plasma-manager.homeModules.plasma-manager
-              nix-openclaw.homeManagerModules.openclaw
             ];
             home-manager.extraSpecialArgs = {
               inherit pkgs-stable;

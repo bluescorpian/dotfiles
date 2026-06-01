@@ -33,7 +33,15 @@ in
     google-chrome
 
     # Communication
-    discord
+    # Fix partial UI flicker (on hover/dropdowns and Sway workspace switches) on
+    # NVIDIA + Wayland. The compositor stack already supports explicit sync
+    # (sway 1.11/wlroots 0.19, NVIDIA 595), but NVIDIA's driver never handled
+    # *implicit* DMABUF sync — so a client that doesn't negotiate explicit sync
+    # races the compositor and shows regional corruption on repaint. Discord
+    # bundles Electron 37 / Chrome 138, which HAS the explicit-sync feature but
+    # leaves it off by default; this flag turns it on. (Chromium merges multiple
+    # --enable-features, so this is additive to the wrapper's WaylandWindowDecorations.)
+    (discord.override { commandLineArgs = "--enable-features=WaylandLinuxDrmSyncobj"; })
     bitwarden-desktop
     thunderbird
 
@@ -184,16 +192,16 @@ in
     # available for encryption" banner. The kwallet{5,6} backends use raw
     # D-Bus via libdbus (which IS in the FHS) and reach kwalletd6 directly
     # under both KDE and sway — no extra libs needed, same kdewallet file as
-    # Brave's --password-store=kwallet5. If a host hits that banner, fix it
-    # per-host with ~/.vscode/argv.json ("password-store": "kwallet6"), or
-    # codify globally by adding `--add-flags --password-store=kwallet6` to
-    # the wrapProgram call below.
+    # Brave's --password-store=kwallet6. Codified globally below via --add-flags
+    # so both hosts get it from the repo; supersedes any per-host
+    # ~/.vscode/argv.json ("password-store": "kwallet6") workaround.
     package = (pkgs.symlinkJoin {
       name = "vscode-fhs-igpu";
       paths = [ pkgs.vscode-fhs ];
       buildInputs = [ pkgs.makeWrapper ];
       postBuild = ''
         wrapProgram $out/bin/code \
+          --add-flags "--password-store=kwallet6" \
           --set DRI_PRIME 0 \
           --set __NV_PRIME_RENDER_OFFLOAD 0 \
           --set __GLX_VENDOR_LIBRARY_NAME mesa

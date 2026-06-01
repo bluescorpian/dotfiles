@@ -361,6 +361,45 @@ in
     Install.WantedBy = [ "sway-session.target" ];
   };
 
+  # Night light / red shift. gammastep is the wlroots-native redshift fork;
+  # it drives the wlr-gamma-control protocol that sway implements. Manual
+  # provider with fixed coordinates (Gqeberha / Port Elizabeth) so it tracks
+  # real sunset/sunrise year-round without depending on geoclue's flaky
+  # IP/WiFi geolocation. Day stays neutral (6500K), night goes deep amber
+  # (3500K). Tweak the temperatures or swap to dawnTime/duskTime if you'd
+  # rather pin the transition to clock times.
+  services.gammastep = {
+    enable = true;
+    provider = "manual";
+    latitude = -33.9796;
+    longitude = 25.6598;
+    temperature = {
+      day = 6500;
+      night = 3500;
+    };
+    # Brightness rides the same sunset/sunrise schedule. This is a *software*
+    # dim — gammastep scales the gamma ramp (0.1–1.0), not the hardware
+    # backlight (which external desktop monitors don't expose to brightnessctl
+    # anyway). Day at full, night dimmed to 0.8. Drop the night value for a
+    # stronger dim.
+    settings.general = {
+      brightness-day = 1.0;
+      brightness-night = 0.8;
+    };
+  };
+
+  # Re-gate the home-manager gammastep unit onto sway-session.target. By
+  # default it binds to graphical-session.target, which Plasma also reaches —
+  # but KWin doesn't implement wlr-gamma-control, so under KDE gammastep would
+  # fail and (Restart=always) restart-loop. Plasma has its own Night Color
+  # anyway. mkForce replaces the module's list rather than appending, so the
+  # unit no longer wants graphical-session.target at all.
+  systemd.user.services.gammastep = {
+    Unit.PartOf = lib.mkForce [ "sway-session.target" ];
+    Unit.After = lib.mkForce [ "sway-session.target" ];
+    Install.WantedBy = lib.mkForce [ "sway-session.target" ];
+  };
+
   # Clipboard history (cliphist) + persistence (wl-clip-persist). Three
   # user units, all gated on sway-session.target so they only run under
   # sway — Plasma has Klipper for the same job. The two cliphist watchers
