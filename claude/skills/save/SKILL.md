@@ -1,16 +1,19 @@
 ---
 name: save
 description: Save a session handoff note. Use when the user wants to checkpoint progress, end a session, or capture what was worked on. Invoked with /save.
-allowed-tools: Bash(date:*), Bash(git log:*), Bash(git branch:*), Bash(git status:*), Write
+allowed-tools: Bash(date:*), Bash(git log:*), Bash(git branch:*), Bash(git status:*), Bash(ls:*), Write
 ---
 
 Gather context before writing:
-- Timestamp: !`date +%Y-%m-%d-%H-%M`
+- Today's date: !`date +%Y-%m-%d`
 - Current branch: !`git branch --show-current 2>/dev/null || echo "not a git repo"`
 - Recent commits: !`git log --oneline -5 2>/dev/null || echo "none"`
 - Dirty files: !`git status --short 2>/dev/null || echo "none"`
+- Existing notes today: !`ls docs/session-notes/ 2>/dev/null | grep "^$(date +%Y-%m-%d)" || echo "none"`
 
-Write a session handoff note to `docs/session-notes/` + timestamp + `.md` (e.g. `2026-06-01-14-32.md`).
+Derive a 2–4 word kebab-case slug that captures the session's main topic (e.g. `fix-waybar-module`, `add-vps-service`, `refactor-sway-config`). Use only lowercase letters and hyphens.
+
+Filename: `docs/session-notes/YYYY-MM-DD-<slug>.md`. If that exact file already exists (same-day re-save on the same topic), append `-2`, `-3`, etc.
 
 Structure it as follows — be specific and concrete, not vague:
 
@@ -35,4 +38,4 @@ Unresolved questions, waiting-on items, or known issues.
 ---
 
 After writing the file, respond with only:
-✓ Session saved → docs/session-notes/YYYY-MM-DD-HH-MM.md
+✓ Session saved → docs/session-notes/YYYY-MM-DD-<slug>.md
