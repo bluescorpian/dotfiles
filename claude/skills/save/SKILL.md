@@ -13,7 +13,7 @@ Gather context before writing:
 
 Derive a 2–4 word kebab-case slug that captures the session's main topic (e.g. `fix-login-bug`, `add-auth-middleware`, `refactor-user-model`). Use only lowercase letters and hyphens.
 
-Filename: `docs/session-notes/YYYY-MM-DD-<slug>.md`. If that exact file already exists (same-day re-save on the same topic), append `-2`, `-3`, etc.
+Filename: `docs/session-notes/YYYY-MM-DD-<slug>.md`.
 
 Structure it as follows — be specific and concrete, not vague:
 
