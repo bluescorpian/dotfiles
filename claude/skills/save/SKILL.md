@@ -5,12 +5,12 @@ allowed-tools: Bash(date:*), Bash(git log:*), Bash(git branch:*), Bash(git statu
 ---
 
 Gather context before writing:
-- Today's date: !`date +%Y-%m-%d`
+- Timestamp: !`date +%Y-%m-%d-%H-%M`
 - Current branch: !`git branch --show-current 2>/dev/null || echo "not a git repo"`
 - Recent commits: !`git log --oneline -5 2>/dev/null || echo "none"`
 - Dirty files: !`git status --short 2>/dev/null || echo "none"`
 
-Write a session handoff note to `docs/session-notes/` + today's date + `.md`.
+Write a session handoff note to `docs/session-notes/` + timestamp + `.md` (e.g. `2026-06-01-14-32.md`).
 
 Structure it as follows — be specific and concrete, not vague:
 
@@ -35,4 +35,4 @@ Unresolved questions, waiting-on items, or known issues.
 ---
 
 After writing the file, respond with only:
-✓ Session saved → docs/session-notes/YYYY-MM-DD.md
+✓ Session saved → docs/session-notes/YYYY-MM-DD-HH-MM.md
