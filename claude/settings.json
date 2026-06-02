@@ -66,7 +66,6 @@
 			}
 		]
 	},
-	"effortLevel": "xhigh",
 	"preferredNotifChannel": "terminal_bell",
 	"autoCompactEnabled": false,
 	"skipAutoPermissionPrompt": true,
