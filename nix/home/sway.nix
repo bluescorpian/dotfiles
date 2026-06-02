@@ -61,11 +61,41 @@ in
       # Workspace picker built on rofi's dmenu mode. Existing workspace names
       # are offered, and typing a new name creates it through sway's workspace
       # command.
+      # Workspace names in most-recently-visited order (newest first),
+      # excluding the focused one. Recency comes from a focus-event log kept
+      # by the sway-workspace-history user service (defined below) in
+      # $XDG_RUNTIME_DIR (tmpfs, wiped each boot). Stale entries for
+      # destroyed workspaces are dropped by intersecting with the live set,
+      # and any existing workspace not yet in the log is appended in sway's
+      # own order. Excluding the focused workspace floats the
+      # previously-visited one to the top, so rofi preselects it and Enter
+      # behaves like back_and_forth.
+      wsListMru = pkgs.writeShellScript "sway-ws-list-mru" ''
+        hist="''${XDG_RUNTIME_DIR}/sway-workspace-history"
+        ws=$(${pkgs.sway}/bin/swaymsg -t get_workspaces)
+        focused=$(printf '%s' "$ws" | ${pkgs.jq}/bin/jq -r '.[] | select(.focused) | .name')
+        existing=$(printf '%s' "$ws" | ${pkgs.jq}/bin/jq -r '.[].name')
+        {
+          [ -f "$hist" ] && ${pkgs.coreutils}/bin/tac "$hist"
+          printf '%s\n' "$existing"
+        } | ${pkgs.gawk}/bin/awk '!seen[$0]++' | while IFS= read -r w; do
+          printf '%s\n' "$existing" | ${pkgs.gnugrep}/bin/grep -qxF -- "$w" || continue
+          [ "$w" = "$focused" ] && continue
+          printf '%s\n' "$w"
+        done
+      '';
       rofiWorkspace = pkgs.writeShellScript "rofi-workspace" ''
-        sel=$(${pkgs.sway}/bin/swaymsg -t get_workspaces \
-              | ${pkgs.jq}/bin/jq -r '.[].name' \
-              | ${pkgs.rofi}/bin/rofi -dmenu -p workspace)
+        sel=$(${wsListMru} | ${pkgs.rofi}/bin/rofi -dmenu -p workspace)
         [ -n "$sel" ] && exec ${pkgs.sway}/bin/swaymsg workspace "$sel"
+      '';
+      # Same picker (same MRU ordering), but moves the focused window to the
+      # chosen workspace instead of switching to it (focus stays put —
+      # matches the Mod+Shift+{a,o,e,u} move convention). Typing a new name
+      # and pressing Ctrl+Enter (rofi's accept-custom) creates that
+      # workspace and moves the window there.
+      rofiMoveToWorkspace = pkgs.writeShellScript "rofi-move-to-workspace" ''
+        sel=$(${wsListMru} | ${pkgs.rofi}/bin/rofi -dmenu -p "move to workspace")
+        [ -n "$sel" ] && exec ${pkgs.sway}/bin/swaymsg "move container to workspace $sel"
       '';
       # `move workspace to output` only accepts {left,right,up,down,<name>} —
       # `next` works for `focus output` but not here. This script toggles the
@@ -85,6 +115,17 @@ in
         next=$(${pkgs.sway}/bin/swaymsg -t get_workspaces \
                | ${pkgs.jq}/bin/jq -r '[.[].num | select(. >= 5)] | (max // 4) + 1')
         exec ${pkgs.sway}/bin/swaymsg "workspace number $next"
+      '';
+      # Companion to nextAdHocWorkspace, but drags the focused window to the
+      # new workspace and follows it in one atomic command. Switching to an
+      # empty ad-hoc workspace (Mod+i) then trying to move a window there
+      # doesn't work — sway garbage-collects the empty workspace the moment
+      # it loses focus. Moving the container in first means the workspace is
+      # never empty, so it survives.
+      moveToNextAdHocWorkspace = pkgs.writeShellScript "move-to-next-adhoc-workspace" ''
+        next=$(${pkgs.sway}/bin/swaymsg -t get_workspaces \
+               | ${pkgs.jq}/bin/jq -r '[.[].num | select(. >= 5)] | (max // 4) + 1')
+        exec ${pkgs.sway}/bin/swaymsg "move container to workspace number $next; workspace number $next"
       '';
 
       # Named-workspace bindings. Host-specific because the two machines
@@ -153,12 +194,17 @@ in
         # rofi — window switcher (live list of open windows) and workspace
         # picker. Both share the system Catppuccin theme from common.nix.
         "${mod}+grave"     = "exec ${pkgs.rofi}/bin/rofi -show window";
-        "${mod}+Tab"       = "workspace back_and_forth";
-        "${mod}+Shift+Tab" = "exec ${rofiWorkspace}";
+        # Tab = rofi workspace picker (switch); Shift = same picker but move
+        # the focused window there (focus stays put), matching the Shift=move
+        # convention. Replaces the old back_and_forth toggle on Mod+Tab.
+        "${mod}+Tab"       = "exec ${rofiWorkspace}";
+        "${mod}+Shift+Tab" = "exec ${rofiMoveToWorkspace}";
 
         # Spawn the next free numbered workspace (5+) without a name prompt
         # — removes the friction of inventing a name for throwaway spaces.
         "${mod}+i" = "exec ${nextAdHocWorkspace}";
+        # Send the focused window to a fresh ad-hoc workspace and follow it.
+        "${mod}+Shift+i" = "exec ${moveToNextAdHocWorkspace}";
 
         # Clipboard history picker (cliphist + rofi). Watchers + persist
         # daemon are systemd user units gated on sway-session.target below.
@@ -426,6 +472,31 @@ in
     };
     Service = {
       ExecStart = "${pkgs.wl-clipboard}/bin/wl-paste --type image --watch ${pkgs.cliphist}/bin/cliphist store";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "sway-session.target" ];
+  };
+
+  # Records sway workspace focus order so the rofi pickers can list
+  # workspaces most-recently-visited first (consumed by wsListMru above).
+  # Subscribes to sway's workspace events and appends each newly-focused
+  # workspace name to a log in $XDG_RUNTIME_DIR (tmpfs). Gated on
+  # sway-session.target like the cliphist watchers; the log is truncated on
+  # each start so visit history never carries across sessions.
+  systemd.user.services.sway-workspace-history = {
+    Unit = {
+      Description = "Track sway workspace focus order (MRU) for the rofi pickers";
+      PartOf = [ "sway-session.target" ];
+      After = [ "sway-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.writeShellScript "sway-workspace-history" ''
+        hist="''${XDG_RUNTIME_DIR}/sway-workspace-history"
+        : > "$hist"
+        ${pkgs.sway}/bin/swaymsg -t subscribe -m '["workspace"]' \
+          | ${pkgs.jq}/bin/jq --unbuffered -r 'select(.change=="focus") | .current.name' \
+          >> "$hist"
+      ''}";
       Restart = "on-failure";
     };
     Install.WantedBy = [ "sway-session.target" ];
