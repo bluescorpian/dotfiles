@@ -4,6 +4,7 @@
   imports = [
     ../common.nix
     ../sway.nix
+    ../thunar.nix
     ./hardware-configuration.nix
   ];
 
