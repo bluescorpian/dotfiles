@@ -69,5 +69,6 @@
 	"preferredNotifChannel": "terminal_bell",
 	"autoCompactEnabled": false,
 	"skipAutoPermissionPrompt": true,
-	"voiceEnabled": true
+	"voiceEnabled": true,
+	"tui": "fullscreen"
 }
