@@ -449,6 +449,24 @@ in
     "docs/session-notes/"
   ];
 
+  # Keybindings cheatsheet — always-on static server so it can be bookmarked.
+  # The viewer (keys_cheatsheet/index.html) fetch()es its JSON sources, which
+  # browsers block over file:// (origin null), so it needs an HTTP origin.
+  # This serves the folder on a fixed localhost port at login; bookmark
+  # http://localhost:8787 and forget it. JSON edits are live on a browser
+  # refresh — no rebuild needed. Bound to 127.0.0.1 so it's never exposed.
+  systemd.user.services.keys-cheatsheet = {
+    Unit = {
+      Description = "Keybindings cheatsheet static server";
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.python3}/bin/python3 -m http.server 8787 --bind 127.0.0.1 --directory /home/shared/dotfiles/keys_cheatsheet";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+
   # PipeWire EQ Configuration
   xdg.configFile."pipewire/pipewire.conf.d/10-filter-chain.conf".source = ./pipewire-eq.conf;
 
