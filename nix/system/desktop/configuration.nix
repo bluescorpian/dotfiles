@@ -14,6 +14,9 @@
   # QMK keyboard firmware flashing support
   hardware.keyboard.qmk.enable = true;
 
+  # PlatformIO udev rules for embedded device access
+  services.udev.packages = [ pkgs.platformio-core pkgs.openocd ];
+
   # NVIDIA configuration
   hardware.graphics.enable = true;
   services.xserver.videoDrivers = [ "nvidia" ];
@@ -44,6 +47,7 @@
     packages = with pkgs; [
       kdePackages.kate
       stow
+      platformio
     ];
   };
 

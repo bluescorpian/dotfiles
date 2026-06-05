@@ -207,7 +207,7 @@ in
           --set __NV_PRIME_RENDER_OFFLOAD 0 \
           --set __GLX_VENDOR_LIBRARY_NAME mesa
       '';
-    }) // { pname = pkgs.vscode-fhs.pname; };
+    }) // { pname = pkgs.vscode-fhs.pname; meta.mainProgram = "code"; };
   };
 
   # Terminal and launcher
