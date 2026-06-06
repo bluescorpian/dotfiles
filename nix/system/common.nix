@@ -124,6 +124,11 @@
     };
   };
 
+  # nix-ld: run unpatched, foreign (non-Nix) dynamic binaries — VS Code
+  # extensions, pip/npm-fetched tools, prebuilt SDKs. Keep `libraries` minimal;
+  # only add a lib here when a binary actually fails at runtime on it.
+  programs.nix-ld.enable = true;
+
   # Docker configuration
   virtualisation.docker = {
     enable = true;
