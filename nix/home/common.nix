@@ -42,7 +42,8 @@ in
     # leaves it off by default; this flag turns it on. (Chromium merges multiple
     # --enable-features, so this is additive to the wrapper's WaylandWindowDecorations.)
     (discord.override { commandLineArgs = "--enable-features=WaylandLinuxDrmSyncobj"; })
-    bitwarden-desktop
+    # bitwarden-desktop  # dropped 2026-06-08 by choice (Electron-39 app). electron-39.8.10 is
+    #                      permitted in system/common.nix for logseq, so re-enable = uncomment.
     thunderbird
 
     # Media & Creative

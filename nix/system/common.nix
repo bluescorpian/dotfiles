@@ -71,6 +71,11 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  # logseq still ships Electron 39, now flagged EOL upstream. Permit it explicitly so the
+  # build evaluates. (bitwarden-desktop / claude-desktop also used this and are commented out
+  # by choice, not necessity.) Remove once logseq moves to a supported Electron.
+  nixpkgs.config.permittedInsecurePackages = [ "electron-39.8.10" ];
+
   # System-wide shell aliases (available to all users)
   # Auto-detects hostname to select the correct configuration (desktop or laptop)
   environment.shellAliases = {
@@ -94,7 +99,8 @@
     samba  # SMB client for CUPS network printing
     kdePackages.partitionmanager
     qt6.qtmultimedia
-    claude-desktop
+    # claude-desktop  # dropped 2026-06-08 by choice (Electron-39 app). electron-39.8.10 is
+    #                   permitted above for logseq, so re-enable = uncomment.
   ];
 
   services.flatpak.enable = true;
