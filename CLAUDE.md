@@ -2,6 +2,8 @@
 
 Harry's NixOS dotfiles — the declarative source of truth for his desktop, laptop, and a Hetzner VPS. Lives at `/home/shared/dotfiles` so both user accounts share one checkout.
 
+> **This repo is public on GitHub.** Everything committed here is openly visible. Before committing, flag any content that looks private: API keys, tokens, passwords, internal hostnames, personal email addresses, private IP ranges, or anything else that shouldn't be world-readable. When asked to commit such content, warn Harry explicitly before proceeding.
+
 ## What you'll usually be asked to do
 
 Most requests are **small, surgical edits to `.nix` files** to change the system: install a package, enable a program module, tweak a Sway keybind, add a shell alias, spin up a new VPS service, adjust a systemd unit. The loop is almost always: edit the right `.nix` file → `rebuild` → confirm it worked → commit.
