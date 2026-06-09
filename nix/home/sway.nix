@@ -85,7 +85,7 @@ in
         done
       '';
       rofiWorkspace = pkgs.writeShellScript "rofi-workspace" ''
-        sel=$(${wsListMru} | ${pkgs.rofi}/bin/rofi -dmenu -no-show-icons -p workspace)
+        sel=$(${wsListMru} | ${pkgs.rofi}/bin/rofi -dmenu -no-show-icons -theme-str 'window { width: 400px; }' -p workspace)
         [ -n "$sel" ] && exec ${pkgs.sway}/bin/swaymsg workspace "$sel"
       '';
       # Same picker (same MRU ordering), but moves the focused window to the
@@ -94,7 +94,7 @@ in
       # and pressing Ctrl+Enter (rofi's accept-custom) creates that
       # workspace and moves the window there.
       rofiMoveToWorkspace = pkgs.writeShellScript "rofi-move-to-workspace" ''
-        sel=$(${wsListMru} | ${pkgs.rofi}/bin/rofi -dmenu -no-show-icons -p "move to workspace")
+        sel=$(${wsListMru} | ${pkgs.rofi}/bin/rofi -dmenu -no-show-icons -theme-str 'window { width: 400px; }' -p "move to workspace")
         [ -n "$sel" ] && exec ${pkgs.sway}/bin/swaymsg "move container to workspace $sel"
       '';
       # `move workspace to output` only accepts {left,right,up,down,<name>} —
