@@ -7,6 +7,34 @@
 # Reads session JSON on stdin, prints to stdout.
 set -u
 
+# --- Crash logging --------------------------------------------------------
+# Claude Code silently hides the statusline whenever this script errors or
+# prints nothing, so a one-off failure leaves no trace of *why*. To make those
+# debuggable after the fact: redirect stderr to a scratch buffer and, only when
+# the script exits non-zero, append a timestamped record (the captured error
+# output + the JSON we were handed, for replay) to a log. Successful renders
+# write nothing. Override the path with $CLAUDE_STATUSLINE_LOG.
+LOG="${CLAUDE_STATUSLINE_LOG:-$HOME/.claude/statusline.log}"
+errbuf=$(mktemp 2>/dev/null) || errbuf=""
+[[ -n "$errbuf" ]] && exec 2>"$errbuf"
+_on_exit() {
+  local rc=$?
+  if (( rc != 0 )); then
+    mkdir -p "$(dirname "$LOG")" 2>/dev/null
+    # Cap the log at ~1 MB (only reached if something fails every render).
+    if [[ -f "$LOG" ]] && (( $(wc -c <"$LOG" 2>/dev/null || echo 0) > 1048576 )); then
+      tail -n 200 "$LOG" >"$LOG.tmp" 2>/dev/null && mv "$LOG.tmp" "$LOG"
+    fi
+    {
+      printf '─── %s exit=%s ───\n' "$(date '+%F %T')" "$rc"
+      [[ -n "$errbuf" && -s "$errbuf" ]] && cat "$errbuf"
+      printf 'stdin: %s\n' "${input-<unread>}"
+    } >>"$LOG" 2>/dev/null
+  fi
+  [[ -n "$errbuf" ]] && rm -f "$errbuf"
+}
+trap _on_exit EXIT
+
 input=$(cat)
 J() { command jq -r "$1 // empty" <<<"$input"; }
 
@@ -171,15 +199,23 @@ if [[ -f "$transcript" ]]; then
     | command jq -r 'select(.type == "ai-title") | .aiTitle' 2>/dev/null \
     | head -n1)
   if [[ -z "$title" ]]; then
+    # Filter each record as a whole *inside* jq. Slash commands are recorded as
+    # a single multi-line string (`<command-name>…\n  <command-message>…\n  …`);
+    # piping that to a line-based `grep -v '^<'` would drop line 1 but leak the
+    # indented `<command-message>`/`<command-args>` lines. So: drop meta records,
+    # flatten array content to its text parts, collapse whitespace to one line,
+    # then reject anything that starts with `<` (command/system/tool wrappers).
     title=$(command jq -r '
       select(.type == "user")
+      | select((.isMeta // .message.isMeta // false) | not)
       | .message.content
-      | if type == "string" then .
-        elif type == "array" then
-          (map(select(.type == "text") | .text) | join(" "))
-        else "" end' "$transcript" 2>/dev/null \
-      | grep -v '^<' \
-      | grep -v '^$' \
+      | (if type == "string" then .
+         elif type == "array" then
+           (map(select(.type == "text") | .text) | join(" "))
+         else "" end)
+      | gsub("\\s+"; " ") | sub("^ +"; "") | sub(" +$"; "")
+      | select(length > 0)
+      | select(startswith("<") | not)' "$transcript" 2>/dev/null \
       | head -n1)
   fi
   title=$(printf '%s' "$title" | tr -s '[:space:]' ' ' | cut -c1-80)
@@ -221,3 +257,8 @@ fi
 # --- Line 2 ---
 printf '%s' "$line1"
 [[ -n "$title" ]] && printf '\n%s⤷%s %s%s%s' "$OVERLAY" "$RST" "$SUBTEXT" "$title" "$RST"
+
+# Reaching here means we rendered fine. Exit 0 explicitly: the title `&&` above
+# leaves a non-zero status when there's no title, which the crash log would
+# otherwise mistake for a failure (and a genuine crash still exits non-zero).
+exit 0
