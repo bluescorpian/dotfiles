@@ -264,7 +264,9 @@ in
   # Rofi — launcher, window switcher, and dmenu replacement. As of rofi 2.0
   # (Aug 2025) it has native Wayland support, so a single binary replaces
   # what was previously wofi+swayr on this machine. Themed to match the
-  # Catppuccin Mocha palette used in waybar and mako.
+  # Catppuccin Mocha palette used in waybar and mako, and styled to mirror
+  # the Walker launcher below (rounded card, 10px rows, soft translucent
+  # accent selection) so the two launchers feel like one family.
   programs.rofi = {
     enable = true;
     font = "JetBrainsMono Nerd Font 11";
@@ -293,6 +295,7 @@ in
       fg:        #cdd6f4;
       fg-dim:    #a6adc8;
       accent:    #89b4fa;
+      sel-bg:    rgba(137, 180, 250, 0.25);   /* alpha(accent, 0.25) — matches walker */
       urgent:    #f38ba8;
       active:    #a6e3a1;
 
@@ -300,26 +303,28 @@ in
       text-color:       @fg;
     }
 
+    /* Note: rofi rasi has no box-shadow, so walker's drop-shadow elevation
+       can't be reproduced — the rounded card + accent border carry the look. */
     window {
-      width:            640px;
+      width:            500px;
       background-color: @bg;
       border:           2px;
       border-color:     @accent;
-      border-radius:    0;
-      padding:          14px;
+      border-radius:    20px;       /* walker .box-wrapper: 20px */
+      padding:          20px;       /* walker: 20px */
     }
 
     mainbox {
       children: [ inputbar, message, listview ];
-      spacing:  10px;
+      spacing:  12px;
     }
 
     inputbar {
       children:         [ prompt, entry ];
       spacing:          8px;
-      padding:          6px 10px;
+      padding:          10px;       /* walker .input: 10px */
       background-color: @bg-alt;
-      border-radius:    0;
+      border-radius:    10px;       /* walker .search-container: 10px */
     }
 
     prompt {
@@ -333,15 +338,15 @@ in
 
     message {
       background-color: @bg-alt;
-      border-radius:    0;
-      padding:          6px 10px;
+      border-radius:    10px;
+      padding:          10px;
     }
     textbox {
       text-color: @fg;
     }
 
     listview {
-      lines:        10;
+      lines:        8;
       columns:      1;
       scrollbar:    false;
       spacing:      2px;
@@ -349,16 +354,20 @@ in
     }
 
     element {
-      padding:       6px 8px;
-      spacing:       8px;
-      border-radius: 0;
+      /* walker uses 10px all round, but its rows carry an icon + two text
+         lines; these single-line dmenu rows look too airy at 10px vertical,
+         so tighten the vertical padding while keeping the horizontal room. */
+      padding:       4px 12px;
+      spacing:       10px;
+      border-radius: 8px;
     }
     element normal.normal   { text-color: @fg; }
     element normal.urgent   { text-color: @urgent; }
     element normal.active   { text-color: @active; }
-    element selected.normal { background-color: @accent; text-color: @bg; }
-    element selected.urgent { background-color: @urgent; text-color: @bg; }
-    element selected.active { background-color: @active; text-color: @bg; }
+    /* Soft translucent pill + light text (walker: alpha(accent, 0.25)) */
+    element selected.normal { background-color: @sel-bg; text-color: @fg; }
+    element selected.urgent { background-color: @sel-bg; text-color: @urgent; }
+    element selected.active { background-color: @sel-bg; text-color: @active; }
 
     element-icon {
       size:             1.2em;
