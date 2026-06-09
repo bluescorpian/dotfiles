@@ -19,9 +19,12 @@
     vscode-server.inputs.nixpkgs.follows = "nixpkgs";
     worktrunk.url = "github:max-sixty/worktrunk";
     worktrunk.inputs.nixpkgs.follows = "nixpkgs";
+    elephant.url = "github:abenz1267/elephant";
+    walker.url = "github:abenz1267/walker";
+    walker.inputs.elephant.follows = "elephant";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, walker, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     pkgs-stable = nixpkgs-stable.legacyPackages.x86_64-linux;
@@ -47,6 +50,7 @@
             home-manager.users.guest = ./home/home-guest.nix;
             home-manager.sharedModules = [
               plasma-manager.homeModules.plasma-manager
+              walker.homeManagerModules.default
             ];
             home-manager.extraSpecialArgs = {
               inherit pkgs-stable;
@@ -86,6 +90,7 @@
             home-manager.users.guest = ./home/home-guest.nix;
             home-manager.sharedModules = [
               plasma-manager.homeModules.plasma-manager
+              walker.homeManagerModules.default
             ];
             home-manager.extraSpecialArgs = {
               inherit pkgs-stable;

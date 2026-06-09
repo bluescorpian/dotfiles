@@ -14,7 +14,7 @@
       "color": "#89b4fa",
       "bindings": [
         { "keys": ["Super", "Return"], "action": "Open terminal", "note": "kitty" },
-        { "keys": ["Super", "d"],      "action": "App launcher",   "note": "rofi -show drun" }
+        { "keys": ["Super", "d"],      "action": "Launcher (apps + files)",   "note": "walker — / for files, = calc, @ web, > run, $ windows" }
       ]
     },
     {

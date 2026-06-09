@@ -160,8 +160,16 @@
   # Nix settings
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
-    substituters = [ "https://claude-code.cachix.org" ];
-    trusted-public-keys = [ "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk=" ];
+    substituters = [
+      "https://claude-code.cachix.org"
+      "https://walker.cachix.org"
+      "https://walker-git.cachix.org"
+    ];
+    trusted-public-keys = [
+      "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
+      "walker.cachix.org-1:fG8q+uAaMqhsMxWjwvk0IMb4mFPFLqHjuvfwQxE4oJM="
+      "walker-git.cachix.org-1:vmC0ocfPWh0S/vRAQGtChuiZBTAe4wiKDeyyXM0/7pM="
+    ];
   };
 
   # Automatic garbage collection

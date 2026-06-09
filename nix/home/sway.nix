@@ -161,7 +161,7 @@ in
     in {
       modifier = mod;
       terminal = "kitty";
-      menu = "rofi -show drun";
+      menu = "walker";
 
       # Add bindings on top of the home-manager sway module defaults
       # (focus arrows, kill, reload, layout toggles, etc).
