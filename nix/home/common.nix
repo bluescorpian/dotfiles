@@ -685,6 +685,42 @@ in
   # PipeWire EQ Configuration
   xdg.configFile."pipewire/pipewire.conf.d/10-filter-chain.conf".source = ./pipewire-eq.conf;
 
+  # pnpm supply-chain hardening (global, both users). pnpm 11 reads global
+  # settings from ~/.config/pnpm/config.yaml (YAML — the old INI `rc` is dead).
+  # These apply to every project that doesn't override them in its own
+  # pnpm-workspace.yaml, so they're a safety floor against npm supply-chain
+  # attacks (Shai-Hulud-style worms, compromised version bumps). See
+  # https://pnpm.io/supply-chain-security
+  #
+  # HM symlinks this read-only into the store; pnpm only reads it, so that's
+  # fine. Running `pnpm config set … --global` would fail against the symlink —
+  # intentional: global policy lives here, not in ad-hoc imperative edits.
+  xdg.configFile."pnpm/config.yaml".text = ''
+    # Cooldown: refuse to install any version published less than N minutes ago.
+    # Malicious releases are almost always yanked within hours, so a window this
+    # wide means you skip the blast radius entirely. 10080 = 7 days. pnpm 11's
+    # built-in default is only 1440 (1 day); this tightens it. Lower it if the
+    # lag bites, or exempt a specific hotfix with minimumReleaseAgeExclude.
+    minimumReleaseAge: 10080
+
+    # Fail the install (don't silently skip) when a dependency ships a build /
+    # postinstall script that isn't on the approved list. Forces a deliberate
+    # `pnpm approve-builds` decision instead of letting unknown scripts through.
+    strictDepBuilds: true
+
+    # Block transitive deps that resolve from git repos or tarball URLs instead
+    # of the registry — a common smuggling path for unvetted code.
+    blockExoticSubdeps: true
+
+    # Refuse a version whose publish trust dropped vs. a prior release (e.g. lost
+    # provenance / trusted-publisher status) — a signal of a hijacked package.
+    trustPolicy: no-downgrade
+
+    # Re-check that node_modules matches the lockfile before running scripts,
+    # catching out-of-band tampering / drift; reinstalls to reconcile if needed.
+    verifyDepsBeforeRun: install
+  '';
+
   # XDG user directories — lets GLib (and thus Thunar) correctly resolve
   # special dirs (Documents, Downloads, etc.) via g_get_user_special_dir().
   xdg.userDirs.enable = true;
