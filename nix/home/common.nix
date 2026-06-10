@@ -246,6 +246,11 @@ in
       # Cursor trail (kitty 0.36+)
       cursor_trail = 3;
       cursor_blink_interval = "0.5";
+
+      # TEMPORARY: kitty 0.47.1 bug — config watcher exhausts inotify watches on NixOS/HM
+      # symlink layout (upstream #10104, fixed in 0.47.2). Negative value disables watcher.
+      # Remove after `nix flake update` picks up 0.47.2 from nixos-unstable.
+      auto_reload_config = -1;
     };
     keybindings = {
       "ctrl+equal"       = "change_font_size all +1.0";
