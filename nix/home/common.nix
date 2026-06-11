@@ -72,6 +72,7 @@ in
     python3
 
     # Development - Tools
+    playwright-driver.browsers
     aichat
     gh
     jq
@@ -111,6 +112,8 @@ in
   # the password into a Qt window. Run commands with `sudo -A <cmd>`.
   home.sessionVariables = {
     SUDO_ASKPASS = "${pkgs.kdePackages.ksshaskpass}/bin/ksshaskpass";
+    PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
+    PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
   };
 
   # Direnv configuration with nix-direnv for automatic environment loading
