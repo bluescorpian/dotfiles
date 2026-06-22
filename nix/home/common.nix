@@ -661,6 +661,10 @@ in
     source = ../../claude/hooks/notify.sh;
     executable = true;
   };
+  home.file.".claude/hooks/conversation-search-uuid-hint.sh" = {
+    source = ../../claude/hooks/conversation-search-uuid-hint.sh;
+    executable = true;
+  };
   home.file.".codex/AGENTS.md".source = ../../agents/AGENTS.md;
   home.file.".codex/config.toml".source = ../../codex/config.toml;
   home.file.".codex/rules".source = ../../codex/rules;

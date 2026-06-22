@@ -67,6 +67,17 @@
 					}
 				]
 			}
+		],
+		"PreToolUse": [
+			{
+				"matcher": "mcp__plugin_claude-code-home-manager_claude-conversation-search__.*",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "$HOME/.claude/hooks/conversation-search-uuid-hint.sh"
+					}
+				]
+			}
 		]
 	},
 	"preferredNotifChannel": "terminal_bell",
