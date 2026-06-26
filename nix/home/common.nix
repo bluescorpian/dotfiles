@@ -92,6 +92,7 @@ in
     # Media Processing
     imagemagick
     ffmpeg
+    sox  # audio recording/processing; required by Claude Code voice mode
 
     # Remote Access
     kdePackages.krfb  # KDE VNC server
