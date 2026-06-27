@@ -315,11 +315,13 @@ in
       # aren't present, so listing laptop's connectors here is harmless on
       # desktop. Connector names follow the kernel DRM convention under the
       # AMD iGPU (sway runs on amdgpu, not the dGPU, via PRIME render-offload).
-      # eDP-1 runs at scale 1.25, so its logical width is 1920/1.25 = 1536.
-      # HDMI-A-1 sits flush to the right at logical position 1536, not 1920.
+      # External monitor (Dell S2421HN, 1920x1080 @ scale 1.0) sits on the
+      # left at logical origin; the laptop panel sits flush to its right.
+      # HDMI-A-1's logical width is 1920, so eDP-1 starts at pos 1920.
+      # eDP-1 runs at scale 1.25, so its own logical width is 1920/1.25 = 1536.
       output = lib.mkIf isLaptop {
-        "eDP-1"    = { mode = "1920x1080"; pos = "0 0";    scale = "1.25"; };
-        "HDMI-A-1" = { mode = "1920x1080"; pos = "1536 0"; };
+        "HDMI-A-1" = { mode = "1920x1080"; pos = "0 0"; };
+        "eDP-1"    = { mode = "1920x1080"; pos = "1920 0"; scale = "1.25"; };
       };
 
       # Apply the system xkb layout (us/dvp) to all keyboards under sway.
