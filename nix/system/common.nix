@@ -162,6 +162,11 @@
   systemd.tmpfiles.rules = [
     # Create shared directory with setgid bit (2775 = rwxrwsr-x)
     "d /home/shared 2775 harry harry-shared -"
+    # Tools that hardcode the FHS Chrome install path (e.g. the Playwright MCP
+    # plugin's default browser lookup) can't find NixOS's nix-store binary.
+    # Recreate the expected /opt/google/chrome/chrome symlink on every boot.
+    "d /opt/google/chrome 0755 root root -"
+    "L+ /opt/google/chrome/chrome - - - - ${pkgs.google-chrome}/bin/google-chrome-stable"
   ];
 
   # Nix settings
