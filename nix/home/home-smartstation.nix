@@ -14,7 +14,6 @@
 
   # Work packages (minimal, focused on productivity)
   home.packages = with pkgs; [
-    anydesk
   ];
 
   # Force Brave to use KWallet for passwords regardless of session.
