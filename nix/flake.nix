@@ -4,6 +4,12 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixpkgs-stable.url = "github:nixos/nixpkgs?ref=nixos-24.11";
+    # Pin logseq to 0.10.14: unstable's 0.10.15 isn't in the binary cache (builds
+    # the ClojureScript/Electron app from source, appears to hang) and bumped to
+    # the EOL-flagged Electron 39. This commit ships 0.10.14 on Electron 38.7.1 —
+    # cached (~60 MB DL) and not flagged insecure. Bump when unstable's logseq is
+    # cached again. Only used for the logseq package (see home/common.nix).
+    nixpkgs-logseq.url = "github:nixos/nixpkgs/ea30586ee015f37f38783006a9bc9e4aa64d7d61";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     plasma-manager.url = "github:nix-community/plasma-manager";
@@ -24,10 +30,11 @@
     walker.inputs.elephant.follows = "elephant";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, walker, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-logseq, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, walker, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     pkgs-stable = nixpkgs-stable.legacyPackages.x86_64-linux;
+    logseq-pkg = nixpkgs-logseq.legacyPackages.x86_64-linux.logseq;
   in
   {
      nixosConfigurations = {
@@ -53,7 +60,7 @@
               walker.homeManagerModules.default
             ];
             home-manager.extraSpecialArgs = {
-              inherit pkgs-stable;
+              inherit pkgs-stable logseq-pkg;
               worktrunk-pkg = worktrunk.packages.x86_64-linux.default;
             };
           }
@@ -93,7 +100,7 @@
               walker.homeManagerModules.default
             ];
             home-manager.extraSpecialArgs = {
-              inherit pkgs-stable;
+              inherit pkgs-stable logseq-pkg;
               worktrunk-pkg = worktrunk.packages.x86_64-linux.default;
             };
           }

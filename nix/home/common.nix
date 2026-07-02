@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-stable, worktrunk-pkg, lib, ... }:
+{ config, pkgs, pkgs-stable, logseq-pkg, worktrunk-pkg, lib, ... }:
 
 let
   # Make HM's read-only Nix-store symlink at $HOME/<target> into a real
@@ -12,6 +12,25 @@ let
       install -m600 "$_t" "$HOME/${target}"
     fi
   '';
+
+  # nixpkgs-logseq (see flake.nix) is pinned to Jan 2026, so its Electron/glibc
+  # (2.40) has fallen behind main nixpkgs' Mesa (26.1.3, needs glibc >=2.41).
+  # On NixOS every app loads GPU drivers from the system-wide /run/opengl-driver
+  # regardless of which nixpkgs input built it, so Logseq's GBM/Wayland buffer
+  # init now crashes on launch (GLIBC_ABI_GNU2_TLS not found). Forcing X11
+  # (XWayland) skips that GBM path entirely and falls back to software
+  # compositing, which works. logseq's package.nix has no commandLineArgs
+  # override (unlike discord above), so wrap it manually. Drop this wrapper
+  # once nixpkgs-logseq is unpinned or the glibc/Mesa versions realign.
+  logseq-x11 = pkgs.symlinkJoin {
+    name = "logseq-x11";
+    paths = [ logseq-pkg ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      rm $out/bin/logseq
+      makeWrapper ${lib.getExe logseq-pkg} $out/bin/logseq --add-flags "--ozone-platform=x11"
+    '';
+  };
 in
 {
   # Development packages
@@ -56,7 +75,7 @@ in
     # Office & Productivity
     libreoffice-fresh
     obsidian
-    logseq
+    logseq-x11  # pinned to 0.10.14 via nixpkgs-logseq input (see flake.nix); wrapped for --ozone-platform=x11 (see logseq-x11 above)
     keepassxc
     pkgs-stable.super-productivity  # Using stable version due to build issues in unstable
 

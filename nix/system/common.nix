@@ -71,10 +71,10 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # logseq still ships Electron 39, now flagged EOL upstream. Permit it explicitly so the
-  # build evaluates. (bitwarden-desktop / claude-desktop also used this and are commented out
-  # by choice, not necessity.) Remove once logseq moves to a supported Electron.
-  nixpkgs.config.permittedInsecurePackages = [ "electron-39.8.10" ];
+  # NOTE: no permittedInsecurePackages needed. logseq is pinned to 0.10.14 (Electron
+  # 38.7.1, not flagged insecure) via the nixpkgs-logseq input — see flake.nix. If you
+  # re-enable bitwarden-desktop / claude-desktop (Electron-39 apps), add back:
+  #   nixpkgs.config.permittedInsecurePackages = [ "electron-39.8.10" ];
 
   # System-wide shell aliases (available to all users)
   # Auto-detects hostname to select the correct configuration (desktop or laptop)
