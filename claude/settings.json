@@ -34,7 +34,7 @@
 	"enabledPlugins": {
 		"atlassian@claude-plugins-official": true,
 		"code-review@claude-plugins-official": true,
-		"typescript-lsp@claude-plugins-official": true,
+		"typescript-lsp@claude-plugins-official": false,
 		"commit-commands@claude-plugins-official": true,
 		"claude-md-management@claude-plugins-official": true,
 		"frontend-design@claude-plugins-official": true,
@@ -84,5 +84,6 @@
 	"autoCompactEnabled": false,
 	"skipAutoPermissionPrompt": true,
 	"voiceEnabled": true,
-	"tui": "fullscreen"
+	"tui": "fullscreen",
+	"skipWorkflowUsageWarning": true
 }
