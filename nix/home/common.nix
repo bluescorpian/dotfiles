@@ -93,6 +93,7 @@ in
     pnpm
     yarn
     python3
+    go
 
     # Development - Tools
     playwright-driver.browsers
