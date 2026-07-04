@@ -101,6 +101,7 @@ in
     yarn
     python3
     go
+    gcc
 
     # Development - Tools
     playwright-driver.browsers
