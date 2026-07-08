@@ -187,6 +187,9 @@ in
     defaultProfile = "Konsole";
     profiles.Konsole = {
       name = "Konsole";
+      # home-manager made profiles.<name>.font.name a required option (no
+      # default); match the JetBrainsMono Nerd Font used across sway/waybar/rofi.
+      font.name = "JetBrainsMono Nerd Font";
       extraConfig = {
         "Keyboard"."KeyBindings" = "konsole";
       };
