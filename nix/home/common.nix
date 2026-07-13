@@ -111,7 +111,8 @@ in
     # Database
     mongosh
     mongodb-tools
-    mongodb-compass
+    # mongodb-compass  # broken as of the 2026-07-11 nixpkgs bump: wrapGAppsHook
+    # fails with "bad array subscript" during patchelf. Re-add once fixed upstream.
 
     # Media Processing
     imagemagick
