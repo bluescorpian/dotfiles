@@ -1,6 +1,10 @@
 { config, pkgs, pkgs-stable, logseq-pkg, worktrunk-pkg, lib, ... }:
 
 let
+  playwrightBrowsers = (builtins.fromJSON (builtins.readFile "${pkgs.playwright-driver}/browsers.json")).browsers;
+  chromiumRev = (builtins.head (builtins.filter (x: x.name == "chromium") playwrightBrowsers)).revision;
+  chromiumBin = "${pkgs.playwright-driver.browsers}/chromium-${chromiumRev}/chrome-linux64/chrome";
+
   # Make HM's read-only Nix-store symlink at $HOME/<target> into a real
   # writable copy on every rebuild. Pair with `home.file.<target>.force = true`
   # (and a source if HM doesn't already provide one). Trade-off: in-place
@@ -89,6 +93,7 @@ in
     pnpm
     yarn
     python3
+    go
 
     # Development - Tools
     playwright-driver.browsers
@@ -134,6 +139,7 @@ in
     SUDO_ASKPASS = "${pkgs.kdePackages.ksshaskpass}/bin/ksshaskpass";
     PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
     PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
+    PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH = chromiumBin;
   };
 
   # Direnv configuration with nix-direnv for automatic environment loading
