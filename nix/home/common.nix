@@ -85,7 +85,7 @@ in
 
     # Development - Editors
     neovim
-    antigravity
+    # antigravity  # commented out 2026-07-13 — not used; heavy build. Re-enable if needed.
 
     # Development - Languages & Runtimes
     nodejs_22  # Node.js 22.x LTS

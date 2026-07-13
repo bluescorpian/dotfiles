@@ -16,7 +16,9 @@
   home.packages = with pkgs; [
     osu-lazer-bin
     qbittorrent
-    handbrake
+    # handbrake  # broken on 2026-07-11 nixpkgs: its bundled ffmpeg-full 8.1.2
+    # fails to apply A01-mov-read-name-track-tag patch. Fix PR NixOS/nixpkgs#541043
+    # (handbrake 1.11.2) still open. Re-enable once it lands. Issue #540400.
     makemkv
   ];
 
