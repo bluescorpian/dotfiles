@@ -667,7 +667,7 @@ in
   programs.claude-code = {
     enable = true;
     package = pkgs.claude-code;  # sadjow overlay; nixpkgs claude-code lags upstream
-    context = ../../agents/AGENTS.md;
+    context = ../../claude/CLAUDE.md;
     skills = ../../claude/skills;
     mcpServers = {
       claude-conversation-search = {
