@@ -12,6 +12,10 @@ This machine runs **NixOS** with flakes enabled. This has several implications f
 - **Test NixOS options**: Use `nixos-option` or search the options reference to explore configuration possibilities.
 - **Ephemeral shells**: `nix-shell -p pkg1 pkg2` for quick multi-package environments without writing a flake.
 
+## Git safety: don't assume an unattributed diff is yours to revert
+
+If you find an unexpected change in a working tree (e.g. after a background agent/workflow job finishes) that none of your own prompts/edits explain, don't assume the job caused it and revert it. The user — or another process — may be working directly in that same directory concurrently (this is especially likely in git worktrees dedicated to a session, since worktrees share one object database/refs and the user can commit into one directly while you work in it). Before running any destructive git command (`checkout --`, `reset`, `restore`, `clean`) to undo an unattributed change: check `git log -- <path>` to see if it's already committed, and ask the user what it is rather than guessing. Reverting the wrong thing can silently discard real, intentional work — it's exactly the kind of action the git-safety protocol exists to gate.
+
 ## Model policy for delegated work
 
 Applies to every subagent, workflow `agent()` call, or task you delegate — not to the model you yourself are running as.
