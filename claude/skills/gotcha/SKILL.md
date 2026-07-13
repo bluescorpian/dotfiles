@@ -1,6 +1,6 @@
 ---
-name: capture-context
-description: Route a single learning, gotcha, stale doc, or process fix to its cheapest durable home instead of bloating CLAUDE.md or piling up memory notes. Invoke when you or the agent notice a recurring mistake, a doc that misled the agent, or missing context that cost extra prompting. Invoked with /capture-context.
+name: gotcha
+description: Route a single learning, gotcha, stale doc, or process fix to its cheapest durable home instead of bloating CLAUDE.md or piling up memory notes. Invoke when you or the agent notice a recurring mistake, a doc that misled the agent, or missing context that cost extra prompting. Invoked with /gotcha.
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash(git status:*), Bash(git diff:*), Bash(ls:*)
 ---
 

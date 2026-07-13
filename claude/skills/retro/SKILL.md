@@ -13,7 +13,7 @@ Review two separate targets, then produce one combined output.
 Scan the session for every point where Harry corrected you, hand-walked you through a procedure, restated context he'd already given, or clarified something a fresh session would also stumble on. For each:
 
 - Decide if it's a one-off (skip it) or a pattern worth capturing.
-- For patterns, propose a fix using the exact same logic as `/capture-context`: the 8-rung ladder (eliminate the coupling → types → tests → code comment → path-scoped rule → memory → project CLAUDE.md → global AGENTS.md), the same project-vs-global scoping call, and the same "verify live via `claude-code-guide`" discipline for anything version-sensitive. Don't reinvent this — lean on it.
+- For patterns, propose a fix using the exact same logic as `/gotcha`: the 8-rung ladder (eliminate the coupling → types → tests → code comment → path-scoped rule → memory → project CLAUDE.md → global AGENTS.md), the same project-vs-global scoping call, and the same "verify live via `claude-code-guide`" discipline for anything version-sensitive. Don't reinvent this — lean on it.
 
 ## B. The tooling: how did the skills/subagents that ran actually perform?
 
