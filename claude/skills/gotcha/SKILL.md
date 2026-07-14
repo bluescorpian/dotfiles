@@ -26,20 +26,24 @@ Cheapest and most durable first — each rung below it is progressively more exp
 5. **Path-scoped rule** (`.claude/rules/<name>.md` with a `paths:` frontmatter glob). Loads only when a matching file is opened — zero cost the rest of the time. Best fit for "editing file A also requires touching file B" coupling, or a convention scoped to one directory/filetype.
 6. **Auto-memory topic file** (`type: project` or `feedback` in the memory dir). For facts, preferences, or "why" context that isn't code-adjacent and doesn't belong in every session.
 7. **Project `CLAUDE.md`.** Only for facts relevant to *every* session in this repo that can't be scoped narrower than that.
-8. **Global `agents/AGENTS.md`.** Last resort — only for facts true across all of your projects.
+8. **Global.** Last resort — only for facts true across all of your projects. Two files, both may need editing: `agents/AGENTS.md` is generic content shared with Codex/other tools; `claude/CLAUDE.md` (deploys to `~/.claude/CLAUDE.md` via `programs.claude-code.context`) duplicates that generic content plus Claude Code-specific additions. A generic learning goes in both, kept in sync; a Claude-Code-only learning goes only in `claude/CLAUDE.md`.
 
 ## 4. Fix or prune existing context — don't just append
 
 Before writing anything new, check whether an existing rule, memory note, or CLAUDE.md line already half-covers this and is stale, wrong, or duplicated. Reconcile it in place. Accumulating near-duplicate notes is itself a form of context bloat.
 
+Write the rule, not the evidence that justified it. One-time context — token metrics, a specific run, "in X this cost Y" — goes in your proposal, the commit message, or the conversation, never baked into the always-loaded artifact (it re-costs tokens every load). A brief non-obvious *why* is fine; the anecdote that proved it is not.
+
 ## 5. Keep prose at slow-changing altitude
 
 Never bake a version-sensitive specific (an exact flag, option name, or CLI syntax) into a rule or CLAUDE.md without a live-verify note. Claude Code and its ecosystem move fast — if the learning includes something that could plausibly change, phrase it as "verify via the `claude-code-guide` agent before relying on this" rather than hardcoding it as fact.
 
-## 6. Apply it
+## 6. Propose, then stop
 
-Make the edit at the chosen rung directly.
+Before touching any file, show your diagnosis, the chosen rung and why (not a rung higher or lower), and the exact edit — the target file and the actual new text, not a paraphrase. Then stop and wait. Do not call Edit or Write until the user has responded.
 
-## 7. Report
+If they approve, proceed to step 7. If they redirect (different rung, different wording, "no"), revise the proposal and show it again — don't apply a compromise silently.
 
-State: what changed, which file, which rung you landed on, and why not a rung higher or lower.
+## 7. Apply and report
+
+Make the edit exactly as approved. State what changed and where.
