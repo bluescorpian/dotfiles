@@ -151,7 +151,7 @@
 
   # Open SSH and VNC ports in firewall
   networking.firewall = {
-    allowedTCPPorts = [ 22 5900 7000 24800 ]; # 7000: TallyBot sidecar (device TCP); 24800: waynergy/Deskflow software KVM
+    allowedTCPPorts = [ 22 5900 7000 ]; # 7000: TallyBot sidecar (device TCP)
     allowedUDPPorts = [ 7001 ]; # 7001: TallyBot discovery (TALLY_FIND)
     # KDE Connect ports (TCP and UDP 1714-1764)
     allowedTCPPortRanges = [ { from = 1714; to = 1764; } ];

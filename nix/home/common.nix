@@ -41,15 +41,6 @@ in
   home.packages = with pkgs; [
     (import ../packages/claude-conversation-search { inherit pkgs; })
 
-    # Software KVM client: pull the mouse from the Windows PC (Deskflow server)
-    # over LAN (port 24800). Keyboard is handled by the keyboard's own USB/BT
-    # hardware switch, not waynergy — waynergy's keyboard path can't cleanly
-    # translate the Windows server's PS/2 scancodes through Sway's programmer-
-    # Dvorak keymap (extended keys like arrows never line up). Mouse works fine.
-    # Config below sets xkb_key_offset=8 so *if* a stray keystroke does come
-    # through while the cursor is on this machine, the main block is at least sane.
-    waynergy
-
     # Fonts
     cascadia-code
     nerd-fonts.jetbrains-mono
@@ -197,14 +188,6 @@ in
   # extend default.keytab, so the full ruleset lives alongside this file —
   # see ./konsole.keytab.
   xdg.dataFile."konsole/konsole.keytab".source = ./konsole.keytab;
-
-  # waynergy (software KVM mouse client) config. Windows sends raw PS/2 set-1
-  # scancodes, which equal Linux evdev keycodes for the main block (xkb = evdev
-  # + 8), so shift by 8 and let Sway's own keymap resolve symbols. Run with
-  # `waynergy --host <windows-ip> --name <screen-name-on-server>`.
-  xdg.configFile."waynergy/config.ini".text = ''
-    xkb_key_offset = 8
-  '';
 
   programs.konsole = {
     enable = true;
