@@ -1,10 +1,12 @@
 ---
 name: worktree-cleanup
-description: Review and clean up this repo's git worktrees — inventory every linked worktree, auto-remove ones whose branch is long-merged, and surface only the judgement calls (stale/dirty/orphaned) as batched multiple-choice questions with pre-gathered context. Repo-agnostic; remembers per-worktree keep/snooze decisions so it never re-asks. Invoke with /worktree-cleanup, or when asked to tidy, prune, or clean up worktrees.
+description: Review and clean up this repo's git worktrees — inventory every linked worktree, auto-remove ones whose branch is long-merged, and surface only the judgement calls (stale/dirty/orphaned) as batched, recommended-first multiple-choice questions with pre-gathered context. Repo-agnostic; remembers per-worktree keep/snooze decisions so it never re-asks. Invoke with /worktree-cleanup, or when asked to tidy, prune, or clean up worktrees. For stale local branches with no worktree, use the sibling `branch-cleanup` skill.
 allowed-tools: Read, Write, Edit, AskUserQuestion, Agent, Bash(git worktree:*), Bash(git branch:*), Bash(git push:*), Bash(git for-each-ref:*), Bash(git rev-parse:*), Bash(git fetch:*), Bash(git log:*), Bash(git status:*), Bash(git show-ref:*), Bash(gh pr list:*), Bash(jq:*), Bash(date:*), Bash(mkdir:*), Bash(du:*), Bash(basename:*), Bash(cat:*)
 ---
 
 Clean up git worktrees with the least interaction that's still safe. A deterministic engine (`scripts/worktree-plan.sh`) does all inventory + classification; you only reason about the handful of judgement calls, and you surface those to Harry as clear multiple-choice questions — he may not have read the raw output, so each option must stand on its own.
+
+Scope: **worktrees only.** Stale local branches with no worktree are the sibling `branch-cleanup` skill's job — they share this repo's registry but run independently (worktrees are often clean while branches aren't). If Harry wants "clean up everything," run this, then hand off to `branch-cleanup`.
 
 ## Safety invariants (never violate)
 
@@ -20,7 +22,7 @@ Clean up git worktrees with the least interaction that's still safe. A determini
 git fetch --all --prune                      # accurate merge/pushed status
 MAIN=$(git worktree list --porcelain | sed -n 's/^worktree //p' | head -1)
 SLUG=$(basename "$MAIN")
-REG="${XDG_STATE_HOME:-$HOME/.local/state}/worktree-cleanup/$SLUG.json"
+REG="${XDG_STATE_HOME:-$HOME/.local/state}/git-cleanup/$SLUG.json"   # shared with branch-cleanup
 mkdir -p "$(dirname "$REG")"
 SKILL_DIR="${CLAUDE_SKILL_DIR:-$HOME/.claude/skills/worktree-cleanup}"
 "$SKILL_DIR/scripts/worktree-plan.sh" --registry "$REG" > /tmp/wt-plan.json
@@ -96,6 +98,8 @@ Edit the JSON with `jq` (read → modify → write to temp → move) or Write. S
   - `note` — context string, always shown when the worktree is surfaced.
   - `keep` — omit (normal rules) · `"always"` (never surfaced/removed) · `{ "until": "YYYY-MM-DD" }` (skip until date, then re-evaluate).
 
-## Phase B — branch cleanup (not yet wired; build next)
+The same registry file also holds a `branches[<name>]` section owned by the sibling `branch-cleanup` skill; leave it untouched here.
 
-Local branches with **no worktree** accumulate too. The same engine pattern extends: enumerate `git branch --format` minus worktree branches, classify by `[gone]` upstream (deleted on remote → safe `-d`), merged-into-trunk, or stale, and reuse the AskUserQuestion + registry flow. The existing `commit-commands:clean_gone` skill already handles the `[gone]` subset — fold it in rather than duplicating. Keep worktree and branch phases in one skill; don't split.
+## Branches
+
+Local branches with no worktree are handled by the separate **`branch-cleanup`** skill (shared registry, same recommended-first style). Don't delete branches from this skill beyond the merged-branch cleanup tied to a worktree removal in step 5.
