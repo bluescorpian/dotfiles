@@ -104,6 +104,8 @@ in
     fd
     zellij
     worktrunk-pkg  # git worktree manager (wt CLI)
+    awscli2  # also doubles as an S3 client for Cloudflare R2 via --endpoint-url
+    uv  # provides uvx, which runs the aws-api MCP server below (see mcpServers)
 
     # Notifications
     libnotify  # provides notify-send for desktop notifications
@@ -674,6 +676,29 @@ in
         type = "stdio";
         command = "claude-conversation-search";
         args = [ "mcp" ];
+      };
+      # AWS docs/API reference. Fully managed by AWS, public, no account or
+      # credentials needed — safe to leave on. Rate-limited rather than billed.
+      aws-knowledge = {
+        type = "http";
+        url = "https://knowledge-mcp.global.api.aws";
+      };
+      # Executes real AWS API calls as whichever profile is named below.
+      # Credentials deliberately live in ~/.aws/credentials (outside this
+      # PUBLIC repo) — never inline keys here; the profile name is the only
+      # thing safe to commit. READ_OPERATIONS_ONLY pins it to read-only
+      # calls; flip to "false" (or swap in REQUIRE_MUTATION_CONSENT = "true"
+      # for a per-write prompt) once you actually need to mutate infra.
+      # Note: the server has full filesystem access with your permissions.
+      aws-api = {
+        type = "stdio";
+        command = "uvx";
+        args = [ "awslabs.aws-api-mcp-server@latest" ];
+        env = {
+          AWS_REGION = "us-east-1";  # default region only; override per command
+          AWS_API_MCP_PROFILE_NAME = "default";
+          READ_OPERATIONS_ONLY = "true";
+        };
       };
     };
   };
