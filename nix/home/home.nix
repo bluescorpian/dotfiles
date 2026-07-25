@@ -19,7 +19,9 @@
     # handbrake  # broken on 2026-07-11 nixpkgs: its bundled ffmpeg-full 8.1.2
     # fails to apply A01-mov-read-name-track-tag patch. Fix PR NixOS/nixpkgs#541043
     # (handbrake 1.11.2) still open. Re-enable once it lands. Issue #540400.
-    makemkv
+    # makemkv  # temporarily dropped 2026-07-25: upstream download server
+    # returns HTTP 525 (Cloudflare SSL handshake fail) so the 1.18.4 src
+    # tarball can't be fetched. Re-enable once MakeMKV's host recovers.
   ];
 
   # Git configuration
