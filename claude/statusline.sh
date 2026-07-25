@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Claude Code statusline — Catppuccin Mocha, hairline minimal.
 #
-# Line 1:  project  branch ●⇡N⇣N · ctx % · 5h X% left ⏲ Hh Mm · age·turns · model
+# Line 1:  project  branch ●⇡N⇣N · ctx % · 5h X% left ⏲ Hh Mm [dry~Eta] · 7d … · age·turns · model
+#   `dry~Eta` appears only when, at your recent burn rate, that window will run
+#   dry before it resets; the ⏲ reset time turns yellow/red to match.
 # Line 2: ⤷ first user message (chat title)
 #
 # Reads session JSON on stdin, prints to stdout.
@@ -71,6 +73,15 @@ threshold() { # args: used_pct  is_1m_context_window
   fi
 }
 
+fmt_dur() { # seconds → compact "Dd Hh" / "Hh Mm" / "Mm"
+  local s=$1 d h m
+  d=$(( s / 86400 )); h=$(( (s % 86400) / 3600 )); m=$(( (s % 3600) / 60 ))
+  if   (( d > 0 )); then printf '%dd%dh' "$d" "$h"
+  elif (( h > 0 )); then printf '%dh%dm' "$h" "$m"
+  else                   printf '%dm'    "$m"
+  fi
+}
+
 cwd=$(J '.workspace.current_dir // .cwd')
 project_dir=$(J '.workspace.project_dir // .cwd')
 transcript=$(J '.transcript_path')
@@ -81,6 +92,8 @@ exceeds_200k=$(command jq -r '.exceeds_200k_tokens // false' <<<"$input")
 dur_ms=$(command jq -r '.cost.total_duration_ms // 0' <<<"$input")
 rl5_pct=$(J '.rate_limits.five_hour.used_percentage')
 rl5_reset=$(J '.rate_limits.five_hour.resets_at')
+rl7_pct=$(J '.rate_limits.seven_day.used_percentage')
+rl7_reset=$(J '.rate_limits.seven_day.resets_at')
 
 project_name=$(basename "${project_dir:-$cwd}")
 
@@ -124,47 +137,99 @@ else
   (( window > 0 )) && pct=$(( ctx_tokens * 100 / window ))
 fi
 
-# --- 5h rate limit ---
-# Two independent colors on this segment:
-#   - % left is colored by *current* state (how much quota is in the tank).
-#   - ⏲ time-to-reset is colored by *projected* state — extrapolating the
-#     current burn rate over the rest of the window. So `green % + red time`
-#     means "you look fine right now but you'll exhaust before reset."
+# --- Recent burn-rate tracking (shared across sessions on this machine) ---
+# `used_percentage` is a *global* counter, so a single state file captures the
+# true combined burn regardless of which session renders. Each render samples
+# it and keeps an EWMA of Δused/Δt (%/sec) per window, so projections reflect
+# *recent* pace — not the cumulative average since the window opened (which
+# stays pessimistically red after a burst, or falsely green after idle).
 #
-# Projection: assuming the burn rate so far holds, projected_used =
-# current_used × 5h / time_elapsed_in_window. If projected ≥ 100, you run out.
-rl5_left_colored=""
-rl5_reset_colored=""
-if [[ -n "$rl5_pct" ]]; then
-  rl5_used=${rl5_pct%.*}
-  rl5_left=$(( 100 - rl5_used ))
-  rl5_left_color=$(threshold "$rl5_used" 0)
-  rl5_left_colored="${rl5_left_color}${rl5_left}%${RST} ${DIM}left${RST}"
+# Samples closer than `mindt` are ignored (duplicate renders / no resolution);
+# a gap longer than `fresh` cold-starts the baseline (idle → the old rate is no
+# longer "recent"). A drop in used% means the window rolled over → rate resets.
+# `valid=1` means the EWMA is trustworthy; `0` means fall back to cumulative.
+rl_state="${XDG_RUNTIME_DIR:-/tmp}/claude-statusline-rl.state"
+now=$(date +%s)
+rl_rate5=0; rl_rate7=0; rl_rate_valid=0
+_rl_prev=$(cat "$rl_state" 2>/dev/null)
+_rl_new=$(awk -v now="$now" -v c5="${rl5_pct:-}" -v c7="${rl7_pct:-}" \
+              -v alpha=0.3 -v mindt=3 -v fresh=900 '
+  NF >= 5 { pts=$1; pu5=$2; pu7=$3; pr5=$4; pr7=$5; have=1 }
+  END {
+    r5=(have?pr5:0); r7=(have?pr7:0); valid=0;
+    dt=(have ? now-pts : 0);
+    if (have && dt > mindt && dt <= fresh) {
+      valid=1;
+      if (c5!="" && pu5>=0) { d=c5-pu5; r5=(d<0)?0:alpha*(d/dt)+(1-alpha)*pr5 }
+      if (c7!="" && pu7>=0) { d=c7-pu7; r7=(d<0)?0:alpha*(d/dt)+(1-alpha)*pr7 }
+    } else if (have && dt >= 0 && dt <= mindt) {
+      valid=1;                       # duplicate render: keep the prior rate
+    }                                # else: cold start / stale → fall back
+    printf "%d %s %s %.8f %.8f %d", now,
+      (c5==""?(have?pu5:-1):c5), (c7==""?(have?pu7:-1):c7), r5, r7, valid;
+  }' <<<"$_rl_prev")
+if [[ -n "$_rl_new" ]]; then
+  read -r _ _ _ rl_rate5 rl_rate7 rl_rate_valid <<<"$_rl_new"
+  # Persist only the first five fields (drop the valid flag). Atomic swap so
+  # concurrent renders from other sessions never read a half-written file.
+  { printf '%s\n' "${_rl_new% *}" >"$rl_state.tmp.$$" \
+      && mv -f "$rl_state.tmp.$$" "$rl_state"; } 2>/dev/null \
+    || rm -f "$rl_state.tmp.$$" 2>/dev/null
+fi
 
-  if [[ -n "$rl5_reset" ]]; then
-    now=$(date +%s)
-    reset_epoch=${rl5_reset%.*}
-    delta=$(( reset_epoch - now ))
+# --- Rate-limit segments (5h + weekly) ---
+# Two independent colors per segment:
+#   - % left  → *current* state: how much quota is in the tank (fixed bands).
+#   - ⏲ reset → *time margin*: compare time-to-exhaustion (remaining ÷ recent
+#     burn rate) against time-to-reset. If you'll run dry first, the reset time
+#     goes yellow/red and a `dry~<eta>` shows when. `green % + red time` means
+#     "plenty in the tank, but at this pace you'll empty it before it resets."
+#
+# The `used < floor` guard (A) suppresses escalation until real consumption
+# exists, so an early burst can't extrapolate to a false alarm. When no recent
+# rate is available (valid=0) it falls back to the cumulative average.
+# args: used_pct  reset_epoch  window_seconds  label  rate_pct_per_sec  valid
+rl_segment() {
+  local pct=$1 reset=$2 window=$3 label=$4 rate=${5:-0} valid=${6:-0}
+  [[ -z "$pct" ]] && return 0
+  local used=${pct%.*}
+  local left=$(( 100 - used ))
+  local lc; lc=$(threshold "$used" 0)
+  local seg="${DIM}${label}${RST} ${lc}${left}%${RST} ${DIM}left${RST}"
+
+  if [[ -n "$reset" ]]; then
+    local now2 reset_epoch delta
+    now2=$(date +%s)
+    reset_epoch=${reset%.*}
+    delta=$(( reset_epoch - now2 ))
     if (( delta > 0 )); then
-      h=$(( delta / 3600 ))
-      m=$(( (delta % 3600) / 60 ))
-      if (( h > 0 )); then reset_text="${h}h${m}m"
-      else                  reset_text="${m}m"
-      fi
-
-      # Project: < 10 min of data or 0% used → not enough signal, stay green.
-      reset_color=$GREEN
-      elapsed=$(( 5*3600 - delta ))
-      if (( elapsed >= 600 && rl5_used > 0 )); then
-        projected=$(( rl5_used * 18000 / elapsed ))
-        if   (( projected >= 100 )); then reset_color=$RED
-        elif (( projected >= 80  )); then reset_color=$YELLOW
-        fi
-      fi
-      rl5_reset_colored="${DIM}⏲${RST} ${reset_color}${reset_text}${RST}"
+      # Colour + time-to-exhaustion in float math → "<g|y|r> <dry_secs|-1>".
+      local dec ccode dsec
+      dec=$(awk -v used="$pct" -v rate="$rate" -v valid="$valid" \
+                -v delta="$delta" -v window="$window" -v floor=15 '
+        BEGIN {
+          rem = 100 - used; elapsed = window - delta;
+          # Prefer the recent EWMA rate; fall back to cumulative average.
+          rr = (valid ? rate : (elapsed > 0 ? used / elapsed : 0));
+          if (rr <= 1e-12 || used < floor) { print "g -1"; exit }
+          tte = rem / rr; ratio = tte / delta;   # >1 ⇒ reset arrives first
+          if      (ratio >= 1.25) print "g -1";
+          else if (ratio >= 1.0)  print "y -1";          # close, but you make it
+          else if (ratio >= 0.8)  printf "y %d\n", int(tte);
+          else                    printf "r %d\n", int(tte);
+        }')
+      read -r ccode dsec <<<"$dec"
+      local rc=$GREEN
+      case "$ccode" in y) rc=$YELLOW ;; r) rc=$RED ;; esac
+      seg+=" ${DIM}⏲${RST} ${rc}$(fmt_dur "$delta")${RST}"
+      [[ -n "$dsec" && "$dsec" != "-1" ]] && seg+=" ${rc}dry~$(fmt_dur "$dsec")${RST}"
     fi
   fi
-fi
+  printf '%s' "$seg"
+}
+
+rl5_seg=$(rl_segment "$rl5_pct" "$rl5_reset" 18000  "5h" "$rl_rate5" "$rl_rate_valid")
+rl7_seg=$(rl_segment "$rl7_pct" "$rl7_reset" 604800 "7d" "$rl_rate7" "$rl_rate_valid")
 
 # --- Session age + user-turn count ---
 age_text=""
@@ -236,10 +301,8 @@ if [[ -n "$branch" ]]; then
   [[ -n "$behind" ]] && line1+="${RED}${behind}${RST}"
 fi
 line1+="${sep}${ctx_color}${pct}%${RST} ${DIM}ctx${RST}"
-if [[ -n "$rl5_left_colored" ]]; then
-  line1+="${sep}${DIM}5h${RST} ${rl5_left_colored}"
-  [[ -n "$rl5_reset_colored" ]] && line1+=" ${rl5_reset_colored}"
-fi
+[[ -n "$rl5_seg" ]] && line1+="${sep}${rl5_seg}"
+[[ -n "$rl7_seg" ]] && line1+="${sep}${rl7_seg}"
 [[ -n "$session_text" ]] && line1+="${sep}${DIM}${session_text}${RST}"
 [[ -n "$model"        ]] && line1+="${sep}${DIM}${model}${RST}"
 if [[ -n "$effort" ]]; then
