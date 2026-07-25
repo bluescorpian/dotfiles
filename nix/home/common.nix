@@ -105,6 +105,7 @@ in
     zellij
     worktrunk-pkg  # git worktree manager (wt CLI)
     awscli2  # also doubles as an S3 client for Cloudflare R2 via --endpoint-url
+    opentofu  # `tofu` — IaC for WeddedWorld's AWS SES/S3/SNS + Cloudflare DNS (infra/ in the ww repo)
     uv  # provides uvx, which runs the aws-api MCP server below (see mcpServers)
 
     # Notifications
