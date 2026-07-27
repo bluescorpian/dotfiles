@@ -52,7 +52,14 @@ in
     # mismatch orphaned all v11 cookies on the KDE→sway switch (→ logged out of every
     # site). Forcing kwallet6 keeps one backend across both DEs; same wallet VS Code
     # uses (see kwallet6 note below). v10 entries still read via the built-in fallback.
-    (brave.override { commandLineArgs = "--password-store=kwallet6"; })
+    # brave.override is broken upstream as of the 2026-07-26 nixpkgs bump
+    # (NixOS/nixpkgs#540488 dropped overridability; fix pending in #545834).
+    # Work around it via overrideAttrs until that fix lands, then revert to .override.
+    (brave.overrideAttrs (old: {
+      preFixup = (old.preFixup or "") + ''
+        gappsWrapperArgs+=(--add-flags "--password-store=kwallet6")
+      '';
+    }))
     google-chrome
 
     # Communication
