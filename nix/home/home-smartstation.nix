@@ -14,6 +14,7 @@
 
   # Work packages (minimal, focused on productivity)
   home.packages = with pkgs; [
+    qbittorrent
   ];
 
   # Force Brave to use KWallet for passwords regardless of session.
