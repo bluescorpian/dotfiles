@@ -133,7 +133,7 @@
         { "keys": ["Print"],               "action": "Screenshot region → clipboard", "note": "grim + slurp + wl-copy" },
         { "keys": ["Super", "l"],          "action": "Lock screen",                  "note": "swaylock" },
         { "keys": ["Super", "Shift", "c"], "action": "Reload Sway config" },
-        { "keys": ["Super", "Shift", "End"], "action": "Exit Sway" }
+        { "keys": ["Super", "Shift", "End"], "action": "Power menu",                   "note": "wlogout — lock/logout/suspend/reboot/shutdown" }
       ]
     },
     {

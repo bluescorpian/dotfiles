@@ -225,7 +225,10 @@ in
         "${mod}+x" = "layout toggle split";
         "${mod}+slash" = "focus mode_toggle";
         "${mod}+space" = lib.mkForce "exec ${moveWorkspaceOtherOutput}";
-        "${mod}+Shift+End" = "exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'";
+        # Power menu (lock/logout/suspend/reboot/shutdown) — see
+        # programs.wlogout below. Replaces the old exit-only swaynag prompt;
+        # wlogout's click-to-confirm buttons serve the same purpose.
+        "${mod}+Shift+End" = "exec ${pkgs.wlogout}/bin/wlogout --buttons-per-row 5";
 
         "XF86AudioRaiseVolume"  = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+";
         "XF86AudioLowerVolume"  = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
@@ -355,6 +358,72 @@ in
       titlebar_padding 8 3
       titlebar_border_thickness 0
       title_align center
+    '';
+  };
+
+  # Power menu — lock/logout/suspend/reboot/shutdown, launched via
+  # Mod+Shift+End (bound above). Catppuccin Mocha styling to match the
+  # rest of the sway theme (rofi/mako/sway colors in common.nix / above).
+  programs.wlogout = {
+    enable = true;
+    layout = [
+      { label = "lock"; text = "Lock"; keybind = "l"; action = "${pkgs.swaylock}/bin/swaylock -c 1e1e2e"; }
+      { label = "logout"; text = "Logout"; keybind = "e"; action = "${pkgs.sway}/bin/swaymsg exit"; }
+      { label = "suspend"; text = "Suspend"; keybind = "s"; action = "${pkgs.systemd}/bin/systemctl suspend"; }
+      { label = "reboot"; text = "Reboot"; keybind = "r"; action = "${pkgs.systemd}/bin/systemctl reboot"; }
+      { label = "shutdown"; text = "Shutdown"; keybind = "p"; action = "${pkgs.systemd}/bin/systemctl poweroff"; }
+    ];
+    style = ''
+      * {
+        background-image: none;
+        box-shadow: none;
+      }
+
+      window {
+        background-color: rgba(30, 30, 46, 0.85);
+      }
+
+      button {
+        color: #cdd6f4;
+        background-color: #313244;
+        border-style: solid;
+        border-width: 2px;
+        border-color: #45475a;
+        border-radius: 12px;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 25%;
+        margin: 10px;
+        font-family: "JetBrainsMono Nerd Font";
+        font-size: 14px;
+      }
+
+      button:focus, button:active, button:hover {
+        background-color: #cba6f7;
+        color: #1e1e2e;
+        border-color: #cba6f7;
+        outline-style: none;
+      }
+
+      #lock {
+        background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/lock.png"));
+      }
+
+      #logout {
+        background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/logout.png"));
+      }
+
+      #suspend {
+        background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/suspend.png"));
+      }
+
+      #reboot {
+        background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/reboot.png"));
+      }
+
+      #shutdown {
+        background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/shutdown.png"));
+      }
     '';
   };
 
