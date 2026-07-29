@@ -83,6 +83,7 @@
     ccfast = "claude --model sonnet --effort low";
     rebuild = "sudo nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname)";
     rebuild-test = "sudo nixos-rebuild test --flake /home/shared/dotfiles/nix#$(hostname)";
+    rebuild-boot = "sudo nixos-rebuild boot --flake /home/shared/dotfiles/nix#$(hostname)";
     rebuild-vps = "nixos-rebuild switch --flake /home/shared/dotfiles/nix#vps --target-host harry@91.98.21.137 --sudo";
     update-claude = "/home/shared/dotfiles/scripts/flake-autoupdate.sh claude-code";
     flake-autoupdate = "/home/shared/dotfiles/scripts/flake-autoupdate.sh";
@@ -155,7 +156,10 @@
     allowedTCPPorts = [ 22 5900 7000 ]; # 7000: TallyBot sidecar (device TCP)
     allowedUDPPorts = [ 7001 ]; # 7001: TallyBot discovery (TALLY_FIND)
     # KDE Connect ports (TCP and UDP 1714-1764)
-    allowedTCPPortRanges = [ { from = 1714; to = 1764; } ];
+    allowedTCPPortRanges = [
+      { from = 1714; to = 1764; }
+      { from = 3000; to = 3100; } # local dev servers, reachable from LAN
+    ];
     allowedUDPPortRanges = [ { from = 1714; to = 1764; } ];
   };
 
