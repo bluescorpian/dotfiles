@@ -23,7 +23,7 @@
 
       modules-left   = [ "sway/workspaces" "sway/mode" ];
       modules-center = [ "sway/window" ];
-      modules-right  = [ "tray" "pulseaudio" "network" "battery" "custom/bedtime" "clock" ];
+      modules-right  = [ "tray" "custom/keyboard" "pulseaudio" "network" "battery" "custom/bedtime" "clock" ];
 
       "sway/workspaces" = {
         disable-scroll = false;
@@ -53,6 +53,19 @@
         exec = "${config.xdg.configHome}/waybar/bedtime.sh";
         return-type = "json";
         interval = 30;
+        tooltip = true;
+      };
+
+      # Active keyboard layout (Prog Dvorak / Dvorak / QWERTY). The scripts
+      # live in sway.nix (on PATH via home.packages). Rendered once at startup
+      # and refreshed on SIGRTMIN+8, which sway-layout-pick fires after a swap;
+      # click the module to open the same picker.
+      "custom/keyboard" = {
+        exec = "sway-layout-name";
+        return-type = "json";
+        interval = "once";
+        signal = 8;
+        on-click = "sway-layout-pick";
         tooltip = true;
       };
 
@@ -135,6 +148,7 @@
       #network,
       #pulseaudio,
       #custom-bedtime,
+      #custom-keyboard,
       #tray {
         padding: 0 10px;
         color: #cdd6f4;

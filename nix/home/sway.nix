@@ -11,6 +11,43 @@ let
   host = osConfig.networking.hostName;
   isLaptop = host == "laptop";
   isDesktop = host == "desktop";
+
+  # Keyboard-layout switcher. The default is Programmer Dvorak (us/dvp, set on
+  # input."type:keyboard" below). All three targets are the same "us" layout
+  # with a different variant, so switching is a runtime `xkb_variant` re-issue
+  # — no reload, and an empty variant is plain QWERTY. Exposed on PATH via
+  # home.packages so both the Mod+k keybind (here) and the waybar indicator's
+  # exec/on-click (waybar.nix) can reach the scripts by name. After swapping,
+  # the pick script nudges waybar's custom/keyboard module (SIGRTMIN+8) so the
+  # label refreshes immediately instead of on next poll.
+  layoutPick = pkgs.writeShellScriptBin "sway-layout-pick" ''
+    sel=$(printf '%s\n' 'Programmer Dvorak' 'Dvorak' 'QWERTY' \
+      | ${pkgs.rofi}/bin/rofi -dmenu -no-show-icons \
+          -theme-str 'window { width: 300px; }' -p 'keyboard')
+    case "$sel" in
+      'Programmer Dvorak') variant=dvp ;;
+      'Dvorak')            variant=dvorak ;;
+      'QWERTY')            variant="" ;;
+      *) exit 0 ;;
+    esac
+    ${pkgs.sway}/bin/swaymsg input type:keyboard xkb_variant "$variant"
+    ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
+  '';
+
+  # Companion status line for waybar's custom/keyboard module: reads the live
+  # layout name sway reports and prints a short label + tooltip as JSON.
+  layoutName = pkgs.writeShellScriptBin "sway-layout-name" ''
+    name=$(${pkgs.sway}/bin/swaymsg -t get_inputs \
+      | ${pkgs.jq}/bin/jq -r 'first(.[] | select(.type=="keyboard")
+          | .xkb_active_layout_name) // "?"')
+    case "$name" in
+      *"programmer Dvorak"*) label="PD" ;;
+      *Dvorak*)              label="DV" ;;
+      *)                     label="QW" ;;
+    esac
+    ${pkgs.jq}/bin/jq -cn --arg t "⌨ $label" --arg tt "Keyboard layout: $name" \
+      '{text: $t, tooltip: $tt}'
+  '';
 in
 {
   imports = [
@@ -30,6 +67,11 @@ in
     playerctl
     pavucontrol
     networkmanagerapplet
+
+    # Keyboard-layout switcher (Mod+k picker + waybar indicator), defined in
+    # the let block above. On PATH so the keybind and waybar can both call them.
+    layoutPick
+    layoutName
   ];
 
   # Sway compositor (Wayland session, offered by SDDM alongside Plasma).
@@ -178,7 +220,9 @@ in
         # below, pairing with Mod+w = tabbed) and Mod+l takes the screen
         # lock.
         "${mod}+j" = lib.mkForce null;
-        "${mod}+k" = lib.mkForce null;
+        # Mod+k (mnemonic: keyboard) — rofi picker to switch layouts between
+        # Programmer Dvorak / Dvorak / QWERTY. Reclaims the nulled HM focus-up.
+        "${mod}+k" = lib.mkForce "exec ${layoutPick}/bin/sway-layout-pick";
         "${mod}+l" = lib.mkForce "exec swaylock -c 1e1e2e";
         "${mod}+t" = "focus down";
         "${mod}+n" = "focus up";
