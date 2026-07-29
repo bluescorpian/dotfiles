@@ -84,7 +84,8 @@
     rebuild = "sudo nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname)";
     rebuild-test = "sudo nixos-rebuild test --flake /home/shared/dotfiles/nix#$(hostname)";
     rebuild-vps = "nixos-rebuild switch --flake /home/shared/dotfiles/nix#vps --target-host harry@91.98.21.137 --sudo";
-    update-claude = "nix flake update claude-code --flake /home/shared/dotfiles/nix && sudo nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname)";
+    update-claude = "/home/shared/dotfiles/scripts/flake-autoupdate.sh claude-code";
+    flake-autoupdate = "/home/shared/dotfiles/scripts/flake-autoupdate.sh";
     copy-dotfiles-vps = "rsync -avz --delete --exclude='.*' /home/shared/dotfiles/ harry@91.98.21.137:/home/harry/dotfiles/";
   };
 
