@@ -18,4 +18,6 @@ Drop `skills/<name>/SKILL.md` in and `rebuild` — no `.nix` change needed. **Ne
 
 Format: YAML frontmatter (`name`, `description` — the description is the trigger, so state what it does and when to invoke it; optional `allowed-tools`), then the skill body in Markdown. Keep the body under ~500 lines with single-depth references — a skill should be usable standalone.
 
+**Work-specific skills stay out of this repo, because it's public.** `scrum` is one: it lives hand-placed and untracked at `~/.claude/skills/scrum/` on the work laptop only, since it carries work identifiers (Jira tenant and account IDs, client and project names). This works because the module writes `~/.claude/skills` as a real directory of per-file symlinks, so an untracked skill dir alongside the managed ones survives `rebuild` — verified, not assumed. Trade-off: no version control, no backup, one machine. Don't "restore" it here.
+
 See the model policy in `agents/AGENTS.md` before giving a skill or subagent write access to a fan-out: never leave a delegated call's model unset.
