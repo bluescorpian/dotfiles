@@ -114,7 +114,7 @@ in
     worktrunk-pkg  # git worktree manager (wt CLI)
     awscli2  # also doubles as an S3 client for Cloudflare R2 via --endpoint-url
     opentofu  # `tofu` — IaC for WeddedWorld's AWS SES/S3/SNS + Cloudflare DNS (infra/ in the ww repo)
-    uv  # provides uvx, which runs the aws-api MCP server below (see mcpServers)
+    uv  # provides uvx — runs Python tools (incl. stdio MCP servers) without installing them
 
     # Notifications
     libnotify  # provides notify-send for desktop notifications
@@ -300,9 +300,18 @@ in
       "ctrl+equal"       = "change_font_size all +1.0";
       "ctrl+minus"       = "change_font_size all -1.0";
       "ctrl+0"           = "change_font_size all 0";
-      "ctrl+shift+enter" = "new_window_with_cwd";
-      "ctrl+shift+t"     = "new_tab_with_cwd";
-      "ctrl+shift+n"     = "new_os_window_with_cwd";
+      # cwd inheritance via the shell's OSC 7 report (`last_reported`) instead of
+      # the `*_with_cwd` actions. Those resolve cwd from the *highest-PID* process
+      # in the tab's foreground process group (kitty's "newest process is probably
+      # the interesting one" guess, child.py:get_pid_for_cwd). Under Claude Code that
+      # group holds every stdio MCP server it spawned, so a new tab inherits the cwd
+      # of whichever one started last — wrong as soon as any of them chdirs, as
+      # aws-api-mcp did (into /run/user/$UID/aws-api-mcp/workdir) before it was
+      # dropped from the mcpServers block below. Needs shell integration (on by
+      # default; without it this falls back to the old behaviour).
+      "ctrl+shift+enter" = "launch --cwd=last_reported";
+      "ctrl+shift+t"     = "launch --type=tab --cwd=last_reported";
+      "ctrl+shift+n"     = "launch --type=os-window --cwd=last_reported";
       "alt+left"         = "neighboring_window left";
       "alt+right"        = "neighboring_window right";
       "alt+up"           = "neighboring_window up";
@@ -692,23 +701,17 @@ in
         type = "http";
         url = "https://knowledge-mcp.global.api.aws";
       };
-      # Executes real AWS API calls as whichever profile is named below.
-      # Credentials deliberately live in ~/.aws/credentials (outside this
-      # PUBLIC repo) — never inline keys here; the profile name is the only
-      # thing safe to commit. READ_OPERATIONS_ONLY pins it to read-only
-      # calls; flip to "false" (or swap in REQUIRE_MUTATION_CONSENT = "true"
-      # for a per-write prompt) once you actually need to mutate infra.
-      # Note: the server has full filesystem access with your permissions.
-      aws-api = {
-        type = "stdio";
-        command = "uvx";
-        args = [ "awslabs.aws-api-mcp-server@latest" ];
-        env = {
-          AWS_REGION = "us-east-1";  # default region only; override per command
-          AWS_API_MCP_PROFILE_NAME = "default";
-          READ_OPERATIONS_ONLY = "true";
-        };
-      };
+      # No AWS *API* MCP server on purpose (awslabs.aws-api-mcp-server was here;
+      # 2 lifetime calls vs 856 `aws` CLI calls from Bash). Claude Code can gate
+      # the CLI per *argument* — `Bash(aws rds delete-db-instance:*)` in a repo's
+      # settings.local.json — whereas MCP permissions are per-tool only, so no
+      # AWS MCP server can express that deny.
+      #
+      # Don't swap in the supported replacement (mcp-proxy-for-aws →
+      # aws-mcp.<region>.api.aws) expecting parity: its --read-only flag strips
+      # every API-execution tool, so nothing there matches the old
+      # READ_OPERATIONS_ONLY=true. Docs-only, or unrestricted write to every
+      # profile listed plus an arbitrary-code aws___run_script.
     };
   };
   home.file.".claude/settings.json" = {
