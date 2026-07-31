@@ -10,6 +10,16 @@
     # cached (~60 MB DL) and not flagged insecure. Bump when unstable's logseq is
     # cached again. Only used for the logseq package (see home/common.nix).
     nixpkgs-logseq.url = "github:nixos/nixpkgs/ea30586ee015f37f38783006a9bc9e4aa64d7d61";
+    # Pin kitty to 0.48.0: 0.48.1 aborts the whole process when you drag a tab out
+    # of the tab bar. Its new drag_icon_surface_listener registers only .enter/.leave,
+    # but wl_compositor is bound at version 6 whenever the compositor offers it (sway
+    # 1.12 does), so the drag icon surface gets wl_surface.preferred_buffer_scale
+    # (opcode 2) and libwayland aborts on the NULL listener slot:
+    #   listener function for opcode 2 of wl_surface is NULL
+    # Fixed upstream in kitty 0.48.2 (commit 16da653, kovidgoyal/kitty#10284), which
+    # nixpkgs hasn't picked up yet. 0.48.0 predates the listener entirely, so it has
+    # no such crash path. Drop this input once unstable ships >= 0.48.2.
+    nixpkgs-kitty.url = "github:nixos/nixpkgs/6d12004108e0e4a5cfa4bd83b14477f040b15773";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     plasma-manager.url = "github:nix-community/plasma-manager";
@@ -30,11 +40,12 @@
     walker.inputs.elephant.follows = "elephant";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-logseq, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, walker, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-logseq, nixpkgs-kitty, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, walker, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     pkgs-stable = nixpkgs-stable.legacyPackages.x86_64-linux;
     logseq-pkg = nixpkgs-logseq.legacyPackages.x86_64-linux.logseq;
+    kitty-pkg = nixpkgs-kitty.legacyPackages.x86_64-linux.kitty;
   in
   {
      nixosConfigurations = {
@@ -60,7 +71,7 @@
               walker.homeManagerModules.default
             ];
             home-manager.extraSpecialArgs = {
-              inherit pkgs-stable logseq-pkg;
+              inherit pkgs-stable logseq-pkg kitty-pkg;
               worktrunk-pkg = worktrunk.packages.x86_64-linux.default;
             };
           }
@@ -100,7 +111,7 @@
               walker.homeManagerModules.default
             ];
             home-manager.extraSpecialArgs = {
-              inherit pkgs-stable logseq-pkg;
+              inherit pkgs-stable logseq-pkg kitty-pkg;
               worktrunk-pkg = worktrunk.packages.x86_64-linux.default;
             };
           }

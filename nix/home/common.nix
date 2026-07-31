@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-stable, logseq-pkg, worktrunk-pkg, lib, ... }:
+{ config, pkgs, pkgs-stable, logseq-pkg, kitty-pkg, worktrunk-pkg, lib, ... }:
 
 let
   playwrightBrowsers = (builtins.fromJSON (builtins.readFile "${pkgs.playwright-driver}/browsers.json")).browsers;
@@ -257,6 +257,9 @@ in
   # Terminal and launcher
   programs.kitty = {
     enable = true;
+    # Pinned to 0.48.0 via the nixpkgs-kitty input — 0.48.1 aborts on tab drag-out.
+    # See the comment on that input in flake.nix; drop both once unstable has >= 0.48.2.
+    package = kitty-pkg;
     font = {
       name = "JetBrainsMono Nerd Font";
       size = 10;
