@@ -171,9 +171,24 @@ in
           api = "anthropic-messages";
           # Fully-versioned ids only — CLIProxyAPI does not accept family
           # aliases. Bump these as newer models appear in its /v1/models.
+          #
+          # maxTokens is REQUIRED here: the Anthropic Messages API demands
+          # max_tokens on every request, and without it the transport refuses
+          # to send ("requires a positive maxTokens value"). 64000 verified
+          # accepted by both models against this proxy.
           models = [
-            { id = "claude-opus-5"; name = "Claude Opus 5 (native)"; }
-            { id = "claude-sonnet-5"; name = "Claude Sonnet 5 (native)"; }
+            {
+              id = "claude-opus-5";
+              name = "Claude Opus 5 (native)";
+              maxTokens = 64000;
+              contextWindow = 200000;
+            }
+            {
+              id = "claude-sonnet-5";
+              name = "Claude Sonnet 5 (native)";
+              maxTokens = 64000;
+              contextWindow = 200000;
+            }
           ];
         };
         # FALLBACK — OpenAI-shaped, in front of the Claude CLI.
