@@ -177,17 +177,24 @@ in
           # to send ("requires a positive maxTokens value"). 64000 verified
           # accepted by both models against this proxy.
           models = [
+            # reasoning=true advertises extended-thinking support, which is what
+            # un-greys the Control UI's REASONING selector. Verified end to end:
+            # a thinking-enabled request through this proxy returns real
+            # {"type":"thinking"} blocks. Without the flag the UI correctly
+            # reports Off, because the gateway never asks for thinking at all.
             {
               id = "claude-opus-5";
               name = "Claude Opus 5 (native)";
               maxTokens = 64000;
               contextWindow = 200000;
+              reasoning = true;
             }
             {
               id = "claude-sonnet-5";
               name = "Claude Sonnet 5 (native)";
               maxTokens = 64000;
               contextWindow = 200000;
+              reasoning = true;
             }
           ];
         };
