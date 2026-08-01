@@ -4,21 +4,36 @@
 # subscription via a local proxy.
 #
 # Topology (everything but Caddy is bound to localhost + firewalled):
-#   openclaw gateway (:18789) --> claude-proxy   (:3456, PRIMARY, sanctioned)
-#                             \-> claude-fallback (:8317, FALLBACK, OAuth-reuse)
-#   Caddy openclaw.hrry.sh (public, basic_auth) --> gateway :18789
+#   openclaw gateway (:18789) --> claude-native (:8317, PRIMARY,  OAuth-reuse)
+#                             \-> claude-cli    (:3456, FALLBACK, sanctioned)
+#   Caddy openclaw.hrry.sh (public) --> gateway :18789
 #
-# Primary  = claude-max-api-proxy: shells out to `claude -p` (the path Anthropic
-#            currently permits for subscription-backed programmatic use).
-# Fallback = CLIProxyAPI: subscription-OAuth reuse (the April-2026-blocked path);
-#            only exercised when the primary errors. Ban-prone by design.
+# Primary  = CLIProxyAPI. No Claude CLI: it holds its own subscription OAuth and
+#            speaks the native Anthropic Messages API, so prompt caching,
+#            extended thinking and tool_use blocks survive end to end. That is
+#            subscription-OAuth reuse — the mechanism Anthropic blocked in April
+#            2026 — so it is the ban-prone path, chosen deliberately for the
+#            Anthropic-native feature set.
+# Fallback = claude-max-api-proxy: shells out to `claude -p`, the path Anthropic
+#            currently permits. OpenAI-shaped, so no prompt caching — but if the
+#            primary is ever cut off, the agent degrades onto a compliant path
+#            instead of going dark.
+#
+# Caching note: OpenClaw emits cache_control {type:"ephemeral"} for any
+# anthropic-messages provider, so ~5-minute caching works through the local
+# proxy. The 1-hour extended TTL is gated on the endpoint hostname being
+# api.anthropic.com (or *.aiplatform.googleapis.com), which a localhost proxy
+# cannot satisfy — see resolveAnthropicEphemeralCacheControl in the gateway.
 #
 # MANUAL, ONE-TIME STEPS (cannot be done declaratively — see task summary):
 #   1. Create /etc/openclaw/gateway.env -> OPENCLAW_GATEWAY_TOKEN=<random hex>
-#   2. Log the primary in:  sudo -u clawproxy -H bash -lc \
-#        'CLAUDE_CONFIG_DIR=/var/lib/clawproxy/.claude claude'   (browser OAuth)
+#   2. Log the primary in. The OAuth callback lands on localhost:54545, which
+#      must reach the VPS, so tunnel it from a machine with a browser:
+#        ssh -L 54545:localhost:54545 vps
+#        sudo -u clawproxy -H cli-proxy-api --config /etc/cliproxyapi/config.yaml \
+#          -claude-login -no-browser
 #   3. Log the fallback in: sudo -u clawproxy -H bash -lc \
-#        'cli-proxy-api --claude-login --config /etc/cliproxyapi/config.yaml'
+#        'CLAUDE_CONFIG_DIR=/var/lib/clawproxy/.claude claude'   (browser OAuth)
 #   4. Pair each browser once. Opening the UI queues a request; approve it with:
 #        TOK=$(sudo sed -n 's/^OPENCLAW_GATEWAY_TOKEN=//p' /etc/openclaw/gateway.env)
 #        sudo -u openclaw env HOME=/var/lib/openclaw \
@@ -29,12 +44,12 @@
 
 let
   gatewayPort = 18789;
-  primaryProxyPort = 3456; # claude-max-api-proxy
-  fallbackProxyPort = 8317; # CLIProxyAPI
+  cliProxyPort = 3456; # claude-max-api-proxy (fallback, spawns `claude -p`)
+  nativeProxyPort = 8317; # CLIProxyAPI (primary, native Anthropic Messages)
   subdomain = "openclaw.${domain}";
 
   # Built against unstable: stable-24.11's buildNpmPackage predates the v2 deps
-  # fetcher the primary needs, and it keeps builds matching the resolved hashes.
+  # fetcher claude-max-api-proxy needs, and it keeps builds matching the hashes.
   claude-max-api-proxy = import ../../../packages/claude-max-api-proxy { pkgs = pkgs-unstable; };
   cliproxyapi = import ../../../packages/cliproxyapi { pkgs = pkgs-unstable; };
 
@@ -46,7 +61,7 @@ let
   # Materialized at a stable /etc path so the manual login uses the same config.
   cliproxyConfigText = ''
     host: "127.0.0.1"
-    port: ${toString fallbackProxyPort}
+    port: ${toString nativeProxyPort}
     auth-dir: "/var/lib/cliproxyapi/auth"
     api-keys:
       - "not-needed"
@@ -81,13 +96,13 @@ in
     "d /etc/openclaw 0755 root root - -"
   ];
 
-  # ---- PRIMARY proxy: claude-max-api-proxy (sanctioned CLI-subprocess) ----
+  # ---- FALLBACK proxy: claude-max-api-proxy (sanctioned CLI-subprocess) ----
   systemd.services.claude-max-api-proxy = {
-    description = "claude-max-api-proxy (primary: Claude Max via `claude -p`)";
+    description = "claude-max-api-proxy (fallback: Claude Max via `claude -p`)";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
     environment = {
-      PORT = toString primaryProxyPort;
+      PORT = toString cliProxyPort;
       HOST = "127.0.0.1";
       HOME = "/var/lib/clawproxy";
       CLAUDE_CONFIG_DIR = "/var/lib/clawproxy/.claude";
@@ -103,9 +118,9 @@ in
     };
   };
 
-  # ---- FALLBACK proxy: CLIProxyAPI (OAuth-reuse; only on primary failure) ----
+  # ---- PRIMARY proxy: CLIProxyAPI (native Anthropic Messages, OAuth-reuse) ----
   systemd.services.cliproxyapi = {
-    description = "CLIProxyAPI (fallback: Claude Max via OAuth-reuse)";
+    description = "CLIProxyAPI (primary: Claude Max via native Anthropic API)";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
     environment = { HOME = "/var/lib/cliproxyapi"; };
@@ -145,37 +160,38 @@ in
       # loopback makes the gateway see real client IPs and treat them as remote.
       gateway.trustedProxies = [ "127.0.0.1" "::1" ];
 
-      # Both proxies are OpenAI-compatible on /v1. Custom (non-bundled) providers
-      # MUST declare baseUrl + a `models` array, else the gateway exits 78.
+      # Custom (non-bundled) providers MUST declare baseUrl + a `models` array,
+      # else the gateway exits 78.
       models.providers = {
-        claude-proxy = {
-          baseUrl = "http://127.0.0.1:${toString primaryProxyPort}/v1";
+        # PRIMARY — native Anthropic Messages. No /v1 suffix: the Anthropic SDK
+        # is handed this as its baseURL and appends /v1/messages itself.
+        claude-native = {
+          baseUrl = "http://127.0.0.1:${toString nativeProxyPort}";
           apiKey = "not-needed";
-          api = "openai-completions";
-          # The proxy takes family aliases (opus/sonnet/haiku) and lets the Claude
-          # CLI resolve the current versioned id at runtime — so this tracks the
-          # latest Opus/Sonnet automatically instead of pinning a stale version.
+          api = "anthropic-messages";
+          # Fully-versioned ids only — CLIProxyAPI does not accept family
+          # aliases. Bump these as newer models appear in its /v1/models.
           models = [
-            { id = "opus"; name = "Claude Opus (Max subscription)"; }
-            { id = "sonnet"; name = "Claude Sonnet (Max subscription)"; }
+            { id = "claude-opus-5"; name = "Claude Opus 5 (native)"; }
+            { id = "claude-sonnet-5"; name = "Claude Sonnet 5 (native)"; }
           ];
         };
-        claude-fallback = {
-          baseUrl = "http://127.0.0.1:${toString fallbackProxyPort}/v1";
+        # FALLBACK — OpenAI-shaped, in front of the Claude CLI.
+        claude-cli = {
+          baseUrl = "http://127.0.0.1:${toString cliProxyPort}/v1";
           apiKey = "not-needed";
           api = "openai-completions";
-          # NB: CLIProxyAPI advertises no models until its own OAuth login is done;
-          # verify these ids against `curl localhost:8317/v1/models` afterwards, as
-          # it may want fully-versioned Anthropic ids rather than family aliases.
+          # This proxy takes family aliases and lets the CLI resolve the current
+          # versioned id at runtime, so it tracks the latest models by itself.
           models = [
-            { id = "opus"; name = "Claude Opus (fallback)"; }
-            { id = "sonnet"; name = "Claude Sonnet (fallback)"; }
+            { id = "opus"; name = "Claude Opus (CLI fallback)"; }
+            { id = "sonnet"; name = "Claude Sonnet (CLI fallback)"; }
           ];
         };
       };
       agents.defaults.model = {
-        primary = "claude-proxy/opus";
-        fallbacks = [ "claude-fallback/opus" ];
+        primary = "claude-native/claude-opus-5";
+        fallbacks = [ "claude-cli/opus" ];
       };
     };
   };
