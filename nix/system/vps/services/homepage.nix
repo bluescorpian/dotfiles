@@ -54,13 +54,6 @@ in {
               description = "Recipe manager";
             };
           }
-          {
-            "OpenClaw" = {
-              icon = "mdi-robot";
-              href = "https://openclaw.${domain}";
-              description = "Personal AI assistant";
-            };
-          }
         ];
       }
     ];
