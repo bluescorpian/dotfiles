@@ -84,7 +84,11 @@
     rebuild = "sudo nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname)";
     rebuild-test = "sudo nixos-rebuild test --flake /home/shared/dotfiles/nix#$(hostname)";
     rebuild-boot = "sudo nixos-rebuild boot --flake /home/shared/dotfiles/nix#$(hostname)";
-    rebuild-vps = "nixos-rebuild switch --flake /home/shared/dotfiles/nix#vps --target-host harry@91.98.21.137 --sudo";
+    # Target the `vps` ssh alias, not the raw IP: ~/.ssh/config pins a non-default
+    # key (IdentitiesOnly + IdentityFile), so connecting by IP fails publickey auth.
+    # `--use-remote-sudo` despite its deprecation notice: this nixos-rebuild still
+    # rejects the `--elevate=sudo` it tells you to switch to (and `--sudo` outright).
+    rebuild-vps = "nixos-rebuild switch --flake /home/shared/dotfiles/nix#vps --target-host vps --use-remote-sudo";
     update-claude = "/home/shared/dotfiles/scripts/flake-autoupdate.sh claude-code";
     flake-autoupdate = "/home/shared/dotfiles/scripts/flake-autoupdate.sh";
     copy-dotfiles-vps = "rsync -avz --delete --exclude='.*' /home/shared/dotfiles/ harry@91.98.21.137:/home/harry/dotfiles/";
