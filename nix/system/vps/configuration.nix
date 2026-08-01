@@ -17,6 +17,7 @@ in {
     ./services/pingvin-share.nix
     ./services/filebrowser.nix
     ./services/mealie.nix
+    ./services/openclaw.nix
   ];
 
   time.timeZone = "Africa/Johannesburg";
@@ -59,6 +60,7 @@ in {
 
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "n8n"
+    "claude-code"
   ];
 
   nix.settings = {

@@ -23,6 +23,9 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     vscode-server.inputs.nixpkgs.follows = "nixpkgs";
+    # Not `follows`-ing nixpkgs: nix-openclaw carries its own recent nixpkgs so the
+    # heavy OpenClaw pnpm/Node build matches upstream (and the binary cache).
+    nix-openclaw.url = "github:openclaw/nix-openclaw";
     worktrunk.url = "github:max-sixty/worktrunk";
     worktrunk.inputs.nixpkgs.follows = "nixpkgs";
     elephant.url = "github:abenz1267/elephant";
@@ -30,7 +33,7 @@
     walker.inputs.elephant.follows = "elephant";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-logseq, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, walker, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-logseq, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, walker, nix-openclaw, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     pkgs-stable = nixpkgs-stable.legacyPackages.x86_64-linux;
@@ -70,10 +73,17 @@
       # VPS configuration - minimal headless server (stable channel)
       vps = nixpkgs-stable.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { pkgs-unstable = nixpkgs.legacyPackages.x86_64-linux; };
+        specialArgs = {
+          pkgs-unstable = nixpkgs.legacyPackages.x86_64-linux;
+          # Built against nix-openclaw's own nixpkgs, so stable-24.11 is a non-issue.
+          openclaw-pkg = nix-openclaw.packages.x86_64-linux.openclaw-gateway;
+          # From the claude-code flake's package output (already unfree-allowed there).
+          claude-code-pkg = claude-code.packages.x86_64-linux.default;
+        };
         modules = [
           disko.nixosModules.disko
           vscode-server.nixosModules.default
+          nix-openclaw.nixosModules.openclaw-gateway
           ./system/vps/configuration.nix
         ];
       };
