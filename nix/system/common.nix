@@ -65,6 +65,13 @@
     pulse.enable = true;
   };
 
+  # Bluetooth. blueman supplies the tray applet (autostarted in home/sway.nix) and
+  # the blueman-manager GUI — bluez on its own has no graphical pairing UI here,
+  # since the KDE applet only runs under Plasma.
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
+  services.blueman.enable = true;
+
   # Shared group for file sharing between users
   users.groups.harry-shared = {};
 
