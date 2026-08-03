@@ -17,12 +17,6 @@ in {
     ./services/pingvin-share.nix
     ./services/filebrowser.nix
     ./services/mealie.nix
-    # Shelved: subscription-backed access forces Claude Code's system prompt
-    # (the proxy must present as Claude Code for Anthropic to accept the
-    # subscription OAuth), which overrides OpenClaw's own persona. Re-enable
-    # only alongside a real Anthropic API key, which sends our system prompt
-    # unmodified. Everything else is verified working — see services/openclaw.nix.
-    # ./services/openclaw.nix
   ];
 
   time.timeZone = "Africa/Johannesburg";
