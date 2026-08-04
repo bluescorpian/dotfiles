@@ -771,6 +771,11 @@ in
   programs.git.ignores = [
     ".codex"
     "docs/session-notes/"
+    # graphify writes its graph into the workspace it indexes, so it would
+    # otherwise show up untracked in every repo it's run against (20 MB in
+    # wedded-world). Global rather than per-repo since it's a tool artifact,
+    # not a property of any one project.
+    "graphify-out/"
   ];
 
   # Keybindings cheatsheet — always-on static server so it can be bookmarked.
