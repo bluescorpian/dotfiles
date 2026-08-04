@@ -35,6 +35,17 @@ let
       makeWrapper ${lib.getExe logseq-pkg} $out/bin/logseq --add-flags "--ozone-platform=x11"
     '';
   };
+
+  # Vercel's Claude Code plugin: /deploy, /env, /status commands, deployment
+  # agents, and Vercel's OAuth-gated HTTP MCP server. Fetched directly rather
+  # than added as a flake input so it doesn't ride along in flake.lock; upstream
+  # ships no tags, so bump rev + hash together to update.
+  vercel-claude-plugin = pkgs.fetchFromGitHub {
+    owner = "vercel";
+    repo = "vercel-plugin";
+    rev = "b61a2c5f4b9d4f8814af0c469fa0a6a91d50addf";  # plugin.json v0.45.1
+    hash = "sha256-DZd+h8wZWu4yACmStgwH17JxzsIvtuWIgNOs7DDD5H8=";
+  };
 in
 {
   # Development packages
@@ -692,6 +703,13 @@ in
     package = pkgs.claude-code;  # sadjow overlay; nixpkgs claude-code lags upstream
     context = ../../claude/CLAUDE.md;
     skills = ../../claude/skills;
+    # Personal plugins land as directory symlinks under ~/.claude/skills/<name>,
+    # alongside (not inside) the imperative ~/.claude/plugins tree that
+    # `/plugin install` manages — the two don't collide. Deliberately not using
+    # the module's `marketplaces` option: it would own
+    # ~/.claude/plugins/known_marketplaces.json and clobber the marketplaces
+    # already registered there.
+    plugins.vercel = vercel-claude-plugin;
     mcpServers = {
       claude-conversation-search = {
         type = "stdio";

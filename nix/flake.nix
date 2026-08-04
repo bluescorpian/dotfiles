@@ -81,7 +81,9 @@
       # VPS configuration - minimal headless server (stable channel)
       vps = nixpkgs-stable.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { pkgs-unstable = nixpkgs.legacyPackages.x86_64-linux; };
+        specialArgs = {
+          pkgs-unstable = nixpkgs.legacyPackages.x86_64-linux;
+        };
         modules = [
           disko.nixosModules.disko
           vscode-server.nixosModules.default

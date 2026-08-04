@@ -359,17 +359,32 @@ in
       };
 
       # Per-output config. Sway silently ignores blocks for outputs that
-      # aren't present, so listing laptop's connectors here is harmless on
-      # desktop. Connector names follow the kernel DRM convention under the
-      # AMD iGPU (sway runs on amdgpu, not the dGPU, via PRIME render-offload).
-      # External monitor (Dell S2421HN, 1920x1080 @ scale 1.0) sits on the
-      # left at logical origin; the laptop panel sits flush to its right.
-      # HDMI-A-1's logical width is 1920, so eDP-1 starts at pos 1920.
-      # eDP-1 runs at scale 1.25, so its own logical width is 1920/1.25 = 1536.
-      output = lib.mkIf isLaptop {
-        "HDMI-A-1" = { mode = "1920x1080"; pos = "0 0"; };
-        "eDP-1"    = { mode = "1920x1080"; pos = "1920 0"; scale = "1.25"; };
-      };
+      # aren't present, so listing every connector is harmless when one is
+      # unplugged. Connector names follow the kernel DRM convention.
+      #
+      # Laptop: external Dell (HDMI-A-1, scale 1.0) at the logical origin;
+      # the laptop panel (eDP-1) sits flush to its right. eDP-1 runs at scale
+      # 1.25, so its own logical width is 1920/1.25 = 1536, but HDMI-A-1's
+      # logical width is 1920, so eDP-1 starts at pos 1920.
+      #
+      # Desktop: the Dell S2421HN (HDMI-A-1) is the always-present primary,
+      # anchored at the origin so its layout is stable whether or not the CMT
+      # is plugged in. The CMT GA241 (HDMI-A-2) sits to its LEFT at pos -1920
+      # when present. Workspace 1 is pinned to the Dell below.
+      output =
+        if isLaptop then {
+          "HDMI-A-1" = { mode = "1920x1080"; pos = "0 0"; };
+          "eDP-1"    = { mode = "1920x1080"; pos = "1920 0"; scale = "1.25"; };
+        } else {
+          "HDMI-A-1" = { mode = "1920x1080"; pos = "0 0"; };
+          "HDMI-A-2" = { mode = "1920x1080"; pos = "-1920 0"; };
+        };
+
+      # Keep the primary workspace on the Dell so it stays put when the CMT
+      # is unplugged. Only meaningful on desktop; laptop leaves defaults.
+      workspaceOutputAssign = lib.optionals isDesktop [
+        { workspace = "1:web"; output = "HDMI-A-1"; }
+      ];
 
       # Apply the system xkb layout (us/dvp) to all keyboards under sway.
       input."type:keyboard" = {

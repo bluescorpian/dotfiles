@@ -59,12 +59,25 @@ in {
 
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "n8n"
+    "claude-code"
   ];
 
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
     trusted-users = [ "root" "harry" ];
   };
+
+  # Automatic garbage collection. Deliberately duplicated from system/common.nix
+  # rather than imported — common.nix is desktop-only (Plasma, X11, systemd-boot,
+  # Docker) and conflicts with this host on stateVersion, sshd and bootloader.
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
+
+  # journald defaults to 10% of the filesystem — ~3.7 GB on this 37 GB disk.
+  services.journald.extraConfig = "SystemMaxUse=500M";
 
   system.stateVersion = "24.11";
 }
