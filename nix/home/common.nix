@@ -46,11 +46,14 @@ let
     rev = "b61a2c5f4b9d4f8814af0c469fa0a6a91d50addf";  # plugin.json v0.45.1
     hash = "sha256-DZd+h8wZWu4yACmStgwH17JxzsIvtuWIgNOs7DDD5H8=";
   };
+
+  graphify = import ../packages/graphify { inherit pkgs; };
 in
 {
   # Development packages
   home.packages = with pkgs; [
     (import ../packages/claude-conversation-search { inherit pkgs; })
+    graphify
 
     # Fonts
     cascadia-code
@@ -753,6 +756,12 @@ in
     source = ../../claude/hooks/conversation-search-uuid-hint.sh;
     executable = true;
   };
+  # `graphify install` would copy this in imperatively (and rewrite the managed
+  # ~/.claude/CLAUDE.md while it's there), so symlink the skill from the package
+  # instead — it then tracks the graphify version on every rebuild. `skills`
+  # above is a path, which the module links entry-by-entry, so this sits
+  # alongside ../../claude/skills rather than fighting it.
+  home.file.".claude/skills/graphify".source = graphify.skill;
   home.file.".codex/AGENTS.md".source = ../../agents/AGENTS.md;
   home.file.".codex/config.toml".source = ../../codex/config.toml;
   home.file.".codex/rules".source = ../../codex/rules;
