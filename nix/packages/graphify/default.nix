@@ -81,6 +81,11 @@ let
     { pname = "tree-sitter-fortran"; version = "0.6.0";
       url = "https://files.pythonhosted.org/packages/57/86/0923f061e36f229d99660a8f53f8e3b57da459e08512c09e256de820c472/tree_sitter_fortran-0.6.0-cp39-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl";
       hash = "sha256-rEgAtKvBsl5uerSj8uridMWxkQe+sY06RzwPZ1CcdIY="; }
+    # The `terraform` extra. Pulled in because wedded-world has .tf/.hcl that
+    # otherwise contribute nothing to the graph.
+    { pname = "tree-sitter-hcl"; version = "1.2.0";
+      url = "https://files.pythonhosted.org/packages/ee/0a/01bb627044d273e8e506edff8ab773e562ba447b5790b789f62e47a5e754/tree_sitter_hcl-1.2.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl";
+      hash = "sha256-kVdj2mYwYQwu+3r+ExRfUP64BDcyp0+brniBEhJXjT0="; }
   ];
   version = "0.9.32";
 
@@ -94,8 +99,10 @@ let
       hash = "sha256-ffZ6s73UcqUSQ+YdOwRV3djxw8Wm95RcM8eyke0xooA=";
     };
 
-    # Core install only, matching `uv tool install graphifyy`. The optional
-    # extras (mcp, pdf, neo4j, video, the LLM backends) are deliberately left out.
+    # Core, plus the `sql` and `terraform` extras — without them graphify
+    # silently drops .sql/.tf/.hcl files from the graph, which cost wedded-world
+    # 133 + 10 files. The remaining extras (mcp, pdf, neo4j, video, office, and
+    # the LLM backends) are deliberately left out.
     dependencies = (with py; [
       networkx
       numpy
@@ -107,6 +114,7 @@ let
       tree-sitter-json
       tree-sitter-python
       tree-sitter-rust
+      tree-sitter-sql
     ]) ++ grammars;
 
     pythonImportsCheck = [ "graphify" ];
