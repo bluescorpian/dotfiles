@@ -37,6 +37,41 @@ in {
       };
     };
 
+    # Matrix is the only messaging platform enabled. Signal was considered and
+    # dropped; Telegram/Discord/Slack are deliberately absent — the bot API for
+    # those is not end-to-end encrypted.
+    #
+    # `matrix` is Linux-only and pulls mautrix + python-olm into the sealed venv.
+    # It cannot be installed at runtime: the Nix store is read-only, so any
+    # optional extra has to be built in here.
+    extraDependencyGroups = [ "matrix" ];
+
+    # Non-secret, so safe to have in the world-readable Nix store. Everything
+    # identifying or authenticating lives in ${envFile} instead — see below.
+    environment = {
+      MATRIX_HOMESERVER = "https://matrix.org";
+      # `optional` tries E2EE but keeps working unencrypted if crypto fails to
+      # initialise — i.e. it can silently downgrade. mautrix + python-olm are
+      # confirmed present in the built closure, so it should engage; grep the
+      # journal for "E2EE" after first start to be sure. `required` fails closed
+      # instead, if you'd rather it refuse to run than send plaintext.
+      MATRIX_E2EE_MODE = "optional";
+      # Rooms need an @mention; DMs always get a response.
+      MATRIX_REQUIRE_MENTION = "true";
+      # The bot auto-accepts room invites, so without this anyone who can invite
+      # it into a room could reach it. Keep public-room joins off.
+      MATRIX_ALLOW_PUBLIC_ROOMS = "false";
+    };
+
+    # Secrets and personal identifiers, kept out of this public repo:
+    #   MATRIX_ACCESS_TOKEN   full access to the bot's Matrix account
+    #   MATRIX_ALLOWED_USERS  your @user:matrix.org — who may talk to the bot
+    #   MATRIX_ALLOWED_ROOMS  which rooms may trigger a turn
+    #   MATRIX_RECOVERY_KEY   optional; lets the bot self-sign its device so
+    #                         Element will share encryption sessions with it
+    # Upstream is explicit that a locked-down deployment sets BOTH the user and
+    # room allowlists: with either unset, anything that reaches the bot in a
+    # joined room can trigger an agent turn.
     environmentFiles = [ envFile ];
   };
 
