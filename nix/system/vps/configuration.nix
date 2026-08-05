@@ -14,7 +14,7 @@ in {
     ./services/cockpit.nix
     # ./services/n8n.nix  # temporarily disabled
     ./services/homepage.nix
-    ./services/pingvin-share.nix
+    ./services/send.nix
     ./services/filebrowser.nix
     ./services/mealie.nix
     ./services/hermes.nix

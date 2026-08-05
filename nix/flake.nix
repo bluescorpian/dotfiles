@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs?ref=nixos-24.11";
+    nixpkgs-stable.url = "github:nixos/nixpkgs?ref=nixos-26.05";
     # Pin logseq to 0.10.14: unstable's 0.10.15 isn't in the binary cache (builds
     # the ClojureScript/Electron app from source, appears to hang) and bumped to
     # the EOL-flagged Electron 39. This commit ships 0.10.14 on Electron 38.7.1 —
