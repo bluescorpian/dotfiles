@@ -17,6 +17,7 @@ in {
     ./services/pingvin-share.nix
     ./services/filebrowser.nix
     ./services/mealie.nix
+    ./services/hermes.nix
   ];
 
   time.timeZone = "Africa/Johannesburg";

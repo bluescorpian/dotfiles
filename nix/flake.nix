@@ -25,12 +25,16 @@
     vscode-server.inputs.nixpkgs.follows = "nixpkgs";
     worktrunk.url = "github:max-sixty/worktrunk";
     worktrunk.inputs.nixpkgs.follows = "nixpkgs";
+    # Deliberately not `follows`-ing our nixpkgs: the package set is built by
+    # uv2nix against the exact nixpkgs it pins, and repointing it is a good way
+    # to break the Python dependency closure. Costs one extra nixpkgs eval.
+    hermes-agent.url = "github:NousResearch/hermes-agent";
     elephant.url = "github:abenz1267/elephant";
     walker.url = "github:abenz1267/walker";
     walker.inputs.elephant.follows = "elephant";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-logseq, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, walker, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-logseq, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, walker, hermes-agent, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     pkgs-stable = nixpkgs-stable.legacyPackages.x86_64-linux;
@@ -76,6 +80,7 @@
         modules = [
           disko.nixosModules.disko
           vscode-server.nixosModules.default
+          hermes-agent.nixosModules.default
           ./system/vps/configuration.nix
         ];
       };
