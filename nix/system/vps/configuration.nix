@@ -67,6 +67,19 @@ in {
     experimental-features = [ "nix-command" "flakes" ];
     trusted-users = [ "root" "harry" ];
 
+    # claude-code is a 354 MiB closure and the overlay builds it outside
+    # cache.nixos.org, so without this every bump would be pushed up this
+    # uplink from the desktop instead of substituted here. Same cache the
+    # desktop and laptop already trust (system/common.nix).
+    #
+    # Safe to list just this one: NixOS appends the default cache rather than
+    # replacing it — the desktop's generated nix.conf ends with
+    # `... https://cache.nixos.org/`, even though common.nix never names it.
+    substituters = [ "https://claude-code.cachix.org" ];
+    trusted-public-keys = [
+      "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
+    ];
+
     # Demand-driven GC, which the timer below cannot provide: the nix-daemon
     # collects garbage *during* an operation whenever free space drops under
     # min-free, freeing up to max-free. A single deploy can outgrow the disk

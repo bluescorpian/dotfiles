@@ -76,6 +76,17 @@
         system = "x86_64-linux";
         specialArgs = {
           pkgs-unstable = nixpkgs.legacyPackages.x86_64-linux;
+          # Hermes drives the `claude` CLI (see services/hermes.nix), and wants
+          # a current one: stable 26.05 ships 2.1.187 against this flake's
+          # 2.1.222. Taken as a flake *output* rather than via the overlay
+          # desktop and laptop apply — deliberately. Applying the overlay to
+          # this host would rebuild claude-code against stable nixpkgs, landing
+          # on a store path that exists in no binary cache (verified: 404 on
+          # both cache.nixos.org and claude-code.cachix.org), so every deploy
+          # would build it from source and push 354 MiB up the uplink. The
+          # flake output is the identical path the desktop already runs and is
+          # cached, so the VPS substitutes it directly.
+          claude-code-pkg = claude-code.packages.x86_64-linux.default;
         };
         modules = [
           disko.nixosModules.disko

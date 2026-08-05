@@ -15,9 +15,22 @@
 #   echo "OPENROUTER_API_KEY=sk-or-..." | sudo install -m 0600 -o hermes -g hermes /dev/stdin /var/lib/hermes/env
 #
 # then rebuild (activation regenerates .env; a bare restart is not enough).
-{ pkgs, ... }:
+#
+# Claude Code is authenticated interactively, once, and it must be done AS THE
+# hermes USER — the same trap that broke photon's auth.json. Claude writes
+# credentials 0600 into $HOME/.claude, so logging in as harry produces a file
+# the service cannot read, and running it against ${stateDir} as harry leaves
+# root-of-the-tree files hermes no longer owns. Over SSH:
+#
+#   sudo -u hermes -H PATH=/etc/profiles/per-user/hermes/bin:$PATH claude
+#
+# It prints a URL, you paste the code back — no browser needed on the VPS.
+# Verify with `claude auth status`. Credentials land in ${stateDir}/.claude and
+# survive rebuilds; they are not in this repo and not in the Nix store.
+{ pkgs, claude-code-pkg, ... }:
 let
-  envFile = "/var/lib/hermes/env";
+  stateDir = "/var/lib/hermes";
+  envFile = "${stateDir}/env";
 
   # `agent.disabled_toolsets` is the documented single switch: a denylist applied
   # *after* per-platform config, across the CLI and every gateway platform at
@@ -54,14 +67,16 @@ let
   # roughly 4 KB per turn and, more usefully, stops the model reaching for a
   # Weights-and-Biases workflow when you asked it to summarise an email.
   #
-  # Whole categories dropped: autonomous-ai-agents (driving other coding
-  # agents), creative (ComfyUI/p5js/TouchDesigner/ASCII art), github, mlops,
+  # Whole categories dropped: creative (ComfyUI/p5js/TouchDesigner/ASCII art),
+  # github, mlops,
   # software-development, smart-home (no Hue bridge), social-media (needs an X
   # API key). The apple/* skills are already inert — macOS-only, so they never
   # enter the index on Linux and are not listed here.
   disabledSkills = [
-    # autonomous-ai-agents — this box is not orchestrating other coding agents.
-    "claude-code" "codex" "computer-use" "hermes-agent" "opencode"
+    # autonomous-ai-agents — claude-code is deliberately kept ON; it is the one
+    # coding agent installed here (see extraPackages) and the skill is what
+    # teaches hermes to drive it. The rest are rival CLIs we do not ship.
+    "codex" "computer-use" "hermes-agent" "opencode"
     # creative — image/video/audio/diagram generation, none of it wired up.
     "architecture-diagram" "ascii-art" "ascii-video" "baoyu-infographic"
     "claude-design" "comfyui" "design-md" "excalidraw" "humanizer"
@@ -84,9 +99,10 @@ let
     "arxiv" "llm-wiki" "polymarket" "research-paper-writing"
   ];
 
-  # That leaves 12 on: himalaya (email), docx/xlsx/pdf/nano-pdf/powerpoint and
-  # ocr-and-documents (read and write the attachments you send it), maps,
-  # google-workspace, grounded-citations, blogwatcher, youtube-content.
+  # That leaves 13 on: claude-code, himalaya (email), docx/xlsx/pdf/nano-pdf/
+  # powerpoint and ocr-and-documents (read and write the attachments you send
+  # it), maps, google-workspace, grounded-citations, blogwatcher,
+  # youtube-content.
 in {
   services.hermes-agent = {
     enable = true;
@@ -167,7 +183,20 @@ in {
     #
     # extraPackages lands them on the systemd service PATH *and* in the hermes
     # user profile, so terminal commands, skills and cron jobs see them too.
-    extraPackages = [ pkgs.agent-browser pkgs.chromium ];
+    #
+    # claude-code gives hermes a real coding agent to delegate to — the bundled
+    # `claude-code` skill (kept enabled above) drives it, preferring `claude -p`
+    # print mode, which needs no PTY. Supplied via specialArgs rather than
+    # `pkgs.claude-code`; flake.nix explains why that distinction matters.
+    #
+    # Where it can actually work: the unit runs ProtectSystem=strict with
+    # ReadWritePaths=/var/lib/hermes, so `claude` can only edit files under
+    # ${stateDir}. Point it at repos cloned into ${stateDir}/workspace (its
+    # WorkingDirectory); anywhere else on the filesystem is read-only to it.
+    # That sandbox is also why `--dangerously-skip-permissions` is far less
+    # alarming here than it sounds — systemd, not Claude's own prompt gate, is
+    # the boundary that matters.
+    extraPackages = [ pkgs.agent-browser pkgs.chromium claude-code-pkg ];
 
     # Non-secret, so safe to have in the world-readable Nix store. Everything
     # identifying or authenticating lives in ${envFile} instead — see below.
@@ -178,6 +207,12 @@ in {
       # removes the ambiguity — and it is what the Chromium-presence check
       # looks at first.
       AGENT_BROWSER_EXECUTABLE_PATH = "${pkgs.chromium}/bin/chromium";
+
+      # Claude Code ships a self-updater that rewrites its own install dir.
+      # That dir is the Nix store here, so every run would otherwise attempt a
+      # write to a read-only path and warn about it. Version is a Nix concern:
+      # bump the claude-code flake input (`update-claude`) and redeploy.
+      DISABLE_AUTOUPDATER = "1";
 
       # fast | one-shot | agentic. Already the upstream default, but pinned
       # because it is the whole reason Parallel was picked over a faster
