@@ -86,9 +86,15 @@
     rebuild-boot = "sudo nixos-rebuild boot --flake /home/shared/dotfiles/nix#$(hostname)";
     # Target the `vps` ssh alias, not the raw IP: ~/.ssh/config pins a non-default
     # key (IdentitiesOnly + IdentityFile), so connecting by IP fails publickey auth.
-    # `--use-remote-sudo` despite its deprecation notice: this nixos-rebuild still
-    # rejects the `--elevate=sudo` it tells you to switch to (and `--sudo` outright).
-    rebuild-vps = "nixos-rebuild switch --flake /home/shared/dotfiles/nix#vps --target-host vps --use-remote-sudo";
+    # `--use-remote-sudo` despite its deprecation notice: with `--flake`, nixos-rebuild
+    # re-execs into the nixos-rebuild built by the *target's* flake output (24.11), which
+    # predates the `--elevate=sudo`/`--sudo` spelling its own deprecation notice suggests.
+    # `--use-substitutes` makes the VPS pull cacheable paths from cache.nixos.org itself
+    # instead of streaming them over this uplink. Measured on the hermes deploy: 7.68 of
+    # 8.74 GiB was on cache.nixos.org, so this is the difference between ~70 min and
+    # ~10 min of upload. Only locally-built paths (hermes + its uv2nix wheels) still ship
+    # from here.
+    rebuild-vps = "nixos-rebuild switch --flake /home/shared/dotfiles/nix#vps --target-host vps --use-remote-sudo --use-substitutes";
     update-claude = "/home/shared/dotfiles/scripts/flake-autoupdate.sh claude-code";
     flake-autoupdate = "/home/shared/dotfiles/scripts/flake-autoupdate.sh";
     copy-dotfiles-vps = "rsync -avz --delete --exclude='.*' /home/shared/dotfiles/ harry@91.98.21.137:/home/harry/dotfiles/";
