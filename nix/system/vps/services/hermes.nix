@@ -110,16 +110,48 @@ in {
 
       agent.disabled_toolsets = disabledToolsets;
       skills.disabled = disabledSkills;
+
+      # Split across two providers, which hermes supports per-capability. If
+      # `backend` were set instead it would force one provider to do both.
+      #
+      # Parallel for search: it is built for multi-step agentic research and is
+      # the strongest of the five on hard questions — it self-reports 47% on
+      # HLE against Exa's 24% and Tavily's 21%, and independent testing puts it
+      # in the top tier. The cost is latency, ~13s per search against sub-second
+      # for the snappier providers. Worth it for hard queries, not for "what's
+      # the weather".
+      #
+      # Firecrawl for extract: highest measured relevance of the set and by far
+      # the best page-extraction stack. Parallel can extract too, but this is
+      # the half Firecrawl is actually best at.
+      #
+      # Ruled out: tavily (consistently benchmarks below the leaders), searxng
+      # (free and private, but metasearch scraping rather than agentic
+      # research). Brave scored well independently but hermes has no backend
+      # for it.
+      web = {
+        search_backend = "parallel";
+        extract_backend = "firecrawl";
+      };
     };
 
     # Matrix is the only messaging platform enabled. Signal was considered and
     # dropped; Telegram/Discord/Slack are deliberately absent — the bot API for
     # those is not end-to-end encrypted.
     #
-    # `matrix` is Linux-only and pulls mautrix + python-olm into the sealed venv.
-    # It cannot be installed at runtime: the Nix store is read-only, so any
-    # optional extra has to be built in here.
-    extraDependencyGroups = [ "matrix" ];
+    # Provider SDKs are optional extras upstream, and the venv is sealed — the
+    # Nix store is read-only, so nothing can be pip-installed at runtime. Any
+    # extra we actually use has to be built in here.
+    #
+    # `parallel-web` and `firecrawl` back web_search and web_extract. Note the
+    # trap: the extra literally named `web` is FastAPI/uvicorn for the
+    # dashboard, nothing to do with web search. Without these two, `hermes
+    # doctor` still reports "✓ web" — it only checks that the API keys exist —
+    # and the failure surfaces at the first search, as an ImportError the agent
+    # helpfully suggests fixing with `uv pip install`, which cannot work here.
+    #
+    # `matrix` is Linux-only and pulls mautrix + python-olm.
+    extraDependencyGroups = [ "matrix" "parallel-web" "firecrawl" ];
 
     # What it takes to make the `browser` toolset real on NixOS. Hermes gates
     # browser_* behind two checks (tools/browser_tool.py): the `agent-browser`
@@ -147,6 +179,11 @@ in {
       # looks at first.
       AGENT_BROWSER_EXECUTABLE_PATH = "${pkgs.chromium}/bin/chromium";
 
+      # fast | one-shot | agentic. Already the upstream default, but pinned
+      # because it is the whole reason Parallel was picked over a faster
+      # provider — a silent default change would quietly undo that.
+      PARALLEL_SEARCH_MODE = "agentic";
+
       MATRIX_HOMESERVER = "https://matrix.org";
       # `optional` tries E2EE but keeps working unencrypted if crypto fails to
       # initialise — i.e. it can silently downgrade. mautrix + python-olm are
@@ -162,6 +199,8 @@ in {
     };
 
     # Secrets and personal identifiers, kept out of this public repo:
+    #   PARALLEL_API_KEY      web_search  — platform.parallel.ai
+    #   FIRECRAWL_API_KEY     web_extract — firecrawl.dev
     #   MATRIX_ACCESS_TOKEN   full access to the bot's Matrix account
     #   MATRIX_ALLOWED_USERS  your @user:matrix.org — who may talk to the bot
     #   MATRIX_ALLOWED_ROOMS  which rooms may trigger a turn
