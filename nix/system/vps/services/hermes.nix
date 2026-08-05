@@ -29,8 +29,11 @@ in {
 
     settings = {
       # Via OpenRouter (the module's default provider — no base_url needed).
-      # Swap for anthropic/claude-opus-5 if you want the bigger model.
-      model.default = "anthropic/claude-sonnet-5";
+      # DeepSeek V4 Pro rather than claude-sonnet-5 on cost: $0.44/$0.87 per
+      # million tokens in/out against Sonnet's $2/$10, so ~4.6x cheaper in and
+      # ~11x out. deepseek-v4-flash is cheaper again ($0.09/$0.18) if this still
+      # costs more than it's worth.
+      model.default = "deepseek/deepseek-v4-pro";
       memory = {
         memory_enabled = true;
         user_profile_enabled = true;
