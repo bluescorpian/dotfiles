@@ -87,6 +87,7 @@ in {
     # on a 37 GB disk — so the timer is the floor and this is the safety net.
     min-free = 2 * 1024 * 1024 * 1024; # 2 GiB: start collecting
     max-free = 8 * 1024 * 1024 * 1024; # 8 GiB: stop collecting
+    auto-optimise-store = true;
   };
 
   # Automatic garbage collection. Deliberately duplicated from system/common.nix
