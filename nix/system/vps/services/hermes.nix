@@ -349,16 +349,37 @@ in {
   # root ownership — the state-dir ownership trap that has already broken this
   # service twice, only inverted and permanent.
   #
-  # One inherited gotcha, worth knowing before the first rebuild-from-Hermes:
-  # a plain `sudo nixos-rebuild switch` runs inside hermes-agent.service's own
-  # cgroup, so when activation restarts hermes-agent systemd kills the whole
-  # cgroup — including the rebuild, halfway through switching. The old
-  # trigger-file unit sidestepped that by living outside the sandbox. The
-  # replacement is to detach it into a transient unit, which gets its own
-  # cgroup and survives:
+  # Deploying from the agent, and the three traps that cost it a first attempt:
   #
-  #   sudo systemd-run --collect --unit=vps-rebuild --service-type=oneshot \
-  #     nixos-rebuild switch --flake path:/var/lib/hermes/workspace/dotfiles/nix#vps
+  #   git -C /var/lib/hermes/workspace/dotfiles pull --ff-only
+  #   sudo systemd-run --collect --wait --unit=vps-rebuild --service-type=oneshot \
+  #     --setenv=PATH=/run/wrappers/bin:/run/current-system/sw/bin \
+  #     /run/current-system/sw/bin/nixos-rebuild switch \
+  #     --flake path:/var/lib/hermes/workspace/dotfiles/nix#vps
+  #   journalctl -u vps-rebuild -n 50 --no-pager
   #
-  # then read the outcome with `journalctl -u vps-rebuild`.
+  # 1. Pull first, always. Harry deploys this host from his desktop out of a
+  #    different checkout. A stale agent checkout does not merely deploy old
+  #    code — it rolls back the grant above, restoring the sandbox and deleting
+  #    the sudoers rule, so the agent revokes its own root mid-task and cannot
+  #    undo it. It also cannot diagnose it: from inside the session the
+  #    evidence is a sudo password prompt that contradicts a config it can
+  #    still read. This has happened once (2026-08-06).
+  #
+  # 2. systemd-run, not plain sudo. A plain `sudo nixos-rebuild switch` runs
+  #    inside hermes-agent.service's own cgroup, so when activation restarts
+  #    hermes-agent systemd kills the whole cgroup — including the rebuild,
+  #    halfway through switching. A transient unit gets its own cgroup and
+  #    survives. This is what the old trigger-file unit bought by living
+  #    outside the sandbox.
+  #
+  # 3. --setenv=PATH is required. Transient units inherit a minimal PATH with
+  #    no coreutils, and nixos-rebuild shells out to `test`; without it the
+  #    switch dies with "[Errno 2] No such file or directory: 'test'" *after*
+  #    a full build, which reads like a build failure and is not one.
+  #
+  # And do not trust the exit status: reloading dbus-broker times out on this
+  # host (reproducible since 2026-08-05, unrelated to Hermes), which makes
+  # switch-to-configuration exit 4 and nixos-rebuild report failure over an
+  # activation that fully succeeded. Confirm by testing the change itself.
 }
