@@ -131,17 +131,22 @@ in {
 
     settings = {
       # Via OpenRouter (the module's default provider — no base_url needed).
-      # Sonnet 5 rather than deepseek-v4-pro: better instruction-following and
-      # tool use for an assistant that drives claude-code, a browser and a
-      # dozen skills. It costs: $2/$10 per million tokens in/out against
-      # DeepSeek's $0.44/$0.87, so ~4.5x in and ~11x out — and the $2/$10 is
-      # Anthropic's introductory rate, which ends 2026-08-31 and reverts to
-      # $3/$15. Fall back to "deepseek/deepseek-v4-pro" (or -flash, at
-      # $0.09/$0.18) if the bill outgrows the benefit.
+      #
+      # Trial (2026-08-06): switched off anthropic/claude-sonnet-5 to
+      # openai/gpt-5.6-terra to compare real cost-per-task. Sonnet 5 was
+      # eating ~$7 of ~$9.6/week in `hermes insights` — one interactive
+      # session alone hit $6.88. Terra is OpenRouter's exclusive-discount
+      # rate: $1/$6 in/out (vs Sonnet 5's introductory $2/$10, reverting to
+      # $3/$15 on 2026-08-31), positioned between the flagship Sol tier and
+      # the cost-efficient Luna tier. Revert to anthropic/claude-sonnet-5 (see
+      # below) if Terra's instruction-following/tool-use quality doesn't hold
+      # up for driving claude-code, the browser tools, and a dozen skills.
+      # Cheaper fallback if Terra also disappoints: "deepseek/deepseek-v4-pro"
+      # (or -flash) at $0.44/$0.87 (or $0.09/$0.18).
       #
       # Slug is dotless for the 5 generation — anthropic/claude-sonnet-5, not
       # -5.0; older families keep the dot (anthropic/claude-sonnet-4.6).
-      model.default = "anthropic/claude-sonnet-5";
+      model.default = "openai/gpt-5.6-terra";
 
       # Thinking depth, sent to OpenRouter as `reasoning.effort` and mapped by
       # it onto Anthropic's adaptive-thinking control. Upstream default is
