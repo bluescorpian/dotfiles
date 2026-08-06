@@ -17,7 +17,7 @@
   #
   # A short alias for "switch this machine to a config from some checkout I
   # have not looked at" is a footgun on a host that is normally deployed
-  # remotely with `rebuild-vps` from Harry's desktop. Rebuild from here by
+  # remotely with `vps-deploy` from Harry's desktop. Rebuild from here by
   # spelling out the flake ref; hermes.nix documents the form the agent needs
   # (systemd-run, so activation restarting hermes does not kill the rebuild).
 }

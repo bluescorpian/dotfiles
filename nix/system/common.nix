@@ -84,20 +84,25 @@
     rebuild = "sudo nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname)";
     rebuild-test = "sudo nixos-rebuild test --flake /home/shared/dotfiles/nix#$(hostname)";
     rebuild-boot = "sudo nixos-rebuild boot --flake /home/shared/dotfiles/nix#$(hostname)";
-    # Target the `vps` ssh alias, not the raw IP: ~/.ssh/config pins a non-default
-    # key (IdentitiesOnly + IdentityFile), so connecting by IP fails publickey auth.
-    # `--use-remote-sudo` despite its deprecation notice: with `--flake`, nixos-rebuild
-    # re-execs into the nixos-rebuild built by the *target's* flake output (24.11), which
-    # predates the `--elevate=sudo`/`--sudo` spelling its own deprecation notice suggests.
-    # `--use-substitutes` makes the VPS pull cacheable paths from cache.nixos.org itself
-    # instead of streaming them over this uplink. Measured on the hermes deploy: 7.68 of
-    # 8.74 GiB was on cache.nixos.org, so this is the difference between ~70 min and
-    # ~10 min of upload. Only locally-built paths (hermes + its uv2nix wheels) still ship
-    # from here.
-    rebuild-vps = "nixos-rebuild switch --flake /home/shared/dotfiles/nix#vps --target-host vps --use-remote-sudo --use-substitutes";
+    # Replaces `rebuild-vps`, which deployed that host from *this* checkout. The
+    # VPS now builds from the checkout that lives on it, which Hermes also edits;
+    # two writers with no reconciliation meant whoever deployed last silently
+    # reverted the other. This pushes no closure — it tells the box to pull and
+    # rebuild itself, so there is only ever one source for that host.
+    #
+    # Side benefit: nothing streams up this uplink any more. The old alias needed
+    # --use-substitutes so the VPS fetched cacheable paths itself (7.68 of 8.74
+    # GiB on the hermes deploy — ~10 min instead of ~70); building on the box
+    # makes that the default rather than a flag.
+    vps-deploy = "/home/shared/dotfiles/scripts/vps-deploy.sh";
     update-claude = "/home/shared/dotfiles/scripts/flake-autoupdate.sh claude-code";
     flake-autoupdate = "/home/shared/dotfiles/scripts/flake-autoupdate.sh";
-    copy-dotfiles-vps = "rsync -avz --delete --exclude='.*' /home/shared/dotfiles/ harry@91.98.21.137:/home/harry/dotfiles/";
+    # `copy-dotfiles-vps` lived here — an rsync of this tree to
+    # /home/harry/dotfiles on the VPS. Deleted along with the directory it fed:
+    # it was a third writer of that host's config, and excluding `.*` meant the
+    # copy drifted from its own git history until it sat 182 commits behind and
+    # predated Hermes entirely. Deploying from it would have removed the agent.
+    # The VPS builds from its own checkout now — see vps-deploy above.
   };
 
   environment.interactiveShellInit = ''
