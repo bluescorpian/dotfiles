@@ -97,7 +97,12 @@
     vps-deploy = "/home/shared/dotfiles/scripts/vps-deploy.sh";
     update-claude = "/home/shared/dotfiles/scripts/flake-autoupdate.sh claude-code";
     flake-autoupdate = "/home/shared/dotfiles/scripts/flake-autoupdate.sh";
-    copy-dotfiles-vps = "rsync -avz --delete --exclude='.*' /home/shared/dotfiles/ harry@91.98.21.137:/home/harry/dotfiles/";
+    # `copy-dotfiles-vps` lived here — an rsync of this tree to
+    # /home/harry/dotfiles on the VPS. Deleted along with the directory it fed:
+    # it was a third writer of that host's config, and excluding `.*` meant the
+    # copy drifted from its own git history until it sat 182 commits behind and
+    # predated Hermes entirely. Deploying from it would have removed the agent.
+    # The VPS builds from its own checkout now — see vps-deploy above.
   };
 
   environment.interactiveShellInit = ''
