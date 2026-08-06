@@ -75,8 +75,13 @@ let
   disabledSkills = [
     # autonomous-ai-agents — claude-code is deliberately kept ON; it is the one
     # coding agent installed here (see extraPackages) and the skill is what
-    # teaches hermes to drive it. The rest are rival CLIs we do not ship.
-    "codex" "computer-use" "hermes-agent" "opencode"
+    # teaches hermes to drive it. hermes-agent is also ON: it is the hub doc
+    # for hermes' own CLI, config, profiles and sub-agent spawning — i.e. the
+    # skill that lets it reason about itself and orchestrate copies of itself.
+    # Parts of it are moot under managed mode (`hermes setup`/`config set` are
+    # blocked here), but the orchestration and self-knowledge halves are not.
+    # The rest below are rival CLIs we do not ship.
+    "codex" "computer-use" "opencode"
     # creative — image/video/audio/diagram generation, none of it wired up.
     "architecture-diagram" "ascii-art" "ascii-video" "baoyu-infographic"
     "claude-design" "comfyui" "design-md" "excalidraw" "humanizer"
@@ -99,7 +104,7 @@ let
     "arxiv" "llm-wiki" "polymarket" "research-paper-writing"
   ];
 
-  # That leaves 13 on: claude-code, himalaya (email), docx/xlsx/pdf/nano-pdf/
+  # That leaves 14 on: claude-code, hermes-agent, himalaya (email), docx/xlsx/pdf/nano-pdf/
   # powerpoint and ocr-and-documents (read and write the attachments you send
   # it), maps, google-workspace, grounded-citations, blogwatcher,
   # youtube-content.
@@ -114,14 +119,57 @@ in {
 
     settings = {
       # Via OpenRouter (the module's default provider — no base_url needed).
-      # DeepSeek V4 Pro rather than claude-sonnet-5 on cost: $0.44/$0.87 per
-      # million tokens in/out against Sonnet's $2/$10, so ~4.6x cheaper in and
-      # ~11x out. deepseek-v4-flash is cheaper again ($0.09/$0.18) if this still
-      # costs more than it's worth.
-      model.default = "deepseek/deepseek-v4-pro";
+      # Sonnet 5 rather than deepseek-v4-pro: better instruction-following and
+      # tool use for an assistant that drives claude-code, a browser and a
+      # dozen skills. It costs: $2/$10 per million tokens in/out against
+      # DeepSeek's $0.44/$0.87, so ~4.5x in and ~11x out — and the $2/$10 is
+      # Anthropic's introductory rate, which ends 2026-08-31 and reverts to
+      # $3/$15. Fall back to "deepseek/deepseek-v4-pro" (or -flash, at
+      # $0.09/$0.18) if the bill outgrows the benefit.
+      #
+      # Slug is dotless for the 5 generation — anthropic/claude-sonnet-5, not
+      # -5.0; older families keep the dot (anthropic/claude-sonnet-4.6).
+      model.default = "anthropic/claude-sonnet-5";
+
+      # Thinking depth, sent to OpenRouter as `reasoning.effort` and mapped by
+      # it onto Anthropic's adaptive-thinking control. Upstream default is
+      # "medium"; "high" is the level Anthropic recommends as a floor for
+      # anything intelligence-sensitive, which is most of what gets asked here.
+      #
+      # Ladder: minimal | low | medium | high | xhigh | max | ultra, or false
+      # to switch thinking off entirely. xhigh is Anthropic's pick for coding
+      # and agentic work and is a reasonable next step up, but only high and
+      # below are confirmed to survive the OpenRouter passthrough for this
+      # model — check the journal for a 400 before leaving it there.
+      #
+      # `agent.reasoning_overrides` takes a per-model dict ({"model" = "high";})
+      # if a second model ever needs a different level; unnecessary while there
+      # is only one.
+      agent.reasoning_effort = "high";
       memory = {
         memory_enabled = true;
         user_profile_enabled = true;
+
+        # Raised from upstream's 2200/1375, and levelled: USER.md was sitting at
+        # 1365 of its 1375 chars, i.e. completely full, so everything new it
+        # learned about Harry was being rejected. There is no reason the profile
+        # should get half the room the agent's own notes get.
+        #
+        # These are hard character caps, not soft targets: `memory_add` refuses
+        # the write once the joined entries would cross the limit and tells the
+        # model to consolidate or remove something first — the ceiling is felt
+        # as dropped facts, not truncation.
+        #
+        # Both files are pasted into the system prompt verbatim every turn, so
+        # this is a straight context trade: at ~2.75 chars/token the pair goes
+        # from ~1300 to ~3300 always-on tokens when full, spending back most of
+        # what disabling the skills below saved. Cheap at Sonnet input rates;
+        # the cost is prompt bloat, not dollars.
+        #
+        # Note the injected block is a snapshot taken at session start, so a
+        # memory saved mid-session does not reach the model until the next one.
+        memory_char_limit = 4500;   # ~1650 tokens
+        user_char_limit = 4500;     # ~1650 tokens
       };
 
       agent.disabled_toolsets = disabledToolsets;
