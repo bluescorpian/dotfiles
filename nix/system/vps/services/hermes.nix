@@ -209,6 +209,28 @@ in {
         search_backend = "parallel";
         extract_backend = "firecrawl";
       };
+
+      # Todoist MCP server — tasks/reminders. Stdio transport, so Hermes spawns
+      # `npx @doist/todoist-mcp` (Doist's own official package) as a
+      # subprocess on demand rather than needing an always-on remote
+      # endpoint. Tried the popular community package
+      # (@abhiz123/todoist-mcp-server) first — it depends on the deprecated
+      # @doist/todoist-api-typescript client and 410s against Todoist's
+      # retired REST v2 endpoints. The official package speaks the current
+      # API and takes TODOIST_API_KEY (not *_TOKEN, despite Todoist's own docs
+      # UI calling it a "token").
+      #
+      # `${TODOIST_API_TOKEN}` is resolved from the process environment at
+      # connect time (populated by ${envFile} below) — the token itself never
+      # lands in this public repo.
+      #
+      # Calendar stays on Google (google-workspace skill, OAuth) rather than
+      # Google Tasks — Harry doesn't use Tasks, hence Todoist instead.
+      mcp_servers.todoist = {
+        command = "npx";
+        args = [ "-y" "@doist/todoist-mcp" ];
+        env.TODOIST_API_KEY = "\${TODOIST_API_TOKEN}";
+      };
     };
 
     # Matrix is the only messaging platform enabled. Signal was considered and
@@ -308,6 +330,9 @@ in {
     #   MATRIX_ALLOWED_ROOMS  which rooms may trigger a turn
     #   MATRIX_RECOVERY_KEY   optional; lets the bot self-sign its device so
     #                         Element will share encryption sessions with it
+    #   TODOIST_API_TOKEN     Todoist personal API token (tasks/reminders MCP
+    #                         server, see mcp_servers.todoist above) — from
+    #                         app.todoist.com/app/settings/integrations/developer
     # Upstream is explicit that a locked-down deployment sets BOTH the user and
     # room allowlists: with either unset, anything that reaches the bot in a
     # joined room can trigger an agent turn.
