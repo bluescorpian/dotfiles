@@ -4,6 +4,8 @@
     curl
     git
     htop
+    ripgrep
+    jq
   ];
 
   # No `rebuild` alias here, deliberately. It used to point at
