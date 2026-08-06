@@ -158,6 +158,20 @@ in {
       # if a second model ever needs a different level; unnecessary while there
       # is only one.
       agent.reasoning_effort = "high";
+
+      # Verify-on-stop nudges the agent to prove its work whenever it edits
+      # code. Off, because it misfires here: it looks for a canonical test or
+      # build command, finds none it recognises in a .nix repo, and falls to a
+      # branch that orders it to invent a throwaway /tmp/hermes-verify-* script
+      # every single time. Watching it do that, the ceremony reliably cost more
+      # turns than the edit did, and twice it re-proved a declaration was
+      # present while missing that the change was never deployed — it verifies
+      # the source, never the effect.
+      #
+      # This is a personal assistant that occasionally edits Nix, not a coding
+      # agent. The upstream default "auto" would fire on the TUI and never on
+      # Matrix; false switches it off on both.
+      agent.verify_on_stop = false;
       memory = {
         memory_enabled = true;
         user_profile_enabled = true;
