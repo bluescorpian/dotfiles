@@ -1,0 +1,11 @@
+{
+  "name": "hermes-node-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pinned Node dependencies required by Hermes document skills",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "docx": "9.7.1",
+    "pptxgenjs": "4.0.1"
+  }
+}

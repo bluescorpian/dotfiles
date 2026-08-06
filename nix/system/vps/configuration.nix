@@ -1,4 +1,4 @@
-{ modulesPath, lib, ... }:
+{ modulesPath, lib, pkgs, ... }:
 let
   domain = "hrry.sh";
 in {
@@ -50,6 +50,15 @@ in {
   services.caddy.enable = true;
 
   services.vscode-server.enable = true;
+
+  # Deterministic fonts for LibreOffice/Pandoc conversions and generated office
+  # files. Without them, headless rendering can silently substitute a font and
+  # reflow text or render missing glyphs.
+  fonts.packages = with pkgs; [
+    dejavu_fonts
+    liberation_ttf
+    noto-fonts
+  ];
 
   networking.firewall.allowedTCPPorts = [ 22 80 443 ];
 

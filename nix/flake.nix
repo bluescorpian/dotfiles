@@ -39,8 +39,17 @@
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     pkgs-stable = nixpkgs-stable.legacyPackages.x86_64-linux;
     logseq-pkg = nixpkgs-logseq.legacyPackages.x86_64-linux.logseq;
+
+    # Same package set the VPS consumes at runtime. This dev shell is for
+    # manual investigation; Hermes itself receives this runtime through
+    # services.hermes-agent.extraPackages (see services/hermes.nix).
+    hermes-skill-runtime = import ./packages/hermes-runtime.nix { pkgs = pkgs-stable; };
   in
   {
+    devShells.x86_64-linux.default = pkgs-stable.mkShell {
+      packages = hermes-skill-runtime.packages;
+    };
+
      nixosConfigurations = {
       # Desktop configuration - personal computer with both users
       desktop = nixpkgs.lib.nixosSystem {

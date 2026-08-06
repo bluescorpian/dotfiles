@@ -32,6 +32,12 @@ let
   stateDir = "/var/lib/hermes";
   envFile = "${stateDir}/env";
 
+  # A standalone, Nix-built runtime for the document/content skills. It is
+  # deliberately separate from Hermes' sealed Python venv: the module puts
+  # `extraPackages` on the systemd PATH, so terminal tools and cron jobs inherit
+  # this runtime without each command needing `nix develop`.
+  skillRuntime = import ../../../packages/hermes-runtime.nix { inherit pkgs; };
+
   # `agent.disabled_toolsets` is the documented single switch: a denylist applied
   # *after* per-platform config, across the CLI and every gateway platform at
   # once. Preferred over `platform_toolsets` — that key is an allowlist written
@@ -100,14 +106,20 @@ let
     # Single-service integrations for services not in use.
     "openhue" "xurl" "obsidian" "airtable" "notion" "teams-meeting-pipeline"
     "gif-search" "songsee"
-    # research — kept grounded-citations and blogwatcher; these are narrower.
-    "arxiv" "llm-wiki" "polymarket" "research-paper-writing"
+    # research — keep grounded citations; RSS monitoring stays off until feeds
+    # are actually configured.
+    "arxiv" "llm-wiki" "polymarket" "research-paper-writing" "blogwatcher"
+    # PDF text editing via an external LLM is unconfigured and overlaps with
+    # the reproducible conventional PDF toolchain below.
+    "nano-pdf"
   ];
 
-  # That leaves 14 on: claude-code, hermes-agent, himalaya (email), docx/xlsx/pdf/nano-pdf/
-  # powerpoint and ocr-and-documents (read and write the attachments you send
-  # it), maps, google-workspace, grounded-citations, blogwatcher,
-  # youtube-content.
+  # That leaves the personal-assistant core on: Claude Code, Hermes itself,
+  # document/content skills (docx/xlsx/pdf/powerpoint/ocr), maps, Google
+  # Workspace, grounded citations, and YouTube transcripts. Himalaya stays
+  # available for a future mailbox setup. nano-pdf and blogwatcher are off:
+  # neither is configured, and their conventional alternatives cover current
+  # needs.
 in {
   services.hermes-agent = {
     enable = true;
@@ -243,7 +255,7 @@ in {
     # `--dangerously-skip-permissions` far less alarming than it sounds. That
     # is no longer true; see the privilege grant at the bottom of this file.
     # `claude -p … --dangerously-skip-permissions` now means what it says.
-    extraPackages = [ pkgs.agent-browser pkgs.chromium claude-code-pkg ];
+    extraPackages = [ pkgs.agent-browser pkgs.chromium claude-code-pkg ] ++ skillRuntime.packages;
 
     # Non-secret, so safe to have in the world-readable Nix store. Everything
     # identifying or authenticating lives in ${envFile} instead — see below.
@@ -254,6 +266,14 @@ in {
       # removes the ambiguity — and it is what the Chromium-presence check
       # looks at first.
       AGENT_BROWSER_EXECUTABLE_PATH = "${pkgs.chromium}/bin/chromium";
+
+      # Nix's LibreOffice wrapper tries to create a per-user D-Bus directory
+      # under /run/user/$UID when this is unset. The systemd service has no
+      # logind runtime directory, and that mkdir aborts the wrapper under
+      # `bash -e`. A deliberately inert address prevents that setup; headless
+      # conversions still work and use their own profile via
+      # -env:UserInstallation=file:///tmp/<unique-profile>.
+      DBUS_SESSION_BUS_ADDRESS = "unix:path=/var/lib/hermes/.cache/libreoffice-no-dbus";
 
       # Claude Code ships a self-updater that rewrites its own install dir.
       # That dir is the Nix store here, so every run would otherwise attempt a
