@@ -303,38 +303,28 @@ in {
 
   # ── Full root on this host ────────────────────────────────────────────────
   #
-  # Understand what this is before changing it. The agent ingests untrusted
-  # text by design — web_search, Firecrawl extraction, the browser toolset —
-  # and is reachable over Matrix. A prompt injection in a fetched page now
-  # reaches root on this machine. The MATRIX_ALLOWED_USERS/ROOMS allowlists
-  # above are the front door; keep them tight. This is not a new class of risk
-  # — the previous self-deploy path handed over root by construction, since a
-  # NixOS config the agent authors can add root SSH keys or activation scripts
-  # — but it is now direct, in-process, and unceremonious.
+  # The agent ingests untrusted text by design (web_search, Firecrawl, the
+  # browser toolset) and is reachable over Matrix, so a prompt injection in a
+  # fetched page reaches root here. Not a new class of risk — the self-deploy
+  # path this replaced handed over root by construction, since a NixOS config
+  # the agent authors can add root SSH keys — but it is now direct. The
+  # MATRIX_ALLOWED_USERS/ROOMS allowlists above are the front door.
   #
-  # Two halves, and BOTH are required. Granting only the first is the trap:
-  #
-  # 1. Passwordless sudo. Rules rather than adding hermes to `wheel` — wheel
-  #    would work (configuration.nix sets wheelNeedsPassword = false) but it
-  #    splits the grant across two files and silently inherits a setting that
-  #    exists for human admins.
+  # Both halves below are required; granting only the sudo rule is the trap.
+  # Rules rather than adding hermes to `wheel`, which would work but splits the
+  # grant across two files and inherits a setting meant for human admins.
   security.sudo.extraRules = [{
     users = [ "hermes" ];
     commands = [{ command = "ALL"; options = [ "NOPASSWD" ]; }];
   }];
 
-  # 2. Tearing down the unit sandbox. Without this, sudo alone buys nothing:
-  #    ProtectSystem=strict is implemented as a *mount namespace*, and mount
-  #    namespaces are inherited across setuid. A `sudo nixos-rebuild switch`
-  #    would genuinely run as uid 0 and still see /nix, /etc and /boot
-  #    read-only, then fail confusingly. NoNewPrivileges=true would block the
-  #    setuid transition outright before it even got that far.
-  #
-  #    ReadWritePaths must be emptied too, not just widened: a non-empty list
-  #    forces systemd to set up the namespace even with ProtectSystem=off.
-  #
-  #    mkForce throughout because upstream's module assigns these directly in
-  #    serviceConfig, not with mkDefault.
+  # Sudo alone buys nothing while the sandbox is up: ProtectSystem=strict is a
+  # mount namespace, and namespaces are inherited across setuid, so a sudo'd
+  # rebuild would run as uid 0 and still see /nix and /boot read-only.
+  # NoNewPrivileges blocks the setuid transition before even that.
+  # ReadWritePaths must be emptied rather than widened — a non-empty list
+  # forces the namespace even with ProtectSystem=off. mkForce because upstream
+  # assigns these directly, not with mkDefault.
   systemd.services.hermes-agent.serviceConfig = {
     ProtectSystem = lib.mkForce "off";
     NoNewPrivileges = lib.mkForce false;
@@ -342,23 +332,16 @@ in {
     ReadWritePaths = lib.mkForce [ ];
   };
 
-  # The service still *runs* as hermes, not root, and that is deliberate. Root
-  # is a `sudo` away, but files the agent creates stay hermes:hermes, so harry
-  # keeps group access to sessions and memories and `hermes chat` keeps
-  # working. Running the unit as root instead would flip every new file to
-  # root ownership — the state-dir ownership trap that has already broken this
-  # service twice, only inverted and permanent.
+  # The service still runs as hermes, not root: root is a sudo away, but files
+  # it creates stay hermes:hermes, so harry keeps group access to sessions and
+  # memories. Running the unit as root would flip every new file to root
+  # ownership — the state-dir ownership trap, inverted and permanent.
   #
-  # One inherited gotcha, worth knowing before the first rebuild-from-Hermes:
-  # a plain `sudo nixos-rebuild switch` runs inside hermes-agent.service's own
-  # cgroup, so when activation restarts hermes-agent systemd kills the whole
-  # cgroup — including the rebuild, halfway through switching. The old
-  # trigger-file unit sidestepped that by living outside the sandbox. The
-  # replacement is to detach it into a transient unit, which gets its own
-  # cgroup and survives:
-  #
-  #   sudo systemd-run --collect --unit=vps-rebuild --service-type=oneshot \
-  #     nixos-rebuild switch --flake path:/var/lib/hermes/workspace/dotfiles/nix#vps
-  #
-  # then read the outcome with `journalctl -u vps-rebuild`.
+  # One consequence to know before letting the agent deploy this host from its
+  # own checkout: the grant lives in the config being deployed, so any config
+  # older than it un-grants it. A stale checkout restores the sandbox and
+  # deletes the sudoers rule mid-task, and the agent can neither undo that nor
+  # diagnose it — from inside, the evidence is a sudo prompt contradicting a
+  # config it can still read saying NOPASSWD. It must pull before deploying.
+  # (Happened once, 2026-08-06.)
 }
