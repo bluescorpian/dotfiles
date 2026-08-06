@@ -27,7 +27,7 @@
 # It prints a URL, you paste the code back — no browser needed on the VPS.
 # Verify with `claude auth status`. Credentials land in ${stateDir}/.claude and
 # survive rebuilds; they are not in this repo and not in the Nix store.
-{ pkgs, claude-code-pkg, ... }:
+{ pkgs, lib, claude-code-pkg, ... }:
 let
   stateDir = "/var/lib/hermes";
   envFile = "${stateDir}/env";
@@ -237,13 +237,12 @@ in {
     # print mode, which needs no PTY. Supplied via specialArgs rather than
     # `pkgs.claude-code`; flake.nix explains why that distinction matters.
     #
-    # Where it can actually work: the unit runs ProtectSystem=strict with
-    # ReadWritePaths=/var/lib/hermes, so `claude` can only edit files under
-    # ${stateDir}. Point it at repos cloned into ${stateDir}/workspace (its
-    # WorkingDirectory); anywhere else on the filesystem is read-only to it.
-    # That sandbox is also why `--dangerously-skip-permissions` is far less
-    # alarming here than it sounds — systemd, not Claude's own prompt gate, is
-    # the boundary that matters.
+    # Where it can work: everywhere. This used to say that ProtectSystem=strict
+    # confined `claude` to ${stateDir} and that systemd, not Claude's own
+    # prompt gate, was the boundary that mattered — which made
+    # `--dangerously-skip-permissions` far less alarming than it sounds. That
+    # is no longer true; see the privilege grant at the bottom of this file.
+    # `claude -p … --dangerously-skip-permissions` now means what it says.
     extraPackages = [ pkgs.agent-browser pkgs.chromium claude-code-pkg ];
 
     # Non-secret, so safe to have in the world-readable Nix store. Everything
@@ -301,4 +300,65 @@ in {
   # are 2770 hermes:hermes, so group membership is what makes `hermes chat`
   # work as harry rather than erroring with EACCES on /var/lib/hermes.
   users.users.harry.extraGroups = [ "hermes" ];
+
+  # ── Full root on this host ────────────────────────────────────────────────
+  #
+  # Understand what this is before changing it. The agent ingests untrusted
+  # text by design — web_search, Firecrawl extraction, the browser toolset —
+  # and is reachable over Matrix. A prompt injection in a fetched page now
+  # reaches root on this machine. The MATRIX_ALLOWED_USERS/ROOMS allowlists
+  # above are the front door; keep them tight. This is not a new class of risk
+  # — the previous self-deploy path handed over root by construction, since a
+  # NixOS config the agent authors can add root SSH keys or activation scripts
+  # — but it is now direct, in-process, and unceremonious.
+  #
+  # Two halves, and BOTH are required. Granting only the first is the trap:
+  #
+  # 1. Passwordless sudo. Rules rather than adding hermes to `wheel` — wheel
+  #    would work (configuration.nix sets wheelNeedsPassword = false) but it
+  #    splits the grant across two files and silently inherits a setting that
+  #    exists for human admins.
+  security.sudo.extraRules = [{
+    users = [ "hermes" ];
+    commands = [{ command = "ALL"; options = [ "NOPASSWD" ]; }];
+  }];
+
+  # 2. Tearing down the unit sandbox. Without this, sudo alone buys nothing:
+  #    ProtectSystem=strict is implemented as a *mount namespace*, and mount
+  #    namespaces are inherited across setuid. A `sudo nixos-rebuild switch`
+  #    would genuinely run as uid 0 and still see /nix, /etc and /boot
+  #    read-only, then fail confusingly. NoNewPrivileges=true would block the
+  #    setuid transition outright before it even got that far.
+  #
+  #    ReadWritePaths must be emptied too, not just widened: a non-empty list
+  #    forces systemd to set up the namespace even with ProtectSystem=off.
+  #
+  #    mkForce throughout because upstream's module assigns these directly in
+  #    serviceConfig, not with mkDefault.
+  systemd.services.hermes-agent.serviceConfig = {
+    ProtectSystem = lib.mkForce "off";
+    NoNewPrivileges = lib.mkForce false;
+    PrivateTmp = lib.mkForce false;
+    ReadWritePaths = lib.mkForce [ ];
+  };
+
+  # The service still *runs* as hermes, not root, and that is deliberate. Root
+  # is a `sudo` away, but files the agent creates stay hermes:hermes, so harry
+  # keeps group access to sessions and memories and `hermes chat` keeps
+  # working. Running the unit as root instead would flip every new file to
+  # root ownership — the state-dir ownership trap that has already broken this
+  # service twice, only inverted and permanent.
+  #
+  # One inherited gotcha, worth knowing before the first rebuild-from-Hermes:
+  # a plain `sudo nixos-rebuild switch` runs inside hermes-agent.service's own
+  # cgroup, so when activation restarts hermes-agent systemd kills the whole
+  # cgroup — including the rebuild, halfway through switching. The old
+  # trigger-file unit sidestepped that by living outside the sandbox. The
+  # replacement is to detach it into a transient unit, which gets its own
+  # cgroup and survives:
+  #
+  #   sudo systemd-run --collect --unit=vps-rebuild --service-type=oneshot \
+  #     nixos-rebuild switch --flake path:/var/lib/hermes/workspace/dotfiles/nix#vps
+  #
+  # then read the outcome with `journalctl -u vps-rebuild`.
 }
