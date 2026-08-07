@@ -36,7 +36,11 @@ elif (( diff < 1800 )); then sign="";  class="soon"
 else                        sign="";  class="normal"
 fi
 
-text=$(printf ' %s%d:%02d' "$sign" "$h" "$m")   # leading moon glyph
+# Nerd Font moon glyph (U+F186), written as an escape rather than pasted in
+# literally so it survives editors and copy-paste that quietly drop
+# private-use codepoints — which is how it went missing before.
+glyph=$'\uf186'
+text=$(printf '%s %s%d:%02d' "$glyph" "$sign" "$h" "$m")
 
 jq -nc --arg text "$text" --arg class "$class" --arg tt "Bedtime $BEDTIME" \
   '{text: $text, class: $class, tooltip: $tt}'
