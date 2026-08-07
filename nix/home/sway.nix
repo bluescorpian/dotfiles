@@ -552,6 +552,21 @@ in
       default-timeout = 8000;
       anchor = "top-right";
       margin = 12;
+
+      # Per-notification styling. A nested attrset becomes a mako criteria
+      # section ([app-name=posture]), so this repaints only the posture nudge
+      # and leaves every other toast on the blue default above.
+      #
+      # Peach matches the colour the waybar posture module turns as the nudge
+      # approaches (waybar.nix), so the bar countdown and the toast read as one
+      # thing. The title is recoloured via pango markup in `format` — mako has
+      # no separate title-color option. `\n` must reach the config file as two
+      # literal characters for mako to parse it, which is why this is an
+      # indented Nix string rather than a quoted one.
+      "app-name=posture" = {
+        border-color = "#fab387";
+        format = ''<b><span color="#fab387">%s</span></b>\n%b'';
+      };
     };
   };
 

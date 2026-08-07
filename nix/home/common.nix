@@ -50,6 +50,10 @@ let
   graphify = import ../packages/graphify { inherit pkgs; };
 in
 {
+  imports = [
+    ./posture.nix
+  ];
+
   # Development packages
   home.packages = with pkgs; [
     (import ../packages/claude-conversation-search { inherit pkgs; })

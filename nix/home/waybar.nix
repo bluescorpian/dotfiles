@@ -23,7 +23,7 @@
 
       modules-left   = [ "sway/workspaces" "sway/mode" ];
       modules-center = [ "sway/window" ];
-      modules-right  = [ "tray" "custom/keyboard" "pulseaudio" "network" "battery" "custom/bedtime" "clock" ];
+      modules-right  = [ "tray" "custom/keyboard" "pulseaudio" "network" "battery" "custom/posture" "custom/bedtime" "clock" ];
 
       "sway/workspaces" = {
         disable-scroll = false;
@@ -47,6 +47,17 @@
       clock = {
         format = "{:%a %d %b  %I:%M %p}";
         tooltip-format = "<tt>{calendar}</tt>";
+      };
+
+      # Posture countdown. The script only renders state that the
+      # posture-reminder user unit maintains (see home/posture.nix) — it stays
+      # blank until a nudge is close and while the reminder is paused, so the
+      # bar is untouched almost all of the time.
+      "custom/posture" = {
+        exec = "${config.xdg.configHome}/posture/waybar.sh";
+        return-type = "json";
+        interval = 30;
+        tooltip = true;
       };
 
       "custom/bedtime" = {
@@ -148,6 +159,7 @@
       #network,
       #pulseaudio,
       #custom-bedtime,
+      #custom-posture,
       #custom-keyboard,
       #tray {
         padding: 0 10px;
@@ -162,6 +174,9 @@
 
       #custom-bedtime.soon     { color: #fab387; }                     /* orange, <30 min */
       #custom-bedtime.overtime { color: #f38ba8; font-weight: bold; }  /* red, past bedtime */
+
+      #custom-posture.soon     { color: #fab387; }                     /* orange, <5 min */
+      #custom-posture.overdue  { color: #f38ba8; font-weight: bold; }  /* red, nudge held back */
 
       #tray > .passive         { -gtk-icon-effect: dim; }
       #tray > .needs-attention { -gtk-icon-effect: highlight; }
