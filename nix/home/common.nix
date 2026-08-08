@@ -24,8 +24,8 @@ let
   # init now crashes on launch (GLIBC_ABI_GNU2_TLS not found). Forcing X11
   # (XWayland) skips that GBM path entirely and falls back to software
   # compositing, which works. logseq's package.nix has no commandLineArgs
-  # override (unlike discord above), so wrap it manually. Drop this wrapper
-  # once nixpkgs-logseq is unpinned or the glibc/Mesa versions realign.
+  # override, so wrap it manually. Drop this wrapper once nixpkgs-logseq
+  # is unpinned or the glibc/Mesa versions realign.
   logseq-x11 = pkgs.symlinkJoin {
     name = "logseq-x11";
     paths = [ logseq-pkg ];
@@ -82,15 +82,7 @@ in
     google-chrome
 
     # Communication
-    # Fix partial UI flicker (on hover/dropdowns and Sway workspace switches) on
-    # NVIDIA + Wayland. The compositor stack already supports explicit sync
-    # (sway 1.11/wlroots 0.19, NVIDIA 595), but NVIDIA's driver never handled
-    # *implicit* DMABUF sync — so a client that doesn't negotiate explicit sync
-    # races the compositor and shows regional corruption on repaint. Discord
-    # bundles Electron 37 / Chrome 138, which HAS the explicit-sync feature but
-    # leaves it off by default; this flag turns it on. (Chromium merges multiple
-    # --enable-features, so this is additive to the wrapper's WaylandWindowDecorations.)
-    (discord.override { commandLineArgs = "--enable-features=WaylandLinuxDrmSyncobj"; })
+    discord
     # bitwarden-desktop  # dropped 2026-06-08 by choice (Electron-39 app). electron-39.8.10 is
     #                      permitted in system/common.nix for logseq, so re-enable = uncomment.
     thunderbird
