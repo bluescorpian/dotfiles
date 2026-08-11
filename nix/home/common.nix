@@ -53,6 +53,7 @@ in
   # Development packages
   home.packages = with pkgs; [
     (import ../packages/claude-conversation-search { inherit pkgs; })
+    (import ../packages/firecrawl-cli { inherit pkgs; })
     graphify
 
     # Fonts
@@ -776,6 +777,10 @@ in
     # wedded-world). Global rather than per-repo since it's a tool artifact,
     # not a property of any one project.
     "graphify-out/"
+    # Same deal for the firecrawl CLI: it caches scrape/search output into
+    # .firecrawl/ in whatever directory it's invoked from, to keep Claude's
+    # context window clean.
+    ".firecrawl/"
   ];
 
   # Keybindings cheatsheet — always-on static server so it can be bookmarked.

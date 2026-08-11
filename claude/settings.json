@@ -41,7 +41,8 @@
 		"worktrunk@worktrunk": true,
 		"code-simplifier@claude-plugins-official": true,
 		"feature-dev@claude-plugins-official": true,
-		"playwright@claude-plugins-official": true
+		"playwright@claude-plugins-official": true,
+		"firecrawl@claude-plugins-official": true
 	},
 	"extraKnownMarketplaces": {
 		"worktrunk": {
