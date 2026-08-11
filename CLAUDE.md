@@ -40,7 +40,7 @@ Treat this repo as a living system. If you spot duplication across hosts, module
 ## Workflow
 
 1. Edit the relevant `.nix` file. When unsure where something belongs, prefer the most-shared location (`common.nix`) and push down only if it's truly host- or user-specific.
-2. `rebuild` (or `rebuild-vps` for the server). Test with `rebuild-test` if the change is risky.
+2. `rebuild`. Test with `rebuild-test` if the change is risky. For the VPS use `vps-deploy`, which tells that host to pull and rebuild from its own checkout — never deploy the VPS from a checkout here, since Hermes edits the one on the box and the two silently overwrite each other.
 3. Commit only after a successful switch. One logical change per commit, descriptive message.
 4. **At the end of every code-changing turn**, list the files you modified/created and remind Harry that the changes are uncommitted/untracked so he can review and commit. Do this even when the task feels "done" — `rebuild` succeeding is not a commit.
 

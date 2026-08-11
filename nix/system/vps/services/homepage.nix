@@ -34,8 +34,8 @@ in {
             };
           }
           {
-            "Pingvin Share" = {
-              icon = "pingvin-share";
+            "Send" = {
+              icon = "mdi-send";
               href = "https://share.${domain}";
               description = "File sharing";
             };

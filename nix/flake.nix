@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nixpkgs-stable.url = "github:nixos/nixpkgs?ref=nixos-24.11";
+    nixpkgs-stable.url = "github:nixos/nixpkgs?ref=nixos-26.05";
     # Pin logseq to 0.10.14: unstable's 0.10.15 isn't in the binary cache (builds
     # the ClojureScript/Electron app from source, appears to hang) and bumped to
     # the EOL-flagged Electron 39. This commit ships 0.10.14 on Electron 38.7.1 —
@@ -35,12 +35,16 @@
     vscode-server.inputs.nixpkgs.follows = "nixpkgs";
     worktrunk.url = "github:max-sixty/worktrunk";
     worktrunk.inputs.nixpkgs.follows = "nixpkgs";
+    # Deliberately not `follows`-ing our nixpkgs: the package set is built by
+    # uv2nix against the exact nixpkgs it pins, and repointing it is a good way
+    # to break the Python dependency closure. Costs one extra nixpkgs eval.
+    hermes-agent.url = "github:NousResearch/hermes-agent";
     elephant.url = "github:abenz1267/elephant";
     walker.url = "github:abenz1267/walker";
     walker.inputs.elephant.follows = "elephant";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-logseq, nixpkgs-kitty, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, walker, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-logseq, nixpkgs-kitty, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, walker, hermes-agent, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     pkgs-stable = nixpkgs-stable.legacyPackages.x86_64-linux;
@@ -83,10 +87,22 @@
         system = "x86_64-linux";
         specialArgs = {
           pkgs-unstable = nixpkgs.legacyPackages.x86_64-linux;
+          # Hermes drives the `claude` CLI (see services/hermes.nix), and wants
+          # a current one: stable 26.05 ships 2.1.187 against this flake's
+          # 2.1.222. Taken as a flake *output* rather than via the overlay
+          # desktop and laptop apply — deliberately. Applying the overlay to
+          # this host would rebuild claude-code against stable nixpkgs, landing
+          # on a store path that exists in no binary cache (verified: 404 on
+          # both cache.nixos.org and claude-code.cachix.org), so every deploy
+          # would build it from source and push 354 MiB up the uplink. The
+          # flake output is the identical path the desktop already runs and is
+          # cached, so the VPS substitutes it directly.
+          claude-code-pkg = claude-code.packages.x86_64-linux.default;
         };
         modules = [
           disko.nixosModules.disko
           vscode-server.nixosModules.default
+          hermes-agent.nixosModules.default
           ./system/vps/configuration.nix
         ];
       };
