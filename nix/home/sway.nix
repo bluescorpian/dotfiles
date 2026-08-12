@@ -601,6 +601,12 @@ in
   # rather pin the transition to clock times.
   services.gammastep = {
     enable = true;
+    # Run gammastep-indicator rather than bare gammastep. It's an
+    # AppIndicator/StatusNotifierItem, so it lands in waybar's existing tray
+    # module: right-click for an Enabled toggle plus "Suspend for" 30 min – 8 h,
+    # which auto-re-enables when the timer expires. The indicator spawns
+    # gammastep itself with the same config, so everything below still applies.
+    tray = true;
     provider = "manual";
     latitude = -33.9796;
     longitude = 25.6598;
@@ -624,10 +630,11 @@ in
   # but KWin doesn't implement wlr-gamma-control, so under KDE gammastep would
   # fail and (Restart=always) restart-loop. Plasma has its own Night Color
   # anyway. mkForce replaces the module's list rather than appending, so the
-  # unit no longer wants graphical-session.target at all.
+  # unit no longer wants graphical-session.target at all — so tray.target, which
+  # the module adds to After when tray is on, has to be carried over by hand.
   systemd.user.services.gammastep = {
     Unit.PartOf = lib.mkForce [ "sway-session.target" ];
-    Unit.After = lib.mkForce [ "sway-session.target" ];
+    Unit.After = lib.mkForce [ "sway-session.target" "tray.target" ];
     Install.WantedBy = lib.mkForce [ "sway-session.target" ];
   };
 
