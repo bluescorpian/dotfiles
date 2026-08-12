@@ -131,6 +131,7 @@
       "color": "#f38ba8",
       "bindings": [
         { "keys": ["Print"],               "action": "Screenshot region → clipboard", "note": "grim + slurp + wl-copy" },
+        { "keys": ["Shift", "Print"],      "action": "Screenshot region (frozen screen) → clipboard", "note": "wayfreeze holds the screen still first, so open dropdowns/menus stay in the shot" },
         { "keys": ["Super", "l"],          "action": "Lock screen",                  "note": "swaylock" },
         { "keys": ["Super", "k"],          "action": "Keyboard layout picker",       "note": "rofi — Programmer Dvorak / Dvorak / QWERTY; also click the ⌨ waybar indicator" },
         { "keys": ["Super", "Shift", "c"], "action": "Reload Sway config" },

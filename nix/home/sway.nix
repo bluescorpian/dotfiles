@@ -48,6 +48,37 @@ let
     ${pkgs.jq}/bin/jq -cn --arg t "⌨ $label" --arg tt "Keyboard layout: $name" \
       '{text: $t, tooltip: $tt}'
   '';
+
+  # Region screenshot → clipboard, freeze-first so menus survive.
+  #
+  # `grim -g "$(slurp)"` can't capture an open dropdown: slurp maps its own
+  # surface, the menu's keyboard/pointer grab breaks, and GTK/Qt dismiss the
+  # popup before the region is even drawn. wayfreeze copies every output the
+  # instant it starts and paints the copy back as an overlay, so the menu is
+  # already in the frozen frame; slurp then selects over a still image and
+  # grim re-captures that overlay. Kill order matters — wayfreeze has to stay
+  # up until *after* grim runs, or grim sees the live (menu-less) screen.
+  screenshot = pkgs.writeShellScriptBin "sway-screenshot" ''
+    ready=$(${pkgs.coreutils}/bin/mktemp -u -t sway-screenshot-ready.XXXXXX)
+    ${pkgs.wayfreeze}/bin/wayfreeze --hide-cursor \
+      --after-freeze-cmd "${pkgs.coreutils}/bin/touch $ready" &
+    freezer=$!
+
+    # Wait for the freeze frame to be mapped before starting slurp: both live
+    # on the overlay layer, and a wayfreeze that maps second would paint over
+    # the selection UI.
+    for _ in $(${pkgs.coreutils}/bin/seq 75); do
+      [ -e "$ready" ] && break
+      ${pkgs.coreutils}/bin/sleep 0.02
+    done
+
+    if region=$(${pkgs.slurp}/bin/slurp); then
+      ${pkgs.grim}/bin/grim -g "$region" - | ${pkgs.wl-clipboard}/bin/wl-copy
+    fi
+
+    kill "$freezer" 2>/dev/null || true
+    ${pkgs.coreutils}/bin/rm -f "$ready"
+  '';
 in
 {
   imports = [
@@ -72,6 +103,9 @@ in
     # the let block above. On PATH so the keybind and waybar can both call them.
     layoutPick
     layoutName
+
+    # Freeze-first region screenshot (Shift+Print), defined in the let block above.
+    screenshot
   ];
 
   # Sway compositor (Wayland session, offered by SDDM alongside Plasma).
@@ -212,6 +246,12 @@ in
         # (the framed-camera icon on the F-row); Mod+Shift+s is freed for
         # the htns move-right symmetry below.
         "Print" = "exec ${pkgs.grim}/bin/grim -g \"$(${pkgs.slurp}/bin/slurp)\" - | ${pkgs.wl-clipboard}/bin/wl-copy";
+
+        # Same, but freezes the screen first so open dropdowns/menus survive
+        # into the shot (see sway-screenshot in the let block). Separate key
+        # because freezing costs a beat and rules out capturing anything that
+        # has to keep moving while you select.
+        "Shift+Print" = "exec ${screenshot}/bin/sway-screenshot";
 
         # Dvorak-friendly focus/move: htns sits on the right-hand home row
         # under dvp (physical J/K/L/;), unlike hjkl whose keysyms scatter
