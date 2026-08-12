@@ -737,6 +737,29 @@ in
       # every API-execution tool, so nothing there matches the old
       # READ_OPERATIONS_ONLY=true. Docs-only, or unrestricted write to every
       # profile listed plus an arbitrary-code aws___run_script.
+
+      # Firecrawl's hosted MCP — the declarative form of what upstream tells you
+      # to run: `claude mcp add --transport http firecrawl <url>`.
+      #
+      # The -oauth endpoint, not the bare /v2/mcp one. That variant is either
+      # keyless (a stub surface — only firecrawl_search/_scrape/_parse) or wants
+      # `Authorization: Bearer $FIRECRAWL_API_KEY`, and a key cannot live in this
+      # public repo. OAuth gets the full ~17-tool surface tied to the account
+      # while the token stays in Claude Code's own credential store, off-repo.
+      #
+      # Registering the server is all a rebuild can do — the browser sign-in is
+      # per-machine interactive state. Run /mcp on each of desktop and laptop
+      # once; until then the server shows as connected-but-unauthenticated.
+      #
+      # This duplicates the firecrawl CLI plugin enabled in claude/settings.json:
+      # the plugin's ten skills shell out to the packaged `firecrawl` binary,
+      # these tools hit the same API over HTTP. Both are live on purpose for now
+      # — the CLI keeps working offline of any OAuth state and is what the
+      # skills invoke; drop one once it's clear which gets reached for.
+      firecrawl = {
+        type = "http";
+        url = "https://mcp.firecrawl.dev/v2/mcp-oauth";
+      };
     };
   };
   home.file.".claude/settings.json" = {
