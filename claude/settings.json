@@ -82,7 +82,8 @@
 		]
 	},
 	"preferredNotifChannel": "terminal_bell",
-	"autoCompactEnabled": false,
+	"autoCompactEnabled": true,
+	"autoCompactWindow": 400000,
 	"skipAutoPermissionPrompt": true,
 	"voiceEnabled": true,
 	"tui": "fullscreen",
