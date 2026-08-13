@@ -103,6 +103,10 @@
     # makes that the default rather than a flag.
     vps-deploy = "/home/shared/dotfiles/scripts/vps-deploy.sh";
     update-claude = "/home/shared/dotfiles/scripts/flake-autoupdate.sh claude-code";
+    # Re-splice the untracked per-machine overlay into ~/.claude/settings.json.
+    # A rebuild does this too, but only when the derivation changed — nix can't
+    # see the overlay, so an overlay-only edit needs this.
+    claude-settings-sync = "/home/shared/dotfiles/scripts/claude-settings-merge.sh";
     flake-autoupdate = "/home/shared/dotfiles/scripts/flake-autoupdate.sh";
     # `copy-dotfiles-vps` lived here — an rsync of this tree to
     # /home/harry/dotfiles on the VPS. Deleted along with the directory it fed:

@@ -762,7 +762,24 @@ in
     source = ../../claude/settings.json;
     force = true;
   };
-  home.activation.makeClaudeSettingsWritable = writableSymlinkSwap ".claude/settings.json";
+  # Same writable-copy swap as writableSymlinkSwap, plus a merge step that
+  # splices in an untracked per-machine overlay — see scripts/claude-settings-merge.sh
+  # for why the overlay exists and what the merge guarantees.
+  #
+  # Gated on the symlink because that's what linkGeneration just wrote; the
+  # swap turns it into a real file, so a no-op rebuild finds nothing to do.
+  # That also means a rebuild alone won't pick up an overlay-only edit: nix
+  # can't see that file, so an unchanged derivation skips activation entirely.
+  # Run `claude-settings-sync` after editing the overlay.
+  home.activation.makeClaudeSettingsWritable = lib.hm.dag.entryAfter ["linkGeneration"] ''
+    _target="$HOME/.claude/settings.json"
+    if [ -L "$_target" ]; then
+      _base=$(readlink -f "$_target")
+      rm "$_target"
+      JQ=${pkgs.jq}/bin/jq ${pkgs.bash}/bin/bash ${../../scripts/claude-settings-merge.sh} \
+        "$_base" "$HOME/.config/claude-code-local/overlay.json" "$_target"
+    fi
+  '';
   # No structured option for statusLine script; module mkMerges home.file so this composes.
   home.file.".claude/statusline.sh" = {
     source = ../../claude/statusline.sh;
