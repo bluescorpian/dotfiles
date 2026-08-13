@@ -36,6 +36,28 @@ let
     '';
   };
 
+  # VS Code 1.122 renamed the bundled ripgrep node module from @vscode/ripgrep
+  # to @vscode/ripgrep-universal (binaries moved into a per-platform subdir).
+  # nixpkgs follows that rename and symlinks pkgs.ripgrep into the new path, so
+  # VS Code's own search works — but extensions that still probe the old
+  # resources/app/node_modules/@vscode/ripgrep/bin/rg find nothing. Todo Tree
+  # (0.0.226, effectively unmaintained) does exactly that and nags on every
+  # launch: "Failed to find vscode-ripgrep". Restore the legacy path as a
+  # symlink to the same pkgs.ripgrep nixpkgs already uses.
+  #
+  # This is upstream-agnostic — the alternative, setting "todo-tree.ripgrep",
+  # would mean home-manager taking over the whole (currently hand-edited,
+  # mutable) settings.json. Costs a local VS Code rebuild on each update since
+  # overrideAttrs breaks the binary-cache hit. Drop once Todo Tree learns the
+  # new path, or when the extension goes.
+  vscode-rg-compat = (pkgs.vscode.overrideAttrs (old: {
+    postInstall = (old.postInstall or "") + ''
+      legacyRgDir="$out/lib/vscode/resources/app/node_modules/@vscode/ripgrep/bin"
+      mkdir -p "$legacyRgDir"
+      ln -s ${lib.getExe pkgs.ripgrep} "$legacyRgDir/rg"
+    '';
+  })).fhs;
+
   # Vercel's Claude Code plugin: /deploy, /env, /status commands, deployment
   # agents, and Vercel's OAuth-gated HTTP MCP server. Fetched directly rather
   # than added as a flake input so it doesn't ride along in flake.lock; upstream
@@ -253,7 +275,7 @@ in
     # ~/.vscode/argv.json ("password-store": "kwallet6") workaround.
     package = (pkgs.symlinkJoin {
       name = "vscode-fhs-igpu";
-      paths = [ pkgs.vscode-fhs ];
+      paths = [ vscode-rg-compat ];
       buildInputs = [ pkgs.makeWrapper ];
       postBuild = ''
         wrapProgram $out/bin/code \
