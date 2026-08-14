@@ -1,59 +1,59 @@
 # CLAUDE.md
 
-Harry's NixOS dotfiles — the declarative source of truth for his desktop, laptop, and a Hetzner VPS. Lives at `/home/shared/dotfiles` so both user accounts share one checkout.
+Harry's NixOS dotfiles — the declarative source of truth for his desktop,
+laptop, and a Hetzner VPS (`hostname` tells you which host you're on).
+Lives at `/home/shared/dotfiles` so both user accounts share one checkout.
+`ls` and `nix/flake.nix` are the map; this file keeps only what reading
+the repo won't tell you.
 
-> **This repo is public on GitHub.** Everything committed here is openly visible. Before committing, flag any content that looks private: API keys, tokens, passwords, internal hostnames, personal email addresses, private IP ranges, or anything else that shouldn't be world-readable. When asked to commit such content, warn Harry explicitly before proceeding.
+> **This repo is public on GitHub.** Before committing, flag anything
+> private-looking: keys, tokens, internal hostnames, personal email
+> addresses, private IP ranges. When asked to commit such content anyway,
+> warn Harry explicitly before proceeding.
 
-## What you'll usually be asked to do
+## The default task
 
-Most requests are **small, surgical edits to `.nix` files** to change the system: install a package, enable a program module, tweak a Sway keybind, add a shell alias, spin up a new VPS service, adjust a systemd unit. The loop is almost always: edit the right `.nix` file → `rebuild` → confirm it worked → commit.
+Most requests are small, surgical edits to a `.nix` file, then `rebuild`,
+then commit. Make changes declaratively in this repo, not imperatively on
+the running system; prefer a `programs.*`/`services.*` module over a
+binary in `home.packages` or a hand-rolled unit. When unsure where
+something belongs, prefer the most-shared location and push down only if
+it's truly host- or user-specific.
 
-Less often: debug why a rebuild failed, refactor a module that's grown messy, update flake inputs, or research a NixOS option. Occasionally a larger structural change (new host, new user, new service module).
-
-Default assumption: the user wants the change made declaratively in this repo, not imperatively on the running system. If something *can* be expressed as a `programs.*` or `services.*` module, prefer that over dropping a binary into `home.packages` or hand-rolling a unit file.
-
-## Mental model
-
-Three `nixosConfigurations` in `nix/flake.nix`: `desktop`, `laptop`, `vps`. The `rebuild` alias picks one via `$(hostname)` — run `hostname` if unsure.
-
-- `nix/system/<host>/` — per-host NixOS config; `system/common.nix` is shared by desktop+laptop (vps is independent).
-- `nix/home/` — home-manager; `common.nix` for both users, `home.nix` for personal (harry), `home-smartstation.nix` for work.
-- `nix/system/vps/services/` — one file per self-hosted service, each self-contained (systemd unit + Caddy vhost + port). Add a service: drop a file in, import it from `vps/configuration.nix`.
-
-`ls` and `flake.nix` are the source of truth for what exists. Don't expect a file inventory here.
-
-## Working style
-
-Treat this repo as a living system. If you spot duplication across hosts, modules outgrowing their file, options that want to move up to `common.nix` or down to a host file, or a service that wants its own module — **say so inline with the task**. One-line "by the way, X wants to move to Y because Z" is the goal. Flag, don't silently refactor.
+Treat the repo as a living system: when a module outgrows its file or an
+option wants to move up or down the sharing ladder, say so inline — one
+line, "X wants to move to Y because Z". Flag, don't silently refactor.
 
 ## Non-obvious gotchas
 
-- **`rebuild` hard-codes `/home/shared/dotfiles/nix#$(hostname)`** — defined in `system/common.nix`. Aliases don't expand inside `bash -c`, so scripts need the full command.
-- **VPS pins nixpkgs-stable**, with `pkgs-unstable` threaded through `specialArgs` for selective unstable packages.
-- **Domain `hrry.sh`** is set once in `vps/configuration.nix` and passed via `_module.args`; service files take `{ domain, ... }:`.
-- **Flakes only see tracked files** — Nix's flake evaluator restricts the build to files known to git. A new `.nix` file (or any new file referenced by the config) must be `git add`ed before `rebuild` will see it; an untracked file fails as if it doesn't exist, which reads confusingly like an unrelated eval error.
-- **sudo with no TTY**: `sudo -A` routes the prompt to a `ksshaskpass` GUI dialog and streams output back normally. Use it directly:
+- `rebuild` and `rebuild-test` hard-code `/home/shared/dotfiles/nix#$(hostname)`
+  (defined in `system/common.nix`). Aliases don't expand inside `bash -c`,
+  so scripts need the full command.
+- sudo has no TTY here: `sudo -A` routes the prompt to a GUI askpass
+  dialog and streams output back normally.
   ```bash
   sudo -A nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname)
   ```
-  On pure SSH/TTY with no graphical session, fall back to `konsole -e bash -c "sudo …; read"` — but Claude can't see that output.
+- Flakes only see git-tracked files: `git add` any new file before
+  `rebuild`, or evaluation fails as if the file doesn't exist — which
+  reads confusingly like an unrelated eval error.
 
 ## Workflow
 
-1. Edit the relevant `.nix` file. When unsure where something belongs, prefer the most-shared location (`common.nix`) and push down only if it's truly host- or user-specific.
-2. `rebuild`. Test with `rebuild-test` if the change is risky. For the VPS use `vps-deploy`, which tells that host to pull and rebuild from its own checkout — never deploy the VPS from a checkout here, since Hermes edits the one on the box and the two silently overwrite each other.
-3. Commit only after a successful switch. One logical change per commit, descriptive message.
-4. **At the end of every code-changing turn**, list the files you modified/created and remind Harry that the changes are uncommitted/untracked so he can review and commit. Do this even when the task feels "done" — `rebuild` succeeding is not a commit.
+Edit → `rebuild` (`rebuild-test` first if risky) → commit only after a
+successful switch, one logical change per commit. At the end of every
+code-changing turn, list the files you modified and remind Harry they are
+uncommitted — a successful `rebuild` is not a commit.
 
-When adding or changing keybindings in any `.nix` file, also update the corresponding JSON file in `keys_cheatsheet/` (e.g. `sway.json`, `kitty.json`). Start the viewer with `python3 -m http.server 8787 --directory keys_cheatsheet`.
+Keybinding changes in any `.nix` file also update the matching JSON in
+`keys_cheatsheet/` (viewer: `keys_cheatsheet/start.sh`).
 
 ## Researching options
 
-**Prefer the `nixos` MCP server** — it's wired up in `.mcp.json` at the repo root and exposes `nix` and `nix_versions` tools backed by live `search.nixos.org`, NixHub, FlakeHub, and the binary cache. Use it on **any** mention of a package name, attribute path, NixOS / home-manager option, channel, flake input, or `/nix/store/` path — even when you think you know the answer. It's faster than `nix search`, more current than the local `options.html` (which is frozen at the last `rebuild`), and authoritative for "did this commit ship version X" questions. Skipping it because the answer "feels obvious" is how stale advice gets baked into commits.
-
-Fallbacks when the MCP is unreachable or doesn't cover the question:
-- `man configuration.nix` — full options reference, version-matched to this system
-- `/run/current-system/sw/share/doc/nixos/options.html` — same content as HTML, ~24 MB; grep it, don't read it whole. The companion manual lives at `/run/current-system/sw/share/doc/nixos/index.html`
-- `nix search nixpkgs <query>` — package search (slow first run; flag is experimental but stable in practice)
-
-For weird build failures, undocumented behaviour, or anything where the official docs come up empty, **search the internet** with WebSearch / WebFetch. High-signal sources, in rough order: NixOS Discourse (`discourse.nixos.org`), GitHub issues on `NixOS/nixpkgs` and `nix-community/home-manager`, the NixOS wiki (`wiki.nixos.org`), and recent blog posts. NixOS error messages are often googled verbatim — paste the exact derivation/store path or the line that broke. Don't guess your way through opaque errors when someone has almost certainly hit them already.
+The `nixos` MCP server (wired via `.mcp.json`) injects its own usage
+instructions — follow those. When it's unreachable or comes up empty:
+`man configuration.nix`, or grep
+`/run/current-system/sw/share/doc/nixos/options.html` (~24 MB,
+version-matched but frozen at the last rebuild). For opaque build
+failures, search the exact error text on the internet — NixOS Discourse,
+nixpkgs GitHub issues, and the wiki carry most of them.
