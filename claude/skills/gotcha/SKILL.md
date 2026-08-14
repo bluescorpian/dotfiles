@@ -22,11 +22,13 @@ Cheapest and most durable first — each rung below it is progressively more exp
 1. **Eliminate the coupling.** Can the code be refactored so the mistake is structurally impossible? Best fix — no context cost, ever.
 2. **Make it fail to compile / typecheck.** Encode the constraint in types or a schema.
 3. **Make it fail a test.** Encode the constraint as a test.
-4. **Code-local comment.** One line, at the exact spot, explaining the non-obvious *why* — not what the code does.
-5. **Path-scoped rule** (`.claude/rules/<name>.md` with a `paths:` frontmatter glob). Loads only when a matching file is opened — zero cost the rest of the time. Best fit for "editing file A also requires touching file B" coupling, or a convention scoped to one directory/filetype.
-6. **Auto-memory topic file** (`type: project` or `feedback` in the memory dir). For facts, preferences, or "why" context that isn't code-adjacent and doesn't belong in every session.
-7. **Project `CLAUDE.md`.** Only for facts relevant to *every* session in this repo that can't be scoped narrower than that.
-8. **Global.** Last resort — only for facts true across all of your projects. Two files, both may need editing: `agents/AGENTS.md` is generic content shared with Codex/other tools; `claude/CLAUDE.md` (deploys to `~/.claude/CLAUDE.md` via `programs.claude-code.context`) duplicates that generic content plus Claude Code-specific additions. A generic learning goes in both, kept in sync; a Claude-Code-only learning goes only in `claude/CLAUDE.md`.
+4. **Make a hook enforce it.** For anything that must happen every time with no exceptions — a guard on a tool call, a check before every commit. CLAUDE.md and rules are advisory context the model can skip; hooks are not.
+5. **Code-local comment.** One line, at the exact spot, explaining the non-obvious *why* — not what the code does.
+6. **Path-scoped rule** (`.claude/rules/<name>.md` with a `paths:` frontmatter glob) — or a nested `CLAUDE.md` in the relevant subdirectory, which similarly loads only when files there are touched. Zero cost the rest of the time. Best fit for "editing file A also requires touching file B" coupling, or a convention scoped to one directory/filetype.
+7. **Skill.** A multi-step procedure, or knowledge needed only for a kind of task rather than every session — loads on demand via its description. If the learning is "how to do X", it is almost never a CLAUDE.md line.
+8. **Auto-memory topic file** (`type: project` or `feedback` in the memory dir). For facts, preferences, or "why" context that isn't code-adjacent and doesn't belong in every session.
+9. **Project `CLAUDE.md`.** Only for facts relevant to *every* session in this repo that can't be scoped narrower than that.
+10. **Global.** Last resort — only for facts true across all of your projects. Two files, both may need editing: `agents/AGENTS.md` is generic content shared with Codex/other tools; `claude/CLAUDE.md` (deploys to `~/.claude/CLAUDE.md` via `programs.claude-code.context`) duplicates that generic content plus Claude Code-specific additions. A generic learning goes in both, kept in sync; a Claude-Code-only learning goes only in `claude/CLAUDE.md`.
 
 ## 4. Fix or prune existing context — don't just append
 
