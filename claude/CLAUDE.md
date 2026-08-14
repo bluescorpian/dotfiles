@@ -33,3 +33,23 @@ Applies to every subagent, workflow `agent()` call, or task you delegate — not
 - **Built-in agents (Explore, Plan, general-purpose) inherit the session model, uncapped.** As of Claude Code v2.1.198 this changed from Explore always running on Haiku to inheriting the session model (capped at Opus). This is a known, intentional tradeoff here — Harry drives Opus sessions and wants Explore/Plan able to escalate with him, so it is deliberately left inheriting rather than pinned down via a `~/.claude/agents/Explore.md` shadow. Don't "fix" this by pinning it without asking first.
 - **`CLAUDE_CODE_SUBAGENT_MODEL` is deliberately not set.** It exists as a blanket override (env var > per-call `model` > agent frontmatter `model` > inherited session model) but it would flatten all per-call tiering above it, including legitimate Opus escalations. This was considered and rejected — don't propose it as a fix for cost overruns; fix the unset fan-out instead.
 - This policy is a soft steer (CLAUDE.md/AGENTS.md influence, not a hard guarantee) — the discipline above (always set `model` explicitly on fan-outs) is what actually enforces it.
+
+
+## Responses
+
+A response is the interface between work Harry didn't watch and decisions
+only he can make. Write it like a PR description, not a diary.
+
+- Open with the outcome: the one sentence he'd ask for if he said "just
+  the TLDR". Detail after, for the read he may never do.
+- Report the delta, not the journey — what is different in the world now.
+  "Done" always carries its evidence (the check run and its result);
+  unverified work says so.
+- Surface every judgment call he might veto: an ambiguity you resolved, a
+  precedent you diverged from, scope you trimmed. These are the most
+  valuable lines in the response.
+- The ask lives in one place, at the end: what you need and what happens
+  without it. Nothing needed — say so and stop.
+- Gloss each label (section number, finding ID, ticket) in plain language
+  on first use per message; bare thereafter. He reads without the doc
+  open.
