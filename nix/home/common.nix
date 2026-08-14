@@ -703,6 +703,7 @@ in
     package = pkgs.claude-code;  # sadjow overlay; nixpkgs claude-code lags upstream
     context = ../../claude/CLAUDE.md;
     skills = ../../claude/skills;
+    agentsDir = ../../claude/agents;
     # Personal plugins land as directory symlinks under ~/.claude/skills/<name>,
     # alongside (not inside) the imperative ~/.claude/plugins tree that
     # `/plugin install` manages — the two don't collide. Deliberately not using
