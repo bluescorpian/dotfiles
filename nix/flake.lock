@@ -276,6 +276,27 @@
         "type": "github"
       }
     },
+    "hrry-sh": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-stable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786740706,
+        "narHash": "sha256-A0vJV7Kq2XBdmUseOIYO2+tlj3pnZGNq1qhVBqKDeuY=",
+        "ref": "main",
+        "rev": "1b2d091c5ff9c25464db43f939376481425691b5",
+        "revCount": 32,
+        "type": "git",
+        "url": "ssh://git@github.com/bluescorpian/hrry.sh"
+      },
+      "original": {
+        "ref": "main",
+        "type": "git",
+        "url": "ssh://git@github.com/bluescorpian/hrry.sh"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1786098110,
@@ -553,6 +574,7 @@
         "elephant": "elephant",
         "hermes-agent": "hermes-agent",
         "home-manager": "home-manager_2",
+        "hrry-sh": "hrry-sh",
         "nixpkgs": "nixpkgs_5",
         "nixpkgs-kitty": "nixpkgs-kitty",
         "nixpkgs-logseq": "nixpkgs-logseq",

@@ -39,12 +39,22 @@
     # uv2nix against the exact nixpkgs it pins, and repointing it is a good way
     # to break the Python dependency closure. Costs one extra nixpkgs eval.
     hermes-agent.url = "github:NousResearch/hermes-agent";
+    # Harry's portfolio over SSH, which the VPS serves (system/vps/services/hrry-sh.nix).
+    # Following nixpkgs-stable rather than nixpkgs: the VPS is the only consumer
+    # and it is a stable host, so this builds the daemon against the same package
+    # set everything else there is built from instead of pulling a second Go
+    # toolchain and a second nixpkgs eval onto the box.
+    # git+ssh rather than github: the repo is private, so the box fetches it with
+    # a read-only deploy key at /root/.ssh/id_ed25519 (see system/vps/CLAUDE.md).
+    # Deploys evaluate as root, which is whose key that has to be.
+    hrry-sh.url = "git+ssh://git@github.com/bluescorpian/hrry.sh?ref=main";
+    hrry-sh.inputs.nixpkgs.follows = "nixpkgs-stable";
     elephant.url = "github:abenz1267/elephant";
     walker.url = "github:abenz1267/walker";
     walker.inputs.elephant.follows = "elephant";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-logseq, nixpkgs-kitty, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, walker, hermes-agent, ... } @ inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, nixpkgs-logseq, nixpkgs-kitty, home-manager, plasma-manager, claude-code, claude-desktop, agenix, disko, vscode-server, worktrunk, walker, hermes-agent, hrry-sh, ... } @ inputs:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
     pkgs-stable = nixpkgs-stable.legacyPackages.x86_64-linux;
@@ -103,6 +113,7 @@
           disko.nixosModules.disko
           vscode-server.nixosModules.default
           hermes-agent.nixosModules.default
+          hrry-sh.nixosModules.default
           ./system/vps/configuration.nix
         ];
       };

@@ -18,6 +18,7 @@ in {
     ./services/filebrowser.nix
     ./services/mealie.nix
     ./services/hermes.nix
+    ./services/hrry-sh.nix
   ];
 
   time.timeZone = "Africa/Johannesburg";
