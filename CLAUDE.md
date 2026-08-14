@@ -31,6 +31,7 @@ Treat this repo as a living system. If you spot duplication across hosts, module
 - **`rebuild` hard-codes `/home/shared/dotfiles/nix#$(hostname)`** — defined in `system/common.nix`. Aliases don't expand inside `bash -c`, so scripts need the full command.
 - **VPS pins nixpkgs-stable**, with `pkgs-unstable` threaded through `specialArgs` for selective unstable packages.
 - **Domain `hrry.sh`** is set once in `vps/configuration.nix` and passed via `_module.args`; service files take `{ domain, ... }:`.
+- **Flakes only see tracked files** — Nix's flake evaluator restricts the build to files known to git. A new `.nix` file (or any new file referenced by the config) must be `git add`ed before `rebuild` will see it; an untracked file fails as if it doesn't exist, which reads confusingly like an unrelated eval error.
 - **sudo with no TTY**: `sudo -A` routes the prompt to a `ksshaskpass` GUI dialog and streams output back normally. Use it directly:
   ```bash
   sudo -A nixos-rebuild switch --flake /home/shared/dotfiles/nix#$(hostname)
