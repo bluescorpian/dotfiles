@@ -66,3 +66,14 @@ decisions only he can make. Write it like a PR description, not a diary.
 - Gloss each label (section number, finding ID, ticket) in plain language
   on first use per message; bare thereafter. He reads without the doc
   open.
+
+## CLAUDE.md hygiene
+
+A CLAUDE.md carries durable facts and stances — never status, progress
+notes, or history; those go in commits, docs, or nowhere. A fact with a
+date on it is usually status in disguise. Every line taxes compliance
+with every other line: add a rule on its second occurrence, not its
+first, and point at code (`file:line`) rather than quoting it. When a
+change you make invalidates a fact in any loaded CLAUDE.md, update that
+fact in the same commit. When one has drifted beyond spot fixes, run the
+claude-md-audit skill.
