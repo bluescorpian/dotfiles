@@ -1,4 +1,9 @@
-# Disk layout for Hetzner CX22 (single /dev/sda disk, GPT, EFI + BIOS compatible)
+# Disk layout for Hetzner CX33 (single /dev/sda disk, GPT, EFI + BIOS compatible)
+#
+# disko lays this out at install time only, so a Hetzner disk upgrade grows the
+# block device and stops there — `root` says 100%, but the partition keeps
+# describing the old boundary until someone extends it by hand (sfdisk -N 3,
+# partx -u, resize2fs, all online). Rebuilding does not do it for you.
 { lib, ... }:
 {
   disko.devices = {
