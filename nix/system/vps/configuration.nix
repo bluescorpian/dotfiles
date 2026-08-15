@@ -81,6 +81,15 @@ in {
       "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
     ];
 
+    # One builder, not the two `auto` picks off this box's two cores. Deploys
+    # here are bound by memory, not cores: evaluating this flake peaks near
+    # 2.8 GB, and on 3.8 GB of RAM that plus two concurrent builders is what it
+    # takes to exhaust the swap and starve every service on the host — sshd
+    # included, which leaves the console as the only way back in. Measured, not
+    # feared: the OOM killer took the evaluator at 00:05 on 2026-08-15 doing
+    # exactly this. A slower deploy is the cheaper failure.
+    max-jobs = 1;
+
     # Demand-driven GC, which the timer below cannot provide: the nix-daemon
     # collects garbage *during* an operation whenever free space drops under
     # min-free, freeing up to max-free. A single deploy can outgrow the disk
