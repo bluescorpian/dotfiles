@@ -6,9 +6,14 @@
   # over there. This file only says where it listens.
   #
   # Port 22 is the product: `ssh hrry.sh`, no `-p`, on a domain short enough to
-  # say out loud. Getting there means taking 22 away from this box's own sshd,
-  # which is a sequence rather than an edit — do it by DEPLOY.md in the hrry.sh
-  # repo, not by changing this line and deploying. Until that sequence has run,
-  # the default port keeps the two daemons out of each other's way.
-  services.hrry-sh.enable = true;
+  # say out loud. This box's own sshd moved to 2222 to free it (see
+  # configuration.nix), which was a sequence rather than an edit — DEPLOY.md in
+  # the hrry.sh repo is that sequence, and it is what to follow if this ever has
+  # to be undone or redone on another box.
+  #
+  # The module grants CAP_NET_BIND_SERVICE by itself for anything under 1024.
+  services.hrry-sh = {
+    enable = true;
+    port = 22;
+  };
 }
