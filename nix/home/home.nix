@@ -35,8 +35,14 @@
   };
 
   # SSH: VPS access (personal only)
+  #
+  # Port 2222 because 22 on that box is the portfolio's — `ssh hrry.sh` is the
+  # product, so the admin door moved rather than the front one. See DEPLOY.md
+  # in the hrry.sh repo for the sequence, and system/vps/configuration.nix for
+  # the sshd side of it.
   programs.ssh.settings."vps" = {
     HostName = "91.98.21.137";
+    Port = 2222;
     User = "harry";
     IdentityFile = "~/.ssh/bluescorpian";
     IdentitiesOnly = true;
