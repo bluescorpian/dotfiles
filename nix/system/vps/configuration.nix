@@ -32,12 +32,12 @@ in {
 
   services.openssh = {
     enable = true;
-    # 22 is on its way to the portfolio (services/hrry-sh.nix), and this is the
-    # step that costs nothing: sshd answers on both while every client moves
-    # over. `openFirewall` is on by default, so listing a port here opens it.
-    # Dropping 22 from this list is a separate deploy, and only after 2222 has
-    # been proven from outside the box — see DEPLOY.md in the hrry.sh repo.
-    ports = [ 22 2222 ];
+    # Not 22 — that belongs to the portfolio now (services/hrry-sh.nix), so
+    # `ssh hrry.sh` reaches a visitor's terminal rather than a login prompt.
+    # The admin door is 2222 and every client points at it (home/home.nix).
+    # 22 stays in networking.firewall.allowedTCPPorts below: still open, no
+    # longer sshd's.
+    ports = [ 2222 ];
     settings = {
       PasswordAuthentication = false;
       PermitRootLogin = "no";
