@@ -1,4 +1,4 @@
-{ ... }:
+{ domain, hrry-sh-site, ... }:
 {
   # Harry's portfolio, served as a terminal TUI over SSH. The module is an
   # output of the hrry.sh flake (wired in nix/flake.nix), and everything a
@@ -16,4 +16,25 @@
     enable = true;
     port = 22;
   };
+
+  # The other half of the apex. Ports split it: 22 is the portfolio above, 443
+  # is this — a static bundle out of the Nix store, built from the same commit
+  # the TUI is (packages.site in the hrry.sh flake). Caddy serves it rather than
+  # the Go binary, so nothing web-facing compiles into the daemon.
+  #
+  # No TLS configuration: the apex is grey-clouded at Cloudflare and resolves
+  # straight here, so Caddy's automatic HTTP-01 lands exactly like it does for
+  # every subdomain already on this box.
+  services.caddy.virtualHosts.${domain}.extraConfig = ''
+    root * ${hrry-sh-site}
+    file_server
+  '';
+
+  # www has pointed here for a while with no vhost to answer it, which is a TLS
+  # error rather than a page. The apex is canonical — `ssh hrry.sh` can't carry
+  # a `www.`, so the browser address shouldn't either — hence a redirect rather
+  # than a second copy of the same root.
+  services.caddy.virtualHosts."www.${domain}".extraConfig = ''
+    redir https://${domain}{uri} permanent
+  '';
 }

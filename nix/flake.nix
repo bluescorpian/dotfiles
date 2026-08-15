@@ -108,6 +108,11 @@
           # flake output is the identical path the desktop already runs and is
           # cached, so the VPS substitutes it directly.
           claude-code-pkg = claude-code.packages.x86_64-linux.default;
+
+          # The static page Caddy serves at the apex (services/hrry-sh.nix).
+          # A package rather than a module, because serving a document root is
+          # one `root` directive on a box that already runs a web server.
+          hrry-sh-site = hrry-sh.packages.x86_64-linux.site;
         };
         modules = [
           disko.nixosModules.disko

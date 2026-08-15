@@ -283,11 +283,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786740706,
-        "narHash": "sha256-A0vJV7Kq2XBdmUseOIYO2+tlj3pnZGNq1qhVBqKDeuY=",
+        "lastModified": 1786787819,
+        "narHash": "sha256-JI++0ipEwYd8JkSc4CNq5PLI+X1P0PSFo40DdaNdCzM=",
         "ref": "main",
-        "rev": "1b2d091c5ff9c25464db43f939376481425691b5",
-        "revCount": 32,
+        "rev": "8025cf159348eaa7660b52efb07debb23963541d",
+        "revCount": 36,
         "type": "git",
         "url": "ssh://git@github.com/bluescorpian/hrry.sh"
       },
