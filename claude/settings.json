@@ -3,6 +3,9 @@
 		"commit": "",
 		"pr": ""
 	},
+	"env": {
+		"CLAUDE_CODE_ENABLE_CFC": "1"
+	},
 	"permissions": {
 		"defaultMode": "auto",
 		"ask": [
