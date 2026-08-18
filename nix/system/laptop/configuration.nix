@@ -11,6 +11,12 @@
   # Hostname
   networking.hostName = "laptop";
 
+  # Disable Wi-Fi power save on the RTL8852BE (rtw89). The radio sleeping
+  # between beacons adds a long latency tail even on a strong link: at -30 dBm
+  # with zero retransmits and no packet loss, p95 was 16ms / max 106ms with it
+  # on, versus p95 2.5ms / max 2.9ms with it off. Costs roughly 1W on battery.
+  networking.networkmanager.wifi.powersave = false;
+
   services.asusd.enable = true;
 
   # Graphics - NVIDIA RTX A1000 with AMD integrated graphics
