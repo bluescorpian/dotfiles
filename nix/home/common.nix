@@ -36,6 +36,21 @@ let
     '';
   };
 
+  # Obsidian is Electron-based and hits the same libsecret gap as VS Code's
+  # FHS rootfs (see kwallet6 note below): its "Secrets" vault falls back to
+  # unencrypted storage with an "Encryption not available" banner unless a
+  # supported OS keyring is reachable. --password-store=kwallet6 forces the
+  # same D-Bus backend used everywhere else in this config.
+  obsidian-kwallet = pkgs.symlinkJoin {
+    name = "obsidian-kwallet";
+    paths = [ pkgs.obsidian ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      rm $out/bin/obsidian
+      makeWrapper ${lib.getExe pkgs.obsidian} $out/bin/obsidian --add-flags "--password-store=kwallet6"
+    '';
+  };
+
   # VS Code 1.122 renamed the bundled ripgrep node module from @vscode/ripgrep
   # to @vscode/ripgrep-universal (binaries moved into a per-platform subdir).
   # nixpkgs follows that rename and symlinks pkgs.ripgrep into the new path, so
@@ -118,7 +133,7 @@ in
 
     # Office & Productivity
     libreoffice-fresh
-    obsidian
+    obsidian-kwallet
     logseq-x11  # pinned to 0.10.14 via nixpkgs-logseq input (see flake.nix); wrapped for --ozone-platform=x11 (see logseq-x11 above)
     keepassxc
     pkgs-stable.super-productivity  # Using stable version due to build issues in unstable
