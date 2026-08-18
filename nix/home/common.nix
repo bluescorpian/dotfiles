@@ -73,17 +73,6 @@ let
     '';
   })).fhs;
 
-  # Vercel's Claude Code plugin: /deploy, /env, /status commands, deployment
-  # agents, and Vercel's OAuth-gated HTTP MCP server. Fetched directly rather
-  # than added as a flake input so it doesn't ride along in flake.lock; upstream
-  # ships no tags, so bump rev + hash together to update.
-  vercel-claude-plugin = pkgs.fetchFromGitHub {
-    owner = "vercel";
-    repo = "vercel-plugin";
-    rev = "b61a2c5f4b9d4f8814af0c469fa0a6a91d50addf";  # plugin.json v0.45.1
-    hash = "sha256-DZd+h8wZWu4yACmStgwH17JxzsIvtuWIgNOs7DDD5H8=";
-  };
-
   graphify = import ../packages/graphify { inherit pkgs; };
 in
 {
@@ -741,13 +730,15 @@ in
     context = ../../claude/CLAUDE.md;
     skills = ../../claude/skills;
     agentsDir = ../../claude/agents;
-    # Personal plugins land as directory symlinks under ~/.claude/skills/<name>,
-    # alongside (not inside) the imperative ~/.claude/plugins tree that
-    # `/plugin install` manages — the two don't collide. Deliberately not using
-    # the module's `marketplaces` option: it would own
-    # ~/.claude/plugins/known_marketplaces.json and clobber the marketplaces
-    # already registered there.
-    plugins.vercel = vercel-claude-plugin;
+    # No `plugins` here on purpose. A plugin mounted through this option is
+    # user-scoped on every host, and a plugin's *skills* are advertised in the
+    # system prompt of every session whether or not the repo could ever use it.
+    # Vercel's plugin lived here and cost ~2.5k tokens per session for 33 skills
+    # and 3 agents that a month of transcripts shows were never once invoked —
+    # while its MCP tools, which are deferred and free, did all the real work.
+    # Install project-scoped instead: `/plugin install <name>` from the repo
+    # that needs it. Same reasoning governs `enabledPlugins` in
+    # ../../claude/settings.json.
     mcpServers = {
       claude-conversation-search = {
         type = "stdio";
@@ -785,11 +776,14 @@ in
       # per-machine interactive state. Run /mcp on each of desktop and laptop
       # once; until then the server shows as connected-but-unauthenticated.
       #
-      # This duplicates the firecrawl CLI plugin enabled in claude/settings.json:
-      # the plugin's ten skills shell out to the packaged `firecrawl` binary,
-      # these tools hit the same API over HTTP. Both are live on purpose for now
-      # — the CLI keeps working offline of any OAuth state and is what the
-      # skills invoke; drop one once it's clear which gets reached for.
+      # This is the surviving half of a duplicate pair: the firecrawl CLI plugin
+      # covered the same API through ten skills that shelled out to the packaged
+      # `firecrawl` binary. Transcripts settled which gets reached for — 103 MCP
+      # calls against 26 skill reads — so the plugin is off in
+      # ../../claude/settings.json and its ~2k of per-session skill descriptions
+      # with it. The `firecrawl` binary stays in home.packages: it's the fallback
+      # when OAuth state is missing, and the skills are still installed to
+      # re-enable per project.
       firecrawl = {
         type = "http";
         url = "https://mcp.firecrawl.dev/v2/mcp-oauth";
