@@ -12,6 +12,13 @@
   # Set your time zone
   time.timeZone = "Africa/Johannesburg";
 
+  # Chromium/Electron apps re-detect the zone whenever /etc/localtime changes,
+  # and a rebuild's /etc rewrite leaves that symlink chain briefly dangling —
+  # ICU then falls back to UTC and caches it for the process's life (Brave was
+  # stuck reporting UTC to websites until restarted). ICU reads $TZ before
+  # /etc/localtime, so exporting it makes that window unobservable.
+  environment.sessionVariables.TZ = config.time.timeZone;
+
   # Select internationalisation properties
   i18n.defaultLocale = "en_ZA.UTF-8";
 
