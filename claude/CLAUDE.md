@@ -67,10 +67,20 @@ decisions only he can make. Write it like a PR description, not a diary.
   on first use per message; bare thereafter. He reads without the doc
   open.
 
+## What a durable doc holds
+
+A doc earns its tokens only for what cannot be re-derived: why a decision
+went the way it did, what was rejected and on what evidence, an invariant
+the code does not show. Anything the repo already answers — a command, or
+the code itself — stays where it is answered; a second copy goes stale in
+silence or turns a one-file change into a two-file change, and the doc
+edit is the one that gets skipped. Before writing a doc, settle which of
+those two you are about to do.
+
 ## CLAUDE.md hygiene
 
 A CLAUDE.md carries durable facts and stances — never status, progress
-notes, or history; those go in commits, docs, or nowhere. A fact with a
+notes, or history; those go in commits or nowhere. A fact with a
 date on it is usually status in disguise. Every line taxes compliance
 with every other line: add a rule on its second occurrence, not its
 first, and point at code (`file:line`) rather than quoting it. When a

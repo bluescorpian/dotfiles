@@ -832,6 +832,7 @@ in
   # above is a path, which the module links entry-by-entry, so this sits
   # alongside ../../claude/skills rather than fighting it.
   home.file.".claude/skills/graphify".source = graphify.skill;
+  home.file.".claude/rules".source = ../../claude/rules;
   home.file.".codex/AGENTS.md".source = ../../agents/AGENTS.md;
   home.file.".codex/config.toml".source = ../../codex/config.toml;
   home.file.".codex/rules".source = ../../codex/rules;
