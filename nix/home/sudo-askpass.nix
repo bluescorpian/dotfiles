@@ -67,13 +67,22 @@ let
       # A private pidfile: rofi refuses to start while another instance holds
       # the default one, so without this the prompt fails whenever the launcher
       # or a picker happens to be open.
+      # The theme's listview reserves eight rows of empty height and its
+      # placeholder says "type to filter" — both wrong for a password box, so
+      # drop the listview and put the context above the entry. @urgent (the
+      # palette's red) makes a privileged prompt impossible to mistake for the
+      # ordinary launcher, which wears the same card in blue.
       exec rofi \
         -pid "''${XDG_RUNTIME_DIR:-/tmp}/rofi-sudo-askpass.pid" \
         -dmenu -password -lines 0 \
-        -p "''${1%% for*}" \
+        -p sudo \
         -mesg "$mesg" \
         -window-title "sudo authorisation" \
-        -theme-str 'window { width: 55%; } entry { placeholder: "password"; }' \
+        -theme-str 'window { width: 42%; border-color: @urgent; }
+                    mainbox { children: [ message, inputbar ]; }
+                    listview { enabled: false; }
+                    entry { placeholder: ""; }
+                    prompt { text-color: @urgent; }' \
         < /dev/null
     '';
   };
