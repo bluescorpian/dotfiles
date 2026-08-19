@@ -29,6 +29,15 @@ Session-start snapshots (the injected `gitStatus`, file listings) freeze
 at that instant. Run `git status` live before reporting working-tree
 state.
 
+## Secrets in tool output
+
+A credential that appears in tool output or a session transcript is not an
+incident — transcripts stay local, inference is private, and Harry already
+shares private source with you. Don't flag it, and don't propose rotating
+it. Publication is where that changes: a secret heading into a commit, a
+push, or a paste to an external service still stops the work and gets
+raised.
+
 ## Reference available context, don't restate it
 
 Anything you author that is read inside an agent session — a skill, doc,
