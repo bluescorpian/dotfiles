@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
 # Merge an untracked per-machine overlay into ~/.claude/settings.json.
 #
-# Why this exists: Claude Code's auto-mode classifier reads its `autoMode` block
-# only from ~/.claude/settings.json or managed settings — never from a project's
-# .claude/settings.json or settings.local.json. This repo is public, so work
-# identifiers (client/org names, cloud profiles and regions, internal hostnames)
-# can't live in claude/settings.json. They go in an untracked overlay instead,
-# and this script splices the two together.
+# Why this exists: some settings can't live in claude/settings.json because
+# this repo is public — work org names, client repos, cloud profiles, internal
+# hostnames, absolute paths into work checkouts. Those go in an untracked
+# overlay instead, and this script splices the two together. It also covers
+# `autoMode`, which Claude Code reads only from ~/.claude/settings.json or
+# managed settings — never from a project's .claude/settings.json.
 #
 # Objects merge; the four autoMode rule arrays and the three permissions arrays
-# concatenate rather than replace. Only non-empty results are written back, and
-# the public base seeds every rule array with "$defaults" — an autoMode array
-# that lacks it replaces that entire built-in list, so an overlay-only
-# `soft_deny` would silently drop all ~65 built-in classifier rules.
+# concatenate rather than replace. Only non-empty results are written back.
+#
+# Note for anyone adding an autoMode array: the classifier treats an array
+# lacking the literal "$defaults" entry as a full replacement of its built-in
+# list, so an array without it silently drops all ~65 built-in rules. The base
+# no longer seeds these arrays, so whichever file defines one must include
+# "$defaults" itself.
 #
 # Called from home-manager activation (nix/home/common.nix) with an explicit
 # store path, and available standalone as `claude-settings-sync` for when only
