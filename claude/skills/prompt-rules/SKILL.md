@@ -78,3 +78,8 @@ and dated so it is checkable.
 
 Reread the draft as its own critic: apply every rule above to it, and cut
 what fails. Short and reviewed hard beats long and skimmed.
+
+When revising an existing prompt, compare which stances the old and new
+drafts take, not just their wording. Cutting a position because it is
+wrong is a fair edit; losing one while tightening prose is a regression —
+say which happened.

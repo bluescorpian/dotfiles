@@ -92,8 +92,9 @@ went the way it did, what was rejected and on what evidence, an invariant
 the code does not show. Anything the repo already answers — a command, or
 the code itself — stays where it is answered; a second copy goes stale in
 silence or turns a one-file change into a two-file change, and the doc
-edit is the one that gets skipped. Before writing a doc, settle which of
-those two you are about to do.
+edit is the one that gets skipped. Generating the copy from a script does
+not fix this; it automates the staleness. Before writing a doc, settle
+which of those two you are about to do.
 
 ## CLAUDE.md hygiene
 
