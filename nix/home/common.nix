@@ -145,9 +145,6 @@ in
     playwright-driver.browsers
     aichat
     gh
-    jq
-    ripgrep
-    fd
     zellij
     worktrunk-pkg  # git worktree manager (wt CLI)
     awscli2  # also doubles as an S3 client for Cloudflare R2 via --endpoint-url
@@ -180,7 +177,7 @@ in
     typescript-language-server
     # vscode-langservers-extracted
     # nil  # Nix LSP
-  ];
+  ] ++ (import ../packages/agent-cli.nix { inherit pkgs; });
 
   # Route sudo -A password prompts through a GUI dialog so non-interactive
   # shells (like Claude Code) can drive sudo while you type the password into a

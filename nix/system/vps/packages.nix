@@ -1,10 +1,14 @@
 { pkgs, ... }:
 {
+  # Hermes drives the `claude` CLI on this host (see services/hermes.nix), so
+  # the agent toolbox belongs here too — it was previously reaching for `find`
+  # and `grep` because ripgrep, fd and jq are declared in home/common.nix,
+  # which this host has no home-manager config to import.
   environment.systemPackages = with pkgs; [
     curl
     git
     htop
-  ];
+  ] ++ (import ../../packages/agent-cli.nix { inherit pkgs; });
 
   # No `rebuild` alias here, deliberately. It used to point at
   # /home/harry/dotfiles — a checkout that drifted ~182 commits stale and
