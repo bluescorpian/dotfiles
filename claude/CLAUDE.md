@@ -2,10 +2,19 @@
 
 ## Environment
 
-NixOS with flakes. Lean on it: run any tool without installing (`nix run
-nixpkgs#<pkg>`, or `nix-shell -p pkg1 pkg2` for a quick shell), find
-packages with `nix search nixpkgs <query>`, and give projects reproducible
-dev environments via a `flake.nix` devShell (direnv is configured).
+NixOS with flakes. Before reaching for `nix run`, check PATH. Installed
+on every host: `git` `curl` `rg` `fd` `tree` `jq` `yq` `gron` `mlr`
+`sqlite3` `htmlq` `sd` `sponge` `difft` `shellcheck` `shfmt` `taplo`
+`actionlint` `hadolint` `pandoc` `pdftotext` `openssl` `dig`, plus
+`ast-grep` — spell that one out, since plain `sg` is shadow's setgid
+command. Desktop and laptop additionally: `gh` `tofu` `aws` `node`
+`python3` `uv` `magick` `docker`.
+
+For anything genuinely absent, run it without installing (`nix run
+nixpkgs#<pkg>`, or `nix-shell -p <pkgs>` for a quick shell), find
+packages with `nix search nixpkgs <query>`, and give projects
+reproducible dev environments via a `flake.nix` devShell (direnv is
+configured).
 
 ## Don't assume exclusive ownership of shared state
 
