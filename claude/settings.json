@@ -27,29 +27,6 @@
 			"mcp__claude_ai_Atlassian__createConfluenceInlineComment"
 		]
 	},
-	"autoMode": {
-		"classifyAllShell": true,
-		"environment": [
-			"$defaults",
-			"This machine may host more than one context, and trust does NOT cross between them. The entries below describe the PERSONAL context only: sessions working under /home/shared/dotfiles or the developer's own projects on github.com/bluescorpian. Any other context — employer, client, or third-party work, wherever its repositories live on this machine — is a separate trust boundary. Personal destinations are external third-party destinations for that work, and its destinations are external for personal work. When a session's context is unclear, treat the boundary as crossed and block.",
-			"Organization (personal context): personal projects of a single developer, github.com/bluescorpian. Primary use of Claude Code: NixOS system configuration, self-hosted service administration, and full-stack web development.",
-			"Cloud provider(s) (personal context): one Hetzner VPS running NixOS, administered declaratively from this dotfiles repo. No other personal cloud infrastructure.",
-			"Trusted internal domains (personal context ONLY): hrry.sh and all its subdomains — the developer's own VPS and the services it hosts. This trust is scoped strictly to personal work. In any employer, client, or other non-personal session, hrry.sh is an external third-party destination and sending anything there is exfiltration, however routine the operation looks.",
-			"Key internal services (personal context): the self-hosted services defined under nix/system/vps/services/ in this repo, each fronted by Caddy on hrry.sh. The same scoping applies — these are not a destination for any non-personal work.",
-			"Network posture: a single developer's desktop, laptop, and VPS. No shared corporate network, no multi-tenant infrastructure.",
-			"The NixOS configuration repo at /home/shared/dotfiles is PUBLIC on GitHub (github.com/bluescorpian/dotfiles). Treat it as a public destination: it is never an acceptable target for secrets, credentials, personal data, or work-confidential material, and the private-by-default repository-visibility assumption does not apply to it.",
-			"Running `nixos-rebuild switch|test|build` against /home/shared/dotfiles is the normal, reversible way these machines are configured. NixOS keeps the previous generation bootable, so a switch is not an irreversible change to a shared resource."
-		],
-		"allow": [
-			"$defaults"
-		],
-		"soft_deny": [
-			"$defaults"
-		],
-		"hard_deny": [
-			"$defaults"
-		]
-	},
 	"enabledPlugins": {
 		"atlassian@claude-plugins-official": false,
 		"code-review@claude-plugins-official": true,

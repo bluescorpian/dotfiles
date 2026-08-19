@@ -28,7 +28,7 @@ Cheapest and most durable first — each rung below it is progressively more exp
 7. **Skill.** A multi-step procedure, or knowledge needed only for a kind of task rather than every session — loads on demand via its description. If the learning is "how to do X", it is almost never a CLAUDE.md line.
 8. **Auto-memory topic file** (`type: project` or `feedback` in the memory dir). For facts, preferences, or "why" context that isn't code-adjacent and doesn't belong in every session.
 9. **Project `CLAUDE.md`.** Only for facts relevant to *every* session in this repo that can't be scoped narrower than that.
-10. **Global.** Last resort — only for facts true across all of your projects. Two files, both may need editing: `agents/AGENTS.md` is generic content shared with Codex/other tools; `claude/CLAUDE.md` (deploys to `~/.claude/CLAUDE.md` via `programs.claude-code.context`) duplicates that generic content plus Claude Code-specific additions. A generic learning goes in both, kept in sync; a Claude-Code-only learning goes only in `claude/CLAUDE.md`.
+10. **Global.** Last resort — only for facts true across all of your projects. Edit `claude/CLAUDE.md`, which deploys to `~/.claude/CLAUDE.md` via `programs.claude-code.context` (the store symlink is read-only; edit the dotfiles source and rebuild). Prefer a path-scoped rule in `claude/rules/` when the learning applies only while touching certain files — a global line is paid for in every session of every project.
 
 ## 4. Fix or prune existing context — don't just append
 
@@ -42,7 +42,7 @@ Never bake a version-sensitive specific (an exact flag, option name, or CLI synt
 
 ## 6. Propose, then stop
 
-Before touching any file, show your diagnosis, the chosen rung and why (not a rung higher or lower), and the exact edit — the target file and the actual new text, not a paraphrase. Then stop and wait. Do not call Edit or Write until the user has responded.
+Before touching any file, show your diagnosis, the chosen rung, the cheapest rung you rejected and the reason, and the exact edit — the target file and the actual new text, not a paraphrase. Then stop and wait. Do not call Edit or Write until the user has responded.
 
 If they approve, proceed to step 7. If they redirect (different rung, different wording, "no"), revise the proposal and show it again — don't apply a compromise silently.
 

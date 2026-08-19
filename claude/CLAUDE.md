@@ -2,10 +2,19 @@
 
 ## Environment
 
-NixOS with flakes. Lean on it: run any tool without installing (`nix run
-nixpkgs#<pkg>`, or `nix-shell -p pkg1 pkg2` for a quick shell), find
-packages with `nix search nixpkgs <query>`, and give projects reproducible
-dev environments via a `flake.nix` devShell (direnv is configured).
+NixOS with flakes. Before reaching for `nix run`, check PATH. Installed
+on every host: `git` `curl` `rg` `fd` `tree` `jq` `yq` `gron` `mlr`
+`sqlite3` `htmlq` `sd` `sponge` `difft` `shellcheck` `shfmt` `taplo`
+`actionlint` `hadolint` `pandoc` `pdftotext` `openssl` `dig`, plus
+`ast-grep` — spell that one out, since plain `sg` is shadow's setgid
+command. Desktop and laptop additionally: `gh` `tofu` `aws` `node`
+`python3` `uv` `magick` `docker`.
+
+For anything genuinely absent, run it without installing (`nix run
+nixpkgs#<pkg>`, or `nix-shell -p <pkgs>` for a quick shell), find
+packages with `nix search nixpkgs <query>`, and give projects
+reproducible dev environments via a `flake.nix` devShell (direnv is
+configured).
 
 ## Don't assume exclusive ownership of shared state
 
@@ -19,6 +28,15 @@ timestamps, logs), and ask when it isn't obviously yours.
 Session-start snapshots (the injected `gitStatus`, file listings) freeze
 at that instant. Run `git status` live before reporting working-tree
 state.
+
+## Secrets in tool output
+
+A credential that appears in tool output or a session transcript is not an
+incident — transcripts stay local, inference is private, and Harry already
+shares private source with you. Don't flag it, and don't propose rotating
+it. Publication is where that changes: a secret heading into a commit, a
+push, or a paste to an external service still stops the work and gets
+raised.
 
 ## Reference available context, don't restate it
 
@@ -67,10 +85,21 @@ decisions only he can make. Write it like a PR description, not a diary.
   on first use per message; bare thereafter. He reads without the doc
   open.
 
+## What a durable doc holds
+
+A doc earns its tokens only for what cannot be re-derived: why a decision
+went the way it did, what was rejected and on what evidence, an invariant
+the code does not show. Anything the repo already answers — a command, or
+the code itself — stays where it is answered; a second copy goes stale in
+silence or turns a one-file change into a two-file change, and the doc
+edit is the one that gets skipped. Generating the copy from a script does
+not fix this; it automates the staleness. Before writing a doc, settle
+which of those two you are about to do.
+
 ## CLAUDE.md hygiene
 
 A CLAUDE.md carries durable facts and stances — never status, progress
-notes, or history; those go in commits, docs, or nowhere. A fact with a
+notes, or history; those go in commits or nowhere. A fact with a
 date on it is usually status in disguise. Every line taxes compliance
 with every other line: add a rule on its second occurrence, not its
 first, and point at code (`file:line`) rather than quoting it. When a
