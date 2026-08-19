@@ -78,6 +78,7 @@ in
 {
   imports = [
     ./posture.nix
+    ./sudo-askpass.nix
   ];
 
   # Development packages
@@ -173,7 +174,7 @@ in
     remmina  # VNC/RDP client for remote desktop access
 
     # Authentication
-    kdePackages.ksshaskpass  # GUI password prompt for sudo -A / ssh-add
+    kdePackages.ksshaskpass  # GUI password prompt for manual ssh-add (SSH_ASKPASS)
 
     # LSP servers
     typescript-language-server
@@ -181,11 +182,11 @@ in
     # nil  # Nix LSP
   ];
 
-  # Route sudo -A / ssh-add password prompts through a GUI dialog so
-  # non-interactive shells (like Claude Code) can drive sudo while you type
-  # the password into a Qt window. Run commands with `sudo -A <cmd>`.
+  # Route sudo -A password prompts through a GUI dialog so non-interactive
+  # shells (like Claude Code) can drive sudo while you type the password into a
+  # window. Run commands with `sudo -A <cmd>`. SUDO_ASKPASS itself is set in
+  # sudo-askpass.nix, which shows the command and caller in the dialog.
   home.sessionVariables = {
-    SUDO_ASKPASS = "${pkgs.kdePackages.ksshaskpass}/bin/ksshaskpass";
     PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
     PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
     PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH = chromiumBin;
