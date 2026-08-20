@@ -79,6 +79,44 @@ let
     kill "$freezer" 2>/dev/null || true
     ${pkgs.coreutils}/bin/rm -f "$ready"
   '';
+
+  # Wrapper for the session-ending wlogout actions: shuts Chromium-family
+  # browsers down cleanly, then runs the real action passed as arguments.
+  #
+  # Without it, `systemctl poweroff` stops the login session scope — which is
+  # where sway lives — a couple of seconds before the per-app scopes under
+  # user@.service. The browser loses its Wayland connection and dies of that
+  # long before its own SIGTERM arrives, so Preferences keeps
+  # `profile.exit_type: "Crashed"` and the next launch offers to restore tabs.
+  # A SIGTERM delivered while the compositor is still up records
+  # "SessionEnded" instead, which raises no bubble.
+  #
+  # Only the browser process is signalled: every Chromium child process
+  # carries `--type=` in its cmdline (which they write as one space-joined
+  # argv[0], hence the whole-string match rather than a per-argument one).
+  gracefulExit = pkgs.writeShellScript "sway-graceful-exit" ''
+    browsers() {
+      for p in $(${pkgs.procps}/bin/pgrep -x 'brave|chrome|chromium|firefox'); do
+        # stderr is redirected first, so a process that exits between the
+        # pgrep and this read fails silently instead of logging.
+        args=$(${pkgs.coreutils}/bin/tr '\0' ' ' 2>/dev/null < "/proc/$p/cmdline") || continue
+        case "$args" in *--type=*) ;; *) echo "$p" ;; esac
+      done
+    }
+
+    pids=$(browsers)
+    if [ -n "$pids" ]; then
+      kill -TERM $pids 2>/dev/null || true
+      # Up to 10s to flush Preferences, then power off regardless — a modal
+      # beforeunload dialog must not be able to block a shutdown.
+      for _ in $(${pkgs.coreutils}/bin/seq 100); do
+        [ -z "$(browsers)" ] && break
+        ${pkgs.coreutils}/bin/sleep 0.1
+      done
+    fi
+
+    exec "$@"
+  '';
 in
 {
   imports = [
@@ -467,10 +505,10 @@ in
     enable = true;
     layout = [
       { label = "lock"; text = "Lock"; keybind = "l"; action = "${pkgs.swaylock}/bin/swaylock -c 1e1e2e"; }
-      { label = "logout"; text = "Logout"; keybind = "e"; action = "${pkgs.sway}/bin/swaymsg exit"; }
+      { label = "logout"; text = "Logout"; keybind = "e"; action = "${gracefulExit} ${pkgs.sway}/bin/swaymsg exit"; }
       { label = "suspend"; text = "Suspend"; keybind = "s"; action = "${pkgs.systemd}/bin/systemctl suspend"; }
-      { label = "reboot"; text = "Reboot"; keybind = "r"; action = "${pkgs.systemd}/bin/systemctl reboot"; }
-      { label = "shutdown"; text = "Shutdown"; keybind = "p"; action = "${pkgs.systemd}/bin/systemctl poweroff"; }
+      { label = "reboot"; text = "Reboot"; keybind = "r"; action = "${gracefulExit} ${pkgs.systemd}/bin/systemctl reboot"; }
+      { label = "shutdown"; text = "Shutdown"; keybind = "p"; action = "${gracefulExit} ${pkgs.systemd}/bin/systemctl poweroff"; }
     ];
     style = ''
       * {
