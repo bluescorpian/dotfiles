@@ -1,41 +1,30 @@
 ---
 name: save
-description: Save a session handoff note. Use when the user wants to checkpoint progress, end a session, or capture what was worked on. Invoked with /save.
-allowed-tools: Bash(date:*), Bash(git log:*), Bash(git branch:*), Bash(git status:*), Bash(ls:*), Write
+description: Sweep the current session for anything that should outlive it — stated preferences, open follow-ups, decisions whose reasoning no commit carries — and file each into memory or the nearest durable home. Use at the end of a session, or when the user wants to be sure something was recorded. Not for freeing context (that is /compact) and not for grading skills or subagents (that is /retro). Invoked with /save.
+allowed-tools: Read, Write, Edit, Grep, Glob
 ---
 
-Gather context before writing:
-- Today's date: !`date +%Y-%m-%d`
-- Current branch: !`git branch --show-current 2>/dev/null || echo "not a git repo"`
-- Recent commits: !`git log --oneline -5 2>/dev/null || echo "none"`
-- Dirty files: !`git status --short 2>/dev/null || echo "none"`
-- Existing notes today: !`ls docs/session-notes/ 2>/dev/null | grep "^$(date +%Y-%m-%d)" || echo "none"`
+Work from the transcript you are part of, not from retrieval — you already have every turn at full fidelity.
 
-Derive a 2–4 word kebab-case slug that captures the session's main topic (e.g. `fix-login-bug`, `add-auth-middleware`, `refactor-user-model`). Use only lowercase letters and hyphens.
+## What counts
 
-Filename: `docs/session-notes/YYYY-MM-DD-<slug>.md`.
+Anything a future session would otherwise have to be told again:
 
-Structure it as follows — be specific and concrete, not vague:
+- A preference or working style Harry stated, or a correction that generalises beyond this task (`user` / `feedback`).
+- A follow-up, waiting-on, or deliberate deferral, with what unblocks it (`project`).
+- A decision and its reasoning, where the commit message does not already carry the reasoning.
+- An external resource he pointed you at (`reference`).
 
-## Goal
-What we were trying to accomplish this session (1–3 sentences).
+Skip what the repo already records — code structure, what a commit did, what a CLAUDE.md already says — and skip work state that ends with this session, which a fresh session picks up from `git log` and the diff.
 
-## Done
-Bullet list of completed work. Include file paths, function names, component names where relevant.
+## Where each item goes
 
-## In Progress
-What's partially done. State the current condition and exactly where to pick up.
+Memory is the default home. Reach past it only when the item is a rule the agent must follow rather than a fact; hand that item to the gotcha ladder and name the rung.
 
-## Next Steps
-Ordered list of concrete next actions. Specific enough that a fresh session needs no additional context.
+Before writing, read the memory index and any file that half-covers the item: revise it in place rather than adding a near-duplicate, and delete what this session proved wrong.
 
-## Decisions
-Architectural, design, or implementation decisions made this session, and the reasoning behind them.
+## Output
 
-## Blockers
-Unresolved questions, waiting-on items, or known issues.
+One line per item: `<target file> — <new | update | delete> — <the fact in one clause>`. Then stop. Write nothing until Harry replies, and apply only the items he keeps.
 
----
-
-After writing the file, respond with only:
-✓ Session saved → docs/session-notes/YYYY-MM-DD-<slug>.md
+If the session produced nothing durable, say so in one line and write nothing.
