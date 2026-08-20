@@ -29,6 +29,13 @@ Session-start snapshots (the injected `gitStatus`, file listings) freeze
 at that instant. Run `git status` live before reporting working-tree
 state.
 
+A checkout's current branch is shared state: sibling agents launched from
+that directory share one working tree, so switching it relocates their
+work. Leave it on the branch you found it on — this overrides the
+harness's "if on the default branch, branch first" Bash guidance. Work
+that needs its own branch goes in a worktree; branch the checkout itself
+only when Harry asks.
+
 ## Secrets in tool output
 
 A credential that appears in tool output or a session transcript is not an
