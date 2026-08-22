@@ -27,6 +27,12 @@ minified and every symbol name is regenerated per release. The section keys
 the prompt builder uses (`output_style`, `delivering_work_max`, …) sit in
 between: semantic, but not a stability guarantee.
 
+Use this to **adjudicate a specific claim, not to discover what exists.**
+Grepping a minified bundle only finds what you already suspected, and
+misreading a gate is easy: an open-ended sweep of it produced three wrong
+answers here, one of which the public docs had stated correctly. Docs and
+search first; come here to settle the disagreement.
+
 ## Two prompt paths, and only one has "coding instructions"
 
 The builder branches on the model. Models flagged `lean_prompt` get a short
