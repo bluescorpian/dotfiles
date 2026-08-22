@@ -1,6 +1,6 @@
 ---
 name: aim
-description: Turn a rough intent into a well-formed `/goal` condition for the repo at hand, copied to the clipboard ready to paste. Use when starting substantial work that should run turn after turn without handing control back. Not for exploratory or conversational work — say so and stop instead.
+description: Turn a rough intent into a well-formed `/goal` condition for the repo at hand, ready to paste. Use when starting substantial work that should run turn after turn without handing control back. Not for exploratory or conversational work — say so and stop instead.
 ---
 
 The `/goal` evaluator is a small fast model reading the transcript. It runs no
@@ -32,7 +32,7 @@ four parts:
 
 ## Then hand it over
 
-Print the finished `/goal …` line and pipe it through `wl-copy`. Claude Code
-exposes no tool that sets a goal, so pasting it is Harry's job — leave him
-nothing else to do. Show the line as well as copying it, so he sees what he is
-about to run.
+Print the finished `/goal …` line as a fenced code block on its own, nothing
+else in it — Claude Code makes a code block one click to copy. Claude Code
+exposes no tool that sets a goal, so pasting it is Harry's job; leave him
+nothing else to do.
