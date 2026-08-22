@@ -21,3 +21,15 @@ Format: YAML frontmatter (`name`, `description` — the description is the trigg
 **Work-specific skills stay out of this repo, because it's public.** `scrum` is one: it lives hand-placed and untracked at `~/.claude/skills/scrum/` on the work laptop only, since it carries work identifiers (Jira tenant and account IDs, client and project names). This works because the module writes `~/.claude/skills` as a real directory of per-file symlinks, so an untracked skill dir alongside the managed ones survives `rebuild` — verified, not assumed. Trade-off: no version control, no backup, one machine. Don't "restore" it here.
 
 See the model policy in `agents/AGENTS.md` before giving a skill or subagent write access to a fan-out: never leave a delegated call's model unset.
+
+## Output styles
+
+`output-styles/pr-description.md` deploys to `~/.claude/output-styles/` and is selected by `"outputStyle": "pr-description"` in `settings.json`. It holds the response-format rules that used to be a `## Responses` section in `CLAUDE.md`.
+
+Why it moved: an output style lands in the system prompt and rewrites the identity line to point at it, where `CLAUDE.md` is attached afterwards as a user message. It also stops applying to subagents, which is what we want — their output goes to the orchestrating agent, not to a human.
+
+Three bullets were cut in the move rather than carried across: report-the-delta-not-the-journey, evidence-for-"done", and say-what-scope-you-trimmed. Each is already stated by an always-on section of the stock prompt, so keeping them paid twice for one instruction. **Don't restore them.** What survived is the part nothing upstream says — TLDR-first ordering, the ask in one place at the end, and glossing labels on first use.
+
+Two costs to know before changing any of this. Only one style can be active, so adopting a built-in like `Proactive` means giving this one up. And `/config` inside any project writes `outputStyle` to that project's `.claude/settings.local.json`, which silently shadows the user-level setting.
+
+See [`upstream-internals.md`](upstream-internals.md) for what the stock prompt actually contains, and for why `keep-coding-instructions: true` is set on the style even though it currently changes nothing.
