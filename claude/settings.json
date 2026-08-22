@@ -83,5 +83,6 @@
 	"skipAutoPermissionPrompt": true,
 	"voiceEnabled": true,
 	"tui": "fullscreen",
-	"skipWorkflowUsageWarning": true
+	"skipWorkflowUsageWarning": true,
+	"outputStyle": "pr-description"
 }

@@ -728,6 +728,7 @@ in
     context = ../../claude/CLAUDE.md;
     skills = ../../claude/skills;
     agentsDir = ../../claude/agents;
+    outputStyles.pr-description = ../../claude/output-styles/pr-description.md;
     # No `plugins` here on purpose. A plugin mounted through this option is
     # user-scoped on every host, and a plugin's *skills* are advertised in the
     # system prompt of every session whether or not the repo could ever use it.
